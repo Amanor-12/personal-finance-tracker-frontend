@@ -1,0 +1,56 @@
+.register-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.register-form h2 {
+  margin: 0;
+  color: #102542;
+}
+
+.register-form p {
+  margin: 0;
+  color: #596574;
+  line-height: 1.6;
+}
+
+.register-form label {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: #102542;
+}
+
+.register-form input {
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid #d8d1c3;
+  background: #fcfbf8;
+  font: inherit;
+  color: #102542;
+}
+
+.register-form input:focus {
+  outline: 2px solid rgba(46, 125, 107, 0.22);
+  border-color: #2e7d6b;
+}
+
+.register-form button {
+  width: fit-content;
+}
+
+.error-text {
+  margin: -0.4rem 0 0;
+  color: #b9381b;
+  font-size: 0.9rem;
+}
+
+.success-text {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: #edf8f3;
+  color: #1e6d5b;
+  font-weight: 600;
+}

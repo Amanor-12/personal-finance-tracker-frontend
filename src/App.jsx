@@ -1,271 +1,145 @@
 import { useEffect, useState } from 'react';
-import ActivityFeed from './components/ActivityFeed';
-import BudgetPlanner from './components/BudgetPlanner';
-import GoalTracker from './components/GoalTracker';
-import Sidebar from './components/Sidebar';
-import SummaryCard from './components/SummaryCard';
-import TopBar from './components/TopBar';
-import TransactionForm from './components/TransactionForm';
-import TransactionList from './components/TransactionList';
-import {
-  initialActivity,
-  initialBudgets,
-  initialGoals,
-  initialTransactions,
-  viewOptions
-} from './data/mockData';
+import './App.css';
+import hero from './assets/hero.png';
+import reactLogo from './assets/react.svg';
+import viteLogo from './assets/vite.svg';
+import Card from './components/Card';
+import Counter from './components/Counter';
+import Navbar from './components/Navbar';
+import RegisterForm from './components/RegisterForm';
 
-const storageKey = 'personal-finance-tracker-sprint-2';
-
-const currency = new Intl.NumberFormat('en-CA', {
-  style: 'currency',
-  currency: 'CAD'
-});
-
-function getStoredState() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const saved = window.localStorage.getItem(storageKey);
-  if (!saved) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(saved);
-  } catch (error) {
-    return null;
-  }
-}
+const cardData = [
+  {
+    title: 'Budget Snapshot',
+    description: 'Keep your monthly budget clear by tracking groceries, bills, and everyday spending in one place.',
+    amount: '$2,450',
+  },
+  {
+    title: 'Savings Goal',
+    description: 'Build a realistic emergency fund with small weekly progress updates and visible milestones.',
+    amount: '$1,200',
+  },
+  {
+    title: 'Upcoming Bills',
+    description: 'Stay ahead of rent, subscriptions, and due dates so your dashboard feels useful during demos.',
+    amount: '4 due',
+  },
+];
 
 function App() {
-  const [storedState] = useState(() => getStoredState());
+  const [profiles, setProfiles] = useState(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
 
-  const [activeView, setActiveView] = useState('overview');
-  const [transactionFilter, setTransactionFilter] = useState('all');
-  const [transactions, setTransactions] = useState(storedState?.transactions ?? initialTransactions);
-  const [budgets, setBudgets] = useState(storedState?.budgets ?? initialBudgets);
-  const [goals, setGoals] = useState(storedState?.goals ?? initialGoals);
-  const [activity, setActivity] = useState(storedState?.activity ?? initialActivity);
-  const [toastMessage, setToastMessage] = useState('');
+    const savedProfiles = window.localStorage.getItem('finance-profiles');
+    return savedProfiles ? JSON.parse(savedProfiles) : [];
+  });
 
-  const activeViewConfig = viewOptions.find((view) => view.id === activeView) ?? viewOptions[0];
+  useEffect(() => {
+    document.title = profiles.length
+      ? `Finance App (${profiles.length} saved)`
+      : 'Finance App';
+    window.localStorage.setItem('finance-profiles', JSON.stringify(profiles));
+  }, [profiles]);
 
-  const income = transactions
-    .filter((transaction) => transaction.type === 'income')
-    .reduce((total, transaction) => total + transaction.amount, 0);
-
-  const expenses = transactions
-    .filter((transaction) => transaction.type === 'expense')
-    .reduce((total, transaction) => total + transaction.amount, 0);
-
-  const summary = {
-    income,
-    expenses,
-    balance: income - expenses
+  const handleRegister = (newProfile) => {
+    setProfiles((currentProfiles) => [newProfile, ...currentProfiles].slice(0, 3));
   };
 
-  const spendingByCategory = transactions
-    .filter((transaction) => transaction.type === 'expense')
-    .reduce((totals, transaction) => {
-      totals[transaction.category] = (totals[transaction.category] || 0) + transaction.amount;
-      return totals;
-    }, {});
-
-  const onTrackCount = budgets.filter((budget) => {
-    const spent = spendingByCategory[budget.category] || 0;
-    return spent <= budget.limit;
-  }).length;
-
-  const budgetHealth = `${onTrackCount}/${budgets.length} categories on track`;
-
-  useEffect(() => {
-    document.title = `${activeViewConfig.label} | Personal Finance Tracker`;
-  }, [activeViewConfig.label]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        transactions,
-        budgets,
-        goals,
-        activity
-      })
-    );
-  }, [transactions, budgets, goals, activity]);
-
-  useEffect(() => {
-    if (!toastMessage) {
-      return undefined;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setToastMessage('');
-    }, 2600);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [toastMessage]);
-
-  function recordActivity(message) {
-    setActivity((current) => [
-      {
-        id: Date.now(),
-        message,
-        timestamp: new Date().toISOString()
-      },
-      ...current.slice(0, 7)
-    ]);
-  }
-
-  function handleAddTransaction(transaction) {
-    const nextTransaction = {
-      ...transaction,
-      id: Date.now()
-    };
-
-    setTransactions((current) => [nextTransaction, ...current]);
-    setToastMessage(`${transaction.type === 'expense' ? 'Expense' : 'Income'} saved successfully.`);
-    recordActivity(`${transaction.description} added to ${transaction.category}.`);
-    setActiveView('transactions');
-  }
-
-  function handleSaveBudget(budgetUpdate) {
-    setBudgets((current) => {
-      const existingBudget = current.find((budget) => budget.category === budgetUpdate.category);
-
-      if (existingBudget) {
-        return current.map((budget) =>
-          budget.category === budgetUpdate.category ? budgetUpdate : budget
-        );
-      }
-
-      return [...current, budgetUpdate];
-    });
-
-    setToastMessage(`Budget saved for ${budgetUpdate.category}.`);
-    recordActivity(`${budgetUpdate.category} budget updated to ${currency.format(budgetUpdate.limit)}.`);
-    setActiveView('budgets');
-  }
-
-  function handleContribute(goalId, amount) {
-    const goal = goals.find((item) => item.id === goalId);
-    if (!goal) {
-      return;
-    }
-
-    setGoals((current) =>
-      current.map((item) =>
-        item.id === goalId
-          ? {
-              ...item,
-              saved: Math.min(item.saved + amount, item.target)
-            }
-          : item
-      )
-    );
-
-    setToastMessage(`Added ${currency.format(amount)} to ${goal.name}.`);
-    recordActivity(`${currency.format(amount)} moved into ${goal.name}.`);
-    setActiveView('goals');
-  }
-
-  const nextGoal = goals
-    .map((goal) => ({
-      ...goal,
-      remaining: goal.target - goal.saved
-    }))
-    .sort((left, right) => left.remaining - right.remaining)[0];
+  const latestProfile = profiles[0];
 
   return (
-    <div className="app-shell">
-      <Sidebar views={viewOptions} activeView={activeView} onSelectView={setActiveView} />
+    <>
+      <Navbar />
 
-      <main className="main-shell">
-        <TopBar activeView={activeViewConfig} />
+      <main className="app-shell">
+        <section className="hero">
+          <div className="hero-copy">
+            <span>Personal Finance Dashboard</span>
+            <h1>Build a clean React shell that feels ready to grow.</h1>
+            <p>
+              This mock dashboard focuses on the Sprint 2 goals: reusable
+              components, controlled forms, live state updates, and a seamless
+              single page experience.
+            </p>
 
-        <section className="summary-grid">
-          <SummaryCard
-            label="Current balance"
-            value={currency.format(summary.balance)}
-            helper="Income minus expenses from mock March data"
-            tone="highlight"
-          />
-          <SummaryCard
-            label="Income logged"
-            value={currency.format(summary.income)}
-            helper="Updated instantly when you add income"
-            tone="safe"
-          />
-          <SummaryCard
-            label="Expenses logged"
-            value={currency.format(summary.expenses)}
-            helper="Categories roll into budget tracking"
-            tone="warning"
-          />
-          <SummaryCard
-            label="Budget health"
-            value={budgetHealth}
-            helper={nextGoal ? `${nextGoal.name} is the next goal to finish.` : 'No goals configured yet.'}
-          />
+            <div className="hero-stats">
+              <div>
+                <strong>3</strong>
+                <small>Reusable finance cards</small>
+              </div>
+              <div>
+                <strong>1</strong>
+                <small>Validated React form</small>
+              </div>
+              <div>
+                <strong>Live</strong>
+                <small>useState updates</small>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero-visual">
+            <img src={hero} alt="Personal finance dashboard preview" />
+          </div>
         </section>
 
-        <section className="workspace-grid">
-          <div className="workspace-main">
-            {(activeView === 'overview' || activeView === 'transactions') && (
-              <TransactionForm onAddTransaction={handleAddTransaction} />
-            )}
+        <div className="section-heading">
+          <h2>Finance Overview</h2>
+          <p>Each card is reusable and receives different props from the main app.</p>
+        </div>
 
-            {(activeView === 'overview' || activeView === 'transactions') && (
-              <TransactionList
-                transactions={transactions}
-                filter={transactionFilter}
-                onFilterChange={setTransactionFilter}
-              />
-            )}
+        <section className="card-grid">
+          {cardData.map((card) => (
+            <Card
+              key={card.title}
+              title={card.title}
+              description={card.description}
+              amount={card.amount}
+            />
+          ))}
+        </section>
 
-            {(activeView === 'overview' || activeView === 'budgets') && (
-              <BudgetPlanner
-                budgets={budgets}
-                spendingByCategory={spendingByCategory}
-                onSaveBudget={handleSaveBudget}
-              />
-            )}
+        <section className="workspace">
+          <div className="workspace-panel">
+            <Counter />
+          </div>
+          <div className="workspace-panel">
+            <RegisterForm onRegister={handleRegister} />
+          </div>
+        </section>
 
-            {(activeView === 'overview' || activeView === 'goals') && (
-              <GoalTracker goals={goals} onContribute={handleContribute} />
+        <section className="status-strip">
+          <div className="status-card">
+            <h3>Latest Saved Profile</h3>
+            {latestProfile ? (
+              <ul>
+                <li>Name: {latestProfile.fullName}</li>
+                <li>Email: {latestProfile.email}</li>
+                <li>Monthly income: ${latestProfile.monthlyIncome}</li>
+              </ul>
+            ) : (
+              <p>
+                Submit the form to show how React updates the UI immediately
+                without reloading the page.
+              </p>
             )}
           </div>
 
-          <div className="workspace-side">
-            <ActivityFeed activity={activity} />
-
-            <section className="panel callout-panel">
-              <div className="panel-heading">
-                <div>
-                  <p className="eyebrow">Demo talking points</p>
-                  <h3>What to show in review</h3>
-                </div>
-              </div>
-
-              <ul className="callout-list">
-                <li>Explain that `App.jsx` owns the shared state and passes props to child components.</li>
-                <li>Show a controlled input changing local form state before it updates the dashboard state.</li>
-                <li>Point out the `useEffect` hooks for document title, local storage, and timed toast cleanup.</li>
-                <li>Remind the instructor this Sprint 2 shell uses mock UI, so the backend can stay separate for now.</li>
-              </ul>
-            </section>
+          <div className="status-badges">
+            <div>
+              <img src={reactLogo} alt="React logo" />
+              <span>React</span>
+            </div>
+            <div>
+              <img src={viteLogo} alt="Vite logo" />
+              <span>Vite</span>
+            </div>
           </div>
         </section>
       </main>
-
-      {toastMessage ? <div className="toast">{toastMessage}</div> : null}
-    </div>
+    </>
   );
 }
 
