@@ -59,9 +59,7 @@ function App() {
             <span>Personal Finance Dashboard</span>
             <h1>Build a clean React shell that feels ready to grow.</h1>
             <p>
-              This mock dashboard focuses on the Sprint 2 goals: reusable
-              components, controlled forms, live state updates, and a seamless
-              single page experience.
+              Personal finace tracker.
             </p>
 
             <div className="hero-stats">
@@ -121,8 +119,7 @@ function App() {
               </ul>
             ) : (
               <p>
-                Submit the form to show how React updates the UI immediately
-                without reloading the page.
+                SPRINT 2.
               </p>
             )}
           </div>
