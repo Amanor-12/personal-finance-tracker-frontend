@@ -16,6 +16,14 @@ const demoAccount = {
   monthlyIncome: 4200,
 };
 
+const financeGoal = 1000;
+
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
 const readStoredJson = (storageKey, fallbackValue) => {
   if (typeof window === 'undefined') {
     return fallbackValue;
@@ -41,6 +49,14 @@ function App() {
   const [session, setSession] = useState(() =>
     readStoredJson('finance-session', null),
   );
+  const [savings, setSavings] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 250;
+    }
+
+    const savedAmount = window.localStorage.getItem('finance-savings');
+    return savedAmount ? Number(savedAmount) : 250;
+  });
   const [rememberedEmail, setRememberedEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return '';
@@ -88,6 +104,14 @@ function App() {
 
     window.localStorage.removeItem('finance-remembered-email');
   }, [rememberedEmail]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem('finance-savings', String(savings));
+  }, [savings]);
 
   const handleRegister = (newProfile) => {
     setProfiles((currentProfiles) =>
@@ -137,6 +161,10 @@ function App() {
   };
 
   const latestProfile = profiles[0];
+  const savingsProgress = Math.min(
+    Math.round((savings / financeGoal) * 100),
+    100,
+  );
 
   const navItems = session
     ? [
@@ -155,10 +183,10 @@ function App() {
   const cardData = session
     ? [
         {
-          title: 'Frontend Session',
+          title: 'Savings Progress',
           description:
-            'The dashboard is now protected by a frontend-only auth shell that you can swap to backend auth later.',
-          amount: 'Active',
+            'The counter now reports into app-level state so the dashboard can react to savings updates.',
+          amount: `${savingsProgress}%`,
         },
         {
           title: 'Saved Profiles',
@@ -196,6 +224,10 @@ function App() {
 
   const heroStats = session
     ? [
+        {
+          value: currencyFormatter.format(savings),
+          label: 'Saved locally',
+        },
         {
           value: `${profiles.length}`,
           label: 'Profiles stored',
@@ -306,7 +338,11 @@ function App() {
           <>
             <section className="workspace" id="workspace">
               <div className="workspace-panel">
-                <Counter />
+                <Counter
+                  goal={financeGoal}
+                  savings={savings}
+                  onSavingsChange={setSavings}
+                />
               </div>
               <div className="workspace-panel">
                 <RegisterForm onRegister={handleRegister} />
