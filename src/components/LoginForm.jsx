@@ -69,8 +69,8 @@ function LoginForm({ defaultEmail, demoAccount, onLogin, savedProfilesCount }) {
     <form className="login-form" onSubmit={handleSubmit}>
       <h2>Log In</h2>
       <p>
-        Use the demo access below or sign in with an email that already exists in
-        local storage. {savedProfilesCount} local profile{savedProfilesCount === 1 ? '' : 's'} currently saved.
+        Use the demo access below or sign in with an email saved in the profile
+        panel. {savedProfilesCount} local profile{savedProfilesCount === 1 ? '' : 's'} currently saved.
       </p>
 
       <label htmlFor="loginEmail">
