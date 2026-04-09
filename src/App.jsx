@@ -24,6 +24,18 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
+const parseIncomeValue = (value) => {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (!value) {
+    return 0;
+  }
+
+  return Number(String(value).replace(/[^0-9.]/g, ''));
+};
+
 const readStoredJson = (storageKey, fallbackValue) => {
   if (typeof window === 'undefined') {
     return fallbackValue;
@@ -114,9 +126,27 @@ function App() {
   }, [savings]);
 
   const handleRegister = (newProfile) => {
+    const normalizedEmail = newProfile.email.toLowerCase();
+
     setProfiles((currentProfiles) =>
-      [newProfile, ...currentProfiles].slice(0, 3),
+      [
+        newProfile,
+        ...currentProfiles.filter(
+          (profile) => profile.email.toLowerCase() !== normalizedEmail,
+        ),
+      ].slice(0, 4),
     );
+
+    setSession((currentSession) => {
+      if (!currentSession || currentSession.email.toLowerCase() !== normalizedEmail) {
+        return currentSession;
+      }
+
+      return {
+        ...currentSession,
+        fullName: newProfile.fullName,
+      };
+    });
   };
 
   const handleLogin = ({ email, password, rememberMe }) => {
@@ -161,6 +191,14 @@ function App() {
   };
 
   const latestProfile = profiles[0];
+  const currentProfile = session
+    ? profiles.find(
+        (profile) => profile.email.toLowerCase() === session.email.toLowerCase(),
+      )
+    : null;
+  const monthlyIncome = currentProfile
+    ? parseIncomeValue(currentProfile.monthlyIncome)
+    : demoAccount.monthlyIncome;
   const savingsProgress = Math.min(
     Math.round((savings / financeGoal) * 100),
     100,
@@ -183,22 +221,22 @@ function App() {
   const cardData = session
     ? [
         {
+          title: 'Monthly Income',
+          description:
+            'This value comes from your saved frontend profile and can later be replaced by backend data.',
+          amount: currencyFormatter.format(monthlyIncome || demoAccount.monthlyIncome),
+        },
+        {
           title: 'Savings Progress',
           description:
-            'The counter now reports into app-level state so the dashboard can react to savings updates.',
+            'The savings tracker writes to local storage and updates the dashboard instantly.',
           amount: `${savingsProgress}%`,
         },
         {
-          title: 'Saved Profiles',
+          title: 'Profiles Saved',
           description:
-            'Profiles are still stored locally so you can demonstrate onboarding before the API is ready.',
+            'Each saved profile stays available locally so your demo can show onboarding and persistence.',
           amount: String(profiles.length),
-        },
-        {
-          title: 'Presentation Ready',
-          description:
-            'Your login flow now leads into the finance workspace instead of stopping at a landing page.',
-          amount: 'Yes',
         },
       ]
     : [
@@ -236,10 +274,6 @@ function App() {
           value: 'Active',
           label: 'Session status',
         },
-        {
-          value: 'Ready',
-          label: 'Demo flow',
-        },
       ]
     : [
         {
@@ -255,6 +289,15 @@ function App() {
           label: 'Post-login features',
         },
       ];
+
+  const registerDefaults = {
+    fullName:
+      session?.fullName === demoAccount.fullName ? '' : session?.fullName ?? '',
+    email: session?.email ?? '',
+    monthlyIncome: currentProfile
+      ? String(parseIncomeValue(currentProfile.monthlyIncome))
+      : '',
+  };
 
   return (
     <>
@@ -345,7 +388,11 @@ function App() {
                 />
               </div>
               <div className="workspace-panel">
-                <RegisterForm onRegister={handleRegister} />
+                <RegisterForm
+                  key={session.email}
+                  defaultValues={registerDefaults}
+                  onRegister={handleRegister}
+                />
               </div>
             </section>
 
@@ -356,12 +403,17 @@ function App() {
                   <ul>
                     <li>Name: {latestProfile.fullName}</li>
                     <li>Email: {latestProfile.email}</li>
-                    <li>Monthly income: ${latestProfile.monthlyIncome}</li>
+                    <li>
+                      Monthly income:{' '}
+                      {currencyFormatter.format(
+                        parseIncomeValue(latestProfile.monthlyIncome),
+                      )}
+                    </li>
                   </ul>
                 ) : (
                   <p>
                     You are logged in with the frontend auth shell. Save a profile to
-                    start personalizing the dashboard.
+                    personalize the income card and latest profile summary.
                   </p>
                 )}
               </div>

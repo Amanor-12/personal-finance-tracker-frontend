@@ -40,6 +40,11 @@
   width: fit-content;
 }
 
+.register-form button:focus-visible,
+.register-form input:focus-visible {
+  outline-offset: 2px;
+}
+
 .error-text {
   margin: -0.4rem 0 0;
   color: #b9381b;
