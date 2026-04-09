@@ -12,20 +12,10 @@
   border-bottom: 1px solid rgba(16, 37, 66, 0.08);
 }
 
-.navbar-brand {
-  display: grid;
-  gap: 0.2rem;
-}
-
 .navbar h2 {
   margin: 0;
   color: #102542;
   letter-spacing: 0.04em;
-}
-
-.navbar-brand span {
-  font-size: 0.85rem;
-  color: #6a7786;
 }
 
 .navbar ul {
@@ -42,40 +32,8 @@
   cursor: pointer;
 }
 
-.navbar a {
-  text-decoration: none;
-}
-
-.navbar li:hover,
-.navbar a:hover {
+.navbar li:hover {
   color: #e76f51;
-}
-
-.navbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.45rem 0.8rem;
-  border-radius: 999px;
-  background: #fff4c8;
-  color: #102542;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.status-pill-muted {
-  background: #edf3f0;
-  color: #2e7d6b;
-}
-
-.logout-button {
-  padding: 0.7rem 1rem;
-  box-shadow: 0 10px 20px rgba(16, 37, 66, 0.12);
 }
 
 @media (max-width: 640px) {
@@ -86,10 +44,5 @@
 
   .navbar ul {
     flex-wrap: wrap;
-  }
-
-  .navbar-actions {
-    width: 100%;
-    justify-content: space-between;
   }
 }

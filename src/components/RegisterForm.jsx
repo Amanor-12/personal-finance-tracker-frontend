@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import './RegisterForm.css';
 
-const createFormState = (defaultValues = {}) => ({
-  fullName: defaultValues.fullName ?? '',
-  email: defaultValues.email ?? '',
-  monthlyIncome: defaultValues.monthlyIncome ?? '',
-});
+const emptyForm = {
+  fullName: '',
+  email: '',
+  monthlyIncome: '',
+};
 
-function RegisterForm({ defaultValues, onRegister }) {
-  const [formData, setFormData] = useState(() => createFormState(defaultValues));
+function RegisterForm({ onRegister }) {
+  const [formData, setFormData] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -50,26 +50,20 @@ function RegisterForm({ defaultValues, onRegister }) {
     }
 
     onRegister({
-      fullName: formData.fullName.trim(),
-      email: formData.email.trim(),
+      ...formData,
       monthlyIncome: Number(formData.monthlyIncome).toLocaleString(),
     });
 
     setSuccessMessage('Profile saved. The dashboard updated instantly.');
-    setErrors({});
-    setFormData(
-      createFormState({
-        email: defaultValues?.email ?? formData.email.trim(),
-      }),
-    );
+    setFormData(emptyForm);
   };
 
   return (
     <form className="register-form" onSubmit={handleSubmit}>
-      <h2>Complete Your Finance Profile</h2>
+      <h2>Register Your Dashboard</h2>
       <p>
-        Save the details that personalize the dashboard after login. This stays
-        frontend-only for now, but the form state is already structured for an API later.
+        This form is fully controlled with React state, so every input updates
+        the UI as you type.
       </p>
 
       <label htmlFor="fullName">
@@ -104,8 +98,6 @@ function RegisterForm({ defaultValues, onRegister }) {
           id="monthlyIncome"
           name="monthlyIncome"
           type="number"
-          min="0"
-          step="50"
           value={formData.monthlyIncome}
           onChange={handleChange}
           placeholder="3000"

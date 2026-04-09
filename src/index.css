@@ -14,20 +14,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   margin: 0;
   min-width: 320px;
   background:
     radial-gradient(circle at top, rgba(247, 201, 72, 0.18), transparent 32%),
     #faf7f1;
-}
-
-#root {
-  min-height: 100vh;
 }
 
 a {
@@ -54,15 +46,4 @@ button {
 button:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(247, 201, 72, 0.35);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  transform: none;
-  opacity: 0.65;
-  box-shadow: none;
-}
-
-input::placeholder {
-  color: #8c96a0;
 }
