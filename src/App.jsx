@@ -336,6 +336,75 @@ function App() {
       : '',
   };
 
+  if (!session) {
+    return (
+      <>
+        <Navbar
+          isAuthenticated={false}
+          navItems={[]}
+          onLogout={handleLogout}
+          userName={session?.fullName}
+        />
+
+        <main className="auth-page">
+          <section className="auth-stage">
+            <div className="auth-showcase">
+              <span className="auth-eyebrow">Personal Finance Login</span>
+              <h1>Start with a focused login screen, then unlock the dashboard.</h1>
+              <p>
+                This keeps the app presentation cleaner: first you sign in, then you
+                reveal the actual finance workspace. Your backend can replace the mock
+                login logic later without changing the rest of the UI.
+              </p>
+
+              <div className="auth-stage-stats">
+                <div>
+                  <strong>Demo Ready</strong>
+                  <small>Fast login for class presentation</small>
+                </div>
+                <div>
+                  <strong>{profiles.length}</strong>
+                  <small>Profiles already stored locally</small>
+                </div>
+                <div>
+                  <strong>{rememberedEmail ? 'On' : 'Off'}</strong>
+                  <small>Remembered email status</small>
+                </div>
+              </div>
+
+              <div className="auth-visual-card">
+                <img src={hero} alt="Personal finance dashboard preview" />
+                <div className="auth-credential-card">
+                  <span>Demo Access</span>
+                  <strong>{demoAccount.email}</strong>
+                  <small>Password: {demoAccount.password}</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="auth-form-panel">
+              <LoginForm
+                key={rememberedEmail || 'login-form'}
+                defaultEmail={rememberedEmail}
+                demoAccount={demoAccount}
+                onLogin={handleLogin}
+                savedProfilesCount={profiles.length}
+              />
+
+              <div className="auth-note">
+                <h2>Backend handoff</h2>
+                <p>
+                  When your API is ready, swap the mock login handler with your real
+                  request and keep this screen as the dedicated entry point.
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar
@@ -414,136 +483,71 @@ function App() {
           ))}
         </section>
 
-        {session ? (
-          <>
-            <section className="workspace" id="workspace">
-              <div className="workspace-panel">
-                <Counter
-                  goal={financeGoal}
-                  savings={savings}
-                  onSavingsChange={setSavings}
-                />
-              </div>
-              <div className="workspace-panel">
-                <RegisterForm
-                  key={session.email}
-                  defaultValues={registerDefaults}
-                  onRegister={handleRegister}
-                />
-              </div>
-            </section>
+        <section className="workspace" id="workspace">
+          <div className="workspace-panel">
+            <Counter
+              goal={financeGoal}
+              savings={savings}
+              onSavingsChange={setSavings}
+            />
+          </div>
+          <div className="workspace-panel">
+            <RegisterForm
+              key={session.email}
+              defaultValues={registerDefaults}
+              onRegister={handleRegister}
+            />
+          </div>
+        </section>
 
-            <section className="dashboard-grid" id="activity">
-              <div className="workspace-panel">
-                <ActivityFeed items={activityItems} />
-              </div>
-              <div className="workspace-panel">
-                <SessionPanel
-                  currentIncome={monthlyIncome}
-                  goal={financeGoal}
-                  profiles={profiles}
-                  savings={savings}
-                  session={session}
-                />
-              </div>
-            </section>
+        <section className="dashboard-grid" id="activity">
+          <div className="workspace-panel">
+            <ActivityFeed items={activityItems} />
+          </div>
+          <div className="workspace-panel">
+            <SessionPanel
+              currentIncome={monthlyIncome}
+              goal={financeGoal}
+              profiles={profiles}
+              savings={savings}
+              session={session}
+            />
+          </div>
+        </section>
 
-            <section className="status-strip">
-              <div className="status-card">
-                <h3>Latest Saved Profile</h3>
-                {latestProfile ? (
-                  <ul>
-                    <li>Name: {latestProfile.fullName}</li>
-                    <li>Email: {latestProfile.email}</li>
-                    <li>
-                      Monthly income:{' '}
-                      {currencyFormatter.format(
-                        parseIncomeValue(latestProfile.monthlyIncome),
-                      )}
-                    </li>
-                  </ul>
-                ) : (
-                  <p>
-                    You are logged in with the frontend auth shell. Save a profile to
-                    personalize the income card and latest profile summary.
-                  </p>
-                )}
-              </div>
+        <section className="status-strip">
+          <div className="status-card">
+            <h3>Latest Saved Profile</h3>
+            {latestProfile ? (
+              <ul>
+                <li>Name: {latestProfile.fullName}</li>
+                <li>Email: {latestProfile.email}</li>
+                <li>
+                  Monthly income:{' '}
+                  {currencyFormatter.format(
+                    parseIncomeValue(latestProfile.monthlyIncome),
+                  )}
+                </li>
+              </ul>
+            ) : (
+              <p>
+                You are logged in with the frontend auth shell. Save a profile to
+                personalize the income card and latest profile summary.
+              </p>
+            )}
+          </div>
 
-              <div className="status-badges">
-                <div>
-                  <img src={reactLogo} alt="React logo" />
-                  <span>React</span>
-                </div>
-                <div>
-                  <img src={viteLogo} alt="Vite logo" />
-                  <span>Vite</span>
-                </div>
-              </div>
-            </section>
-          </>
-        ) : (
-          <>
-            <section className="workspace auth-workspace" id="workspace">
-              <div className="workspace-panel">
-                <LoginForm
-                  key={rememberedEmail || 'login-form'}
-                  defaultEmail={rememberedEmail}
-                  demoAccount={demoAccount}
-                  onLogin={handleLogin}
-                  savedProfilesCount={profiles.length}
-                />
-              </div>
-              <div className="workspace-panel workspace-panel-accent" id="activity">
-                <h2>What this login page already includes</h2>
-                <p>
-                  The goal was not just to draw a form. This auth shell behaves like a
-                  real frontend milestone and stays easy to connect to your backend.
-                </p>
-
-                <ul className="feature-list">
-                  <li>Remembered email for trusted devices</li>
-                  <li>Demo credentials for fast grading and demos</li>
-                  <li>Protected dashboard content with logout</li>
-                  <li>Profile setup and savings tools after login</li>
-                </ul>
-
-                <div className="mini-stat-grid">
-                  <div>
-                    <strong>{profiles.length}</strong>
-                    <small>Profiles in local storage</small>
-                  </div>
-                  <div>
-                    <strong>{rememberedEmail ? 'On' : 'Off'}</strong>
-                    <small>Remember me status</small>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="status-strip">
-              <div className="status-card">
-                <h3>Backend Handoff Notes</h3>
-                <ul>
-                  <li>Replace the mock handleLogin logic with your API request.</li>
-                  <li>Keep the same dashboard layout after your token is returned.</li>
-                  <li>Reuse the saved profile panel for onboarding or account setup.</li>
-                </ul>
-              </div>
-
-              <div className="status-badges">
-                <div>
-                  <img src={reactLogo} alt="React logo" />
-                  <span>React</span>
-                </div>
-                <div>
-                  <img src={viteLogo} alt="Vite logo" />
-                  <span>Vite</span>
-                </div>
-              </div>
-            </section>
-          </>
-        )}
+          <div className="status-badges">
+            <div>
+              <img src={reactLogo} alt="React logo" />
+              <span>React</span>
+            </div>
+            <div>
+              <img src={viteLogo} alt="Vite logo" />
+              <span>Vite</span>
+            </div>
+          </div>
+        </section>
       </main>
     </>
   );

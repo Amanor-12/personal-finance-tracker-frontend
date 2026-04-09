@@ -8,13 +8,15 @@ function Navbar({ isAuthenticated, navItems, onLogout, userName }) {
         <span>{isAuthenticated ? 'Dashboard unlocked' : 'Frontend auth shell'}</span>
       </div>
 
-      <ul>
-        {navItems.map((item) => (
-          <li key={item.href}>
-            <a href={item.href}>{item.label}</a>
-          </li>
-        ))}
-      </ul>
+      {navItems.length > 0 ? (
+        <ul>
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="navbar-actions">
         {isAuthenticated ? (
