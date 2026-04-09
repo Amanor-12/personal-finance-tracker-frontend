@@ -3,11 +3,13 @@ import './App.css';
 import hero from './assets/hero.png';
 import reactLogo from './assets/react.svg';
 import viteLogo from './assets/vite.svg';
+import ActivityFeed from './components/ActivityFeed';
 import Card from './components/Card';
 import Counter from './components/Counter';
 import LoginForm from './components/LoginForm';
 import Navbar from './components/Navbar';
 import RegisterForm from './components/RegisterForm';
+import SessionPanel from './components/SessionPanel';
 
 const demoAccount = {
   fullName: 'Demo Member',
@@ -17,6 +19,41 @@ const demoAccount = {
 };
 
 const financeGoal = 1000;
+
+const activityItems = [
+  {
+    id: 1,
+    title: 'Payday deposit',
+    note: 'Salary scheduled for Friday morning.',
+    type: 'income',
+    tag: 'Income',
+    amount: '+$2,350',
+  },
+  {
+    id: 2,
+    title: 'Electricity bill',
+    note: 'Due in 2 days to stay on track.',
+    type: 'bill',
+    tag: 'Bill',
+    amount: '-$94',
+  },
+  {
+    id: 3,
+    title: 'Emergency fund transfer',
+    note: 'Automatic transfer to savings goal.',
+    type: 'savings',
+    tag: 'Savings',
+    amount: '+$150',
+  },
+  {
+    id: 4,
+    title: 'Groceries',
+    note: 'Weekly budget stayed below plan.',
+    type: 'spending',
+    tag: 'Spending',
+    amount: '-$82',
+  },
+];
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -209,7 +246,7 @@ function App() {
         { href: '#home', label: 'Home' },
         { href: '#overview', label: 'Overview' },
         { href: '#workspace', label: 'Workspace' },
-        { href: '#summary', label: 'Summary' },
+        { href: '#activity', label: 'Activity' },
       ]
     : [
         { href: '#home', label: 'Home' },
@@ -396,7 +433,22 @@ function App() {
               </div>
             </section>
 
-            <section className="status-strip" id="summary">
+            <section className="dashboard-grid" id="activity">
+              <div className="workspace-panel">
+                <ActivityFeed items={activityItems} />
+              </div>
+              <div className="workspace-panel">
+                <SessionPanel
+                  currentIncome={monthlyIncome}
+                  goal={financeGoal}
+                  profiles={profiles}
+                  savings={savings}
+                  session={session}
+                />
+              </div>
+            </section>
+
+            <section className="status-strip">
               <div className="status-card">
                 <h3>Latest Saved Profile</h3>
                 {latestProfile ? (

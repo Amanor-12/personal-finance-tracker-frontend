@@ -1,0 +1,110 @@
+.activity-feed {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-heading h2,
+.panel-heading p {
+  margin: 0;
+}
+
+.panel-heading p {
+  margin-top: 0.45rem;
+  color: #596574;
+  line-height: 1.7;
+}
+
+.activity-filters {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  padding: 0.65rem 0.95rem;
+  background: #f7f4ee;
+  box-shadow: none;
+}
+
+.filter-button.is-active {
+  background: #102542;
+  color: #f8f4ec;
+}
+
+.filter-button:hover {
+  box-shadow: none;
+}
+
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.activity-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f9f7f2;
+  border: 1px solid #ece5d8;
+}
+
+.activity-list strong {
+  color: #102542;
+}
+
+.activity-list p {
+  margin: 0.35rem 0 0;
+  color: #596574;
+}
+
+.activity-meta {
+  display: grid;
+  justify-items: end;
+  gap: 0.6rem;
+}
+
+.activity-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.activity-tag-income,
+.activity-tag-savings {
+  background: #e7f5ef;
+  color: #1e6d5b;
+}
+
+.activity-tag-bill,
+.activity-tag-spending {
+  background: #fff1ea;
+  color: #b35a41;
+}
+
+.activity-amount {
+  color: #1e6d5b;
+}
+
+.activity-amount.is-expense {
+  color: #b35a41;
+}
+
+@media (max-width: 640px) {
+  .activity-list li {
+    flex-direction: column;
+  }
+
+  .activity-meta {
+    justify-items: start;
+  }
+}
