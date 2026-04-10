@@ -5,6 +5,7 @@ import reactLogo from './assets/react.svg';
 import viteLogo from './assets/vite.svg';
 import Card from './components/Card';
 import Counter from './components/Counter';
+import LoginPage from './components/LoginPage';
 import Navbar from './components/Navbar';
 import RegisterForm from './components/RegisterForm';
 
@@ -27,6 +28,7 @@ const cardData = [
 ];
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [profiles, setProfiles] = useState(() => {
     if (typeof window === 'undefined') {
       return [];
@@ -49,9 +51,13 @@ function App() {
 
   const latestProfile = profiles[0];
 
+  if (!currentUser) {
+    return <LoginPage onLogin={setCurrentUser} />;
+  }
+
   return (
     <>
-      <Navbar />
+      <Navbar user={currentUser} onLogout={() => setCurrentUser(null)} />
 
       <main className="app-shell">
         <section className="hero">

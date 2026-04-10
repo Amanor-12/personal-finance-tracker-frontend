@@ -18,6 +18,12 @@
   letter-spacing: 0.04em;
 }
 
+.navbar p {
+  margin: 0.2rem 0 0;
+  color: #5a6775;
+  font-size: 0.9rem;
+}
+
 .navbar ul {
   display: flex;
   gap: 1.2rem;
@@ -34,6 +40,11 @@
 
 .navbar li:hover {
   color: #e76f51;
+}
+
+.navbar button {
+  padding: 0.65rem 1rem;
+  box-shadow: 0 8px 18px rgba(247, 201, 72, 0.22);
 }
 
 @media (max-width: 640px) {
