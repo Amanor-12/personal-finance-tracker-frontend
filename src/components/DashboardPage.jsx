@@ -12,12 +12,18 @@ const navigationItems = [
   { label: 'Message', caption: 'Soon' },
 ];
 
-const quickActions = [
-  { label: 'Add Card', detail: 'Secure local save' },
-  { label: 'Protected', detail: 'Route guard on' },
-  { label: 'Private', detail: 'User-only view' },
-  { label: 'Sign Out', detail: 'End session' },
+const walletActions = [
+  { key: 'send', label: 'Add Card', detail: 'Save masked card' },
+  { key: 'receive', label: 'Session', detail: 'Protected route' },
+  { key: 'invoice', label: 'Privacy', detail: 'No fake data' },
+  { key: 'more', label: 'Logout', detail: 'End access' },
 ];
+
+const themeLabels = {
+  indigo: 'Indigo',
+  emerald: 'Emerald',
+  sunset: 'Sunset',
+};
 
 const createInitialCardForm = (fullName = '') => ({
   nickname: '',
@@ -52,6 +58,7 @@ function DashboardPage({ currentUser, onLogout }) {
     setCards(cardStore.getCardsForUser(currentUser.id));
     setCardForm(createInitialCardForm(currentUser.fullName));
     setCardMessage('');
+    setIsAddingCard(false);
   }, [currentUser?.fullName, currentUser?.id]);
 
   const handleCardChange = (event) => {
@@ -103,9 +110,19 @@ function DashboardPage({ currentUser, onLogout }) {
     setCards(nextCards);
   };
 
+  const handleWalletAction = (key) => {
+    if (key === 'send') {
+      setIsAddingCard(true);
+    }
+
+    if (key === 'more') {
+      onLogout();
+    }
+  };
+
   const initials = getInitials(currentUser?.fullName);
-  const joinedDate = currentUser?.createdAt ? formatJoinedDate(currentUser.createdAt) : 'Not available';
   const firstName = currentUser?.fullName?.split(' ')[0] || 'there';
+  const joinedDate = currentUser?.createdAt ? formatJoinedDate(currentUser.createdAt) : 'Not available';
   const primaryCard = cards[0];
 
   return (
@@ -115,7 +132,7 @@ function DashboardPage({ currentUser, onLogout }) {
           <div className="brand-mark">F</div>
           <div>
             <strong>Fina Inc</strong>
-            <span>Personal finance tracker</span>
+            <span>Private finance workspace</span>
           </div>
           <div className="brand-chevron">+</div>
         </div>
@@ -151,7 +168,7 @@ function DashboardPage({ currentUser, onLogout }) {
 
         <div className="sidebar-support">
           <span>Help & Support</span>
-          <p>Cards are stored per signed-in user. The dashboard stays empty until your own data exists.</p>
+          <p>Cards shown here belong only to the signed-in user. Transactions and balances stay empty until they are real.</p>
         </div>
       </aside>
 
@@ -175,9 +192,6 @@ function DashboardPage({ currentUser, onLogout }) {
                 <span>Member since {joinedDate}</span>
               </div>
             </div>
-            <button className="subtle-logout" type="button" onClick={onLogout}>
-              Sign out
-            </button>
           </div>
         </header>
 
@@ -186,20 +200,20 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="dashboard-heading">
               <div>
                 <h1>Welcome Back {firstName}</h1>
-                <p>Here is what is happening in your workspace today.</p>
+                <p>Here is what is happening in your finance workspace today.</p>
               </div>
               <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
-                + Add Card
+                + New Card
               </button>
             </div>
 
             <article className="hero-banner">
               <div className="hero-banner-copy">
-                <span className="banner-kicker">Your private wallet</span>
-                <h2>{cards.length ? 'Your cards are ready for this workspace.' : 'Add your first card to start your wallet.'}</h2>
+                <span className="banner-kicker">Private wallet</span>
+                <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start by adding your first card.'}</h2>
                 <p>
-                  This interface is designed like a real finance app, but it avoids fake balances and fake spending.
-                  Only your own saved cards appear here.
+                  The layout is intentionally premium and complete, but it still avoids fake balances,
+                  fake expenses, and fake transactions.
                 </p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
@@ -213,14 +227,110 @@ function DashboardPage({ currentUser, onLogout }) {
               </div>
             </article>
 
+            {isAddingCard ? (
+              <article className="content-panel add-card-panel">
+                <div className="panel-header">
+                  <div>
+                    <h3>Add a Card</h3>
+                    <p>Only masked card display details are stored for this user.</p>
+                  </div>
+                </div>
+
+                <form className="card-form" onSubmit={handleAddCard}>
+                  {cardMessage ? <p className="form-error">{cardMessage}</p> : null}
+
+                  <div className="card-form-grid">
+                    <label htmlFor="nickname">
+                      Card nickname
+                      <input
+                        id="nickname"
+                        name="nickname"
+                        type="text"
+                        value={cardForm.nickname}
+                        onChange={handleCardChange}
+                        placeholder="Main Visa"
+                      />
+                    </label>
+
+                    <label htmlFor="holderName">
+                      Card holder
+                      <input
+                        id="holderName"
+                        name="holderName"
+                        type="text"
+                        value={cardForm.holderName}
+                        onChange={handleCardChange}
+                        placeholder="Card holder name"
+                      />
+                    </label>
+
+                    <label htmlFor="brand">
+                      Brand
+                      <select id="brand" name="brand" value={cardForm.brand} onChange={handleCardChange}>
+                        <option>Visa</option>
+                        <option>Mastercard</option>
+                        <option>Amex</option>
+                        <option>Debit</option>
+                      </select>
+                    </label>
+
+                    <label htmlFor="theme">
+                      Card theme
+                      <select id="theme" name="theme" value={cardForm.theme} onChange={handleCardChange}>
+                        <option value="indigo">Indigo</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="sunset">Sunset</option>
+                      </select>
+                    </label>
+
+                    <label htmlFor="last4">
+                      Last 4 digits
+                      <input
+                        id="last4"
+                        name="last4"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength="4"
+                        value={cardForm.last4}
+                        onChange={handleCardChange}
+                        placeholder="4242"
+                      />
+                    </label>
+
+                    <label htmlFor="expiry">
+                      Expiry
+                      <input
+                        id="expiry"
+                        name="expiry"
+                        type="text"
+                        maxLength="5"
+                        value={cardForm.expiry}
+                        onChange={handleCardChange}
+                        placeholder="04/28"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="card-form-actions">
+                    <button className="secondary-button" type="button" onClick={() => setIsAddingCard(false)}>
+                      Cancel
+                    </button>
+                    <button className="primary-card-action" type="submit">
+                      Save card
+                    </button>
+                  </div>
+                </form>
+              </article>
+            ) : null}
+
             <article className="content-panel graph-panel">
               <div className="panel-header">
                 <div>
                   <h3>Money Flow</h3>
-                  <p>{cards.length ? 'Charts will activate when you connect real transactions.' : 'Add cards first, then connect real finance activity later.'}</p>
+                  <p>{cards.length ? 'Waiting for your real transactions.' : 'Add a card first, then connect real finance activity later.'}</p>
                 </div>
                 <div className="tab-strip">
-                  <span className="tab-pill active">All Cards</span>
+                  <span className="tab-pill active">All Card</span>
                   {cards.slice(0, 3).map((card) => (
                     <span key={card.id} className="tab-pill">
                       {card.nickname}
@@ -234,20 +344,21 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="graph-placeholder">
                   <strong>No transaction history yet</strong>
                   <p>
-                    The layout is here, but the graph remains intentionally empty until you connect
-                    real financial activity for this account.
+                    This chart area stays blank until you connect real transactions for the
+                    signed-in user.
                   </p>
                 </div>
               </div>
             </article>
 
             <div className="dashboard-bottom-grid">
-              <article className="content-panel">
+              <article className="content-panel saving-panel">
                 <div className="panel-header">
                   <div>
                     <h3>Saved Cards</h3>
-                    <p>Only masked display details are stored in this frontend.</p>
+                    <p>Your own masked cards stored in this frontend workspace.</p>
                   </div>
+                  <span className="panel-badge">This user</span>
                 </div>
 
                 {cards.length ? (
@@ -273,35 +384,41 @@ function DashboardPage({ currentUser, onLogout }) {
                 ) : (
                   <div className="empty-panel-state">
                     <strong>No cards added yet</strong>
-                    <p>Use the add card button to save your own card details for this account.</p>
+                    <p>Use the new card button to save your own masked card details.</p>
                   </div>
                 )}
               </article>
 
-              <article className="content-panel">
+              <article className="content-panel statistics-panel">
                 <div className="panel-header">
                   <div>
                     <h3>Statistics</h3>
-                    <p>System state, not fake finance values.</p>
+                    <p>Real system state without fake finance amounts.</p>
                   </div>
+                  <span className="panel-link">View all</span>
                 </div>
 
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <span>Cards saved</span>
-                    <strong>{cards.length}</strong>
+                <div className="stats-visual-wrap">
+                  <div className="stats-donut" aria-hidden="true">
+                    <div className="stats-donut-inner">
+                      <strong>{cards.length}</strong>
+                      <span>Cards</span>
+                    </div>
                   </div>
-                  <div className="stat-card">
-                    <span>Account status</span>
-                    <strong>Secure</strong>
-                  </div>
-                  <div className="stat-card">
-                    <span>Data source</span>
-                    <strong>Local only</strong>
-                  </div>
-                  <div className="stat-card">
-                    <span>Current owner</span>
-                    <strong>{firstName}</strong>
+
+                  <div className="stats-list">
+                    <div>
+                      <span>Profile</span>
+                      <strong>{firstName}</strong>
+                    </div>
+                    <div>
+                      <span>Access</span>
+                      <strong>Protected</strong>
+                    </div>
+                    <div>
+                      <span>Theme</span>
+                      <strong>{primaryCard ? themeLabels[primaryCard.theme] : 'Waiting'}</strong>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -313,7 +430,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Your Card</h3>
-                  <p>{cards.length ? `${cards.length} saved ${cards.length === 1 ? 'card' : 'cards'}` : 'No saved card yet'}</p>
+                  <p>{primaryCard ? 'Masked card details for this account' : 'No card saved yet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Card options">
                   ...
@@ -344,25 +461,19 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="wallet-card empty">
                   <span>No card saved</span>
                   <strong>Add your first card</strong>
-                  <p>Only masked card details are stored for the signed-in user.</p>
+                  <p>Only masked display details are shown here after you add them.</p>
                 </div>
               )}
 
               <div className="wallet-action-grid">
-                {quickActions.map((action) => (
+                {walletActions.map((action) => (
                   <button
-                    key={action.label}
+                    key={action.key}
                     className="wallet-action-tile"
                     type="button"
-                    onClick={() => {
-                      if (action.label === 'Add Card') {
-                        setIsAddingCard(true);
-                      }
-                      if (action.label === 'Sign Out') {
-                        onLogout();
-                      }
-                    }}
+                    onClick={() => handleWalletAction(action.key)}
                   >
+                    <div className="wallet-action-icon">{action.label.slice(0, 1)}</div>
                     <strong>{action.label}</strong>
                     <span>{action.detail}</span>
                   </button>
@@ -374,8 +485,11 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Expenses</h3>
-                  <p>Waiting for your real finance data</p>
+                  <p>No spend data until you add real transactions</p>
                 </div>
+                <button className="icon-dots" type="button" aria-label="Expense options">
+                  ...
+                </button>
               </div>
 
               <div className="expense-rings" aria-hidden="true">
@@ -384,114 +498,10 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="expense-ring expense-ring-three" />
                 <div className="expense-ring expense-ring-four" />
                 <div className="expense-center">
-                  <strong>No spend data</strong>
+                  <strong>No expense data</strong>
                   <span>Add real transactions later</span>
                 </div>
               </div>
-            </article>
-
-            <article className="content-panel card-form-panel">
-              <div className="panel-header">
-                <div>
-                  <h3>{isAddingCard ? 'Add a Card' : 'Card Setup'}</h3>
-                  <p>Save only masked card information for this account.</p>
-                </div>
-              </div>
-
-              {isAddingCard ? (
-                <form className="card-form" onSubmit={handleAddCard}>
-                  {cardMessage ? <p className="form-error">{cardMessage}</p> : null}
-
-                  <label htmlFor="nickname">
-                    Card nickname
-                    <input
-                      id="nickname"
-                      name="nickname"
-                      type="text"
-                      value={cardForm.nickname}
-                      onChange={handleCardChange}
-                      placeholder="Main Visa"
-                    />
-                  </label>
-
-                  <label htmlFor="holderName">
-                    Card holder
-                    <input
-                      id="holderName"
-                      name="holderName"
-                      type="text"
-                      value={cardForm.holderName}
-                      onChange={handleCardChange}
-                      placeholder="Card holder name"
-                    />
-                  </label>
-
-                  <label htmlFor="brand">
-                    Brand
-                    <select id="brand" name="brand" value={cardForm.brand} onChange={handleCardChange}>
-                      <option>Visa</option>
-                      <option>Mastercard</option>
-                      <option>Amex</option>
-                      <option>Debit</option>
-                    </select>
-                  </label>
-
-                  <div className="card-form-row">
-                    <label htmlFor="last4">
-                      Last 4
-                      <input
-                        id="last4"
-                        name="last4"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength="4"
-                        value={cardForm.last4}
-                        onChange={handleCardChange}
-                        placeholder="4242"
-                      />
-                    </label>
-
-                    <label htmlFor="expiry">
-                      Expiry
-                      <input
-                        id="expiry"
-                        name="expiry"
-                        type="text"
-                        maxLength="5"
-                        value={cardForm.expiry}
-                        onChange={handleCardChange}
-                        placeholder="04/28"
-                      />
-                    </label>
-                  </div>
-
-                  <label htmlFor="theme">
-                    Card theme
-                    <select id="theme" name="theme" value={cardForm.theme} onChange={handleCardChange}>
-                      <option value="indigo">Indigo</option>
-                      <option value="emerald">Emerald</option>
-                      <option value="sunset">Sunset</option>
-                    </select>
-                  </label>
-
-                  <div className="card-form-actions">
-                    <button className="secondary-button" type="button" onClick={() => setIsAddingCard(false)}>
-                      Cancel
-                    </button>
-                    <button className="primary-card-action" type="submit">
-                      Save card
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="empty-panel-state">
-                  <strong>Ready to save a card</strong>
-                  <p>Use the add card action to show a wallet card here for the current user.</p>
-                  <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
-                    + Add Card
-                  </button>
-                </div>
-              )}
             </article>
           </aside>
         </div>
