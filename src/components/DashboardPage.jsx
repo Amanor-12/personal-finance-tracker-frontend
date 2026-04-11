@@ -13,10 +13,10 @@ const navigationItems = [
 ];
 
 const walletActions = [
-  { key: 'send', label: 'Add Card', detail: 'Save masked card' },
-  { key: 'receive', label: 'Session', detail: 'Protected route' },
-  { key: 'invoice', label: 'Privacy', detail: 'No fake data' },
-  { key: 'more', label: 'Logout', detail: 'End access' },
+  { key: 'send', label: 'Send', detail: 'Add card', icon: 'S', tone: 'lavender' },
+  { key: 'receive', label: 'Receive', detail: 'Protected', icon: 'R', tone: 'mint' },
+  { key: 'invoice', label: 'Invoicing', detail: 'Private', icon: 'I', tone: 'amber' },
+  { key: 'more', label: 'More', detail: 'Logout', icon: 'M', tone: 'sky' },
 ];
 
 const themeLabels = {
@@ -24,6 +24,13 @@ const themeLabels = {
   emerald: 'Emerald',
   sunset: 'Sunset',
 };
+
+const expenseLegend = [
+  { label: 'Shopping', value: '$0.00', colorClass: 'legend-violet' },
+  { label: 'Essentials', value: '$0.00', colorClass: 'legend-blue' },
+  { label: 'Bills', value: '$0.00', colorClass: 'legend-green' },
+  { label: 'Travel', value: '$0.00', colorClass: 'legend-orange' },
+];
 
 const createInitialCardForm = (fullName = '') => ({
   nickname: '',
@@ -437,33 +444,33 @@ function DashboardPage({ currentUser, onLogout }) {
                 </button>
               </div>
 
-              {primaryCard ? (
-                <div className={`wallet-card theme-${primaryCard.theme}`}>
-                  <div className="wallet-card-top">
-                    <span>{primaryCard.brand}</span>
-                    <small>{primaryCard.nickname}</small>
+              <div className={`wallet-card theme-${primaryCard?.theme || 'indigo'}${primaryCard ? '' : ' preview'}`}>
+                <div className="wallet-card-sheen" aria-hidden="true" />
+
+                <div className="wallet-card-brand-line">
+                  <div className="wallet-card-brand-markers">
+                    <span className="wallet-brand-dot wallet-brand-dot-red" />
+                    <span className="wallet-brand-dot wallet-brand-dot-gold" />
                   </div>
+                  <strong>{primaryCard ? `${primaryCard.brand} Credit` : 'Secure Wallet'}</strong>
+                </div>
 
-                  <div className="wallet-card-number">**** **** **** {primaryCard.last4}</div>
+                <div className="wallet-card-chip" aria-hidden="true" />
 
-                  <div className="wallet-card-bottom">
-                    <div>
-                      <span>Card Holder</span>
-                      <strong>{primaryCard.holderName}</strong>
-                    </div>
-                    <div>
-                      <span>Expiry</span>
-                      <strong>{primaryCard.expiry}</strong>
-                    </div>
+                <div className="wallet-card-balance">
+                  <span>{primaryCard ? 'Saved Card' : 'Card Status'}</span>
+                  <strong>{primaryCard ? `**** ${primaryCard.last4}` : 'Add your card'}</strong>
+                </div>
+
+                <div className="wallet-card-meta">
+                  <span>{primaryCard ? primaryCard.expiry : '--/--'}</span>
+                  <div className="wallet-card-tail">
+                    <span className="wallet-brand-dot wallet-brand-dot-red" />
+                    <span className="wallet-brand-dot wallet-brand-dot-gold" />
+                    <small>{primaryCard ? primaryCard.holderName : 'No holder yet'}</small>
                   </div>
                 </div>
-              ) : (
-                <div className="wallet-card empty">
-                  <span>No card saved</span>
-                  <strong>Add your first card</strong>
-                  <p>Only masked display details are shown here after you add them.</p>
-                </div>
-              )}
+              </div>
 
               <div className="wallet-action-grid">
                 {walletActions.map((action) => (
@@ -473,9 +480,8 @@ function DashboardPage({ currentUser, onLogout }) {
                     type="button"
                     onClick={() => handleWalletAction(action.key)}
                   >
-                    <div className="wallet-action-icon">{action.label.slice(0, 1)}</div>
-                    <strong>{action.label}</strong>
-                    <span>{action.detail}</span>
+                    <div className={`wallet-action-icon ${action.tone}`}>{action.icon}</div>
+                    <span>{action.label}</span>
                   </button>
                 ))}
               </div>
@@ -485,22 +491,45 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Expenses</h3>
-                  <p>No spend data until you add real transactions</p>
+                  <p>You have {cards.length} saved {cards.length === 1 ? 'card' : 'cards'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Expense options">
                   ...
                 </button>
               </div>
 
-              <div className="expense-rings" aria-hidden="true">
-                <div className="expense-ring expense-ring-one" />
-                <div className="expense-ring expense-ring-two" />
-                <div className="expense-ring expense-ring-three" />
-                <div className="expense-ring expense-ring-four" />
-                <div className="expense-center">
-                  <strong>No expense data</strong>
-                  <span>Add real transactions later</span>
+              <div className="expense-rings-wrap">
+                <svg className="expense-chart" viewBox="0 0 220 220" aria-hidden="true">
+                  <g transform="rotate(140 110 110)">
+                    <circle className="expense-track" cx="110" cy="110" r="76" />
+                    <circle className="expense-track" cx="110" cy="110" r="58" />
+                    <circle className="expense-track" cx="110" cy="110" r="40" />
+                    <circle className="expense-track" cx="110" cy="110" r="22" />
+
+                    <circle className="expense-arc expense-arc-violet" cx="110" cy="110" r="76" />
+                    <circle className="expense-arc expense-arc-blue" cx="110" cy="110" r="58" />
+                    <circle className="expense-arc expense-arc-green" cx="110" cy="110" r="40" />
+                    <circle className="expense-arc expense-arc-orange" cx="110" cy="110" r="22" />
+                  </g>
+                </svg>
+
+                <div className="expense-summary">
+                  <strong>$0.00</strong>
+                  <span>0%</span>
+                  <small>No spend recorded this month</small>
                 </div>
+              </div>
+
+              <div className="expense-legend">
+                {expenseLegend.map((item) => (
+                  <div key={item.label} className="expense-legend-row">
+                    <div className="expense-legend-label">
+                      <span className={`legend-dot ${item.colorClass}`} />
+                      <span>{item.label}</span>
+                    </div>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
               </div>
             </article>
           </aside>
