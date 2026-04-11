@@ -1,23 +1,30 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const REMEMBERED_EMAIL_KEY = 'finance-flow-remembered-email';
 
 const loginFeatures = [
-  'Frontend-only validation',
+  'Real sign up and login flow',
   'Remembered email option',
   'Password visibility toggle',
-  'Demo sign-in while the backend is separate',
+  'Persistent session until logout',
 ];
 
-function LoginPage({ onLogin }) {
-  const [formData, setFormData] = useState({
-    email: window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || '',
-    password: '',
-  });
-  const [rememberEmail, setRememberEmail] = useState(
-    Boolean(window.localStorage.getItem(REMEMBERED_EMAIL_KEY)),
-  );
+const createInitialForm = (rememberedEmail = '') => ({
+  fullName: '',
+  email: rememberedEmail,
+  password: '',
+  confirmPassword: '',
+});
+
+function LoginPage({ mode = 'login', onLogin, onSignUp }) {
+  const navigate = useNavigate();
+  const rememberedEmail = typeof window !== 'undefined'
+    ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
+    : '';
+  const [formData, setFormData] = useState(createInitialForm(rememberedEmail));
+  const [rememberEmail, setRememberEmail] = useState(Boolean(rememberedEmail));
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -33,45 +40,61 @@ function LoginPage({ onLogin }) {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    if (mode === 'signup' && !formData.fullName.trim()) {
+      setMessage('Full name is required.');
+      return;
+    }
+
     if (!formData.email.includes('@')) {
       setMessage('Please enter a valid email address.');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setMessage('Password must be at least 6 characters for this frontend demo.');
+    if (formData.password.length < 8) {
+      setMessage('Password must be at least 8 characters.');
       return;
     }
 
-    if (rememberEmail) {
-      window.localStorage.setItem(REMEMBERED_EMAIL_KEY, formData.email.trim());
-    } else {
-      window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+    if (mode === 'signup' && formData.password !== formData.confirmPassword) {
+      setMessage('Passwords do not match.');
+      return;
     }
 
-    onLogin({
-      email: formData.email.trim(),
-      name: formData.email.split('@')[0],
-    });
-  };
+    try {
+      if (rememberEmail) {
+        window.localStorage.setItem(REMEMBERED_EMAIL_KEY, formData.email.trim());
+      } else {
+        window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+      }
 
-  const handleDemoLogin = () => {
-    window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
-    onLogin({
-      email: 'demo@financeflow.dev',
-      name: 'Demo User',
-    });
+      if (mode === 'login') {
+        onLogin({
+          email: formData.email.trim(),
+          password: formData.password,
+        });
+      } else {
+        onSignUp({
+          fullName: formData.fullName.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        });
+      }
+
+      navigate('/dashboard');
+    } catch (error) {
+      setMessage(error.message);
+    }
   };
 
   return (
     <main className="login-page">
       <section className="login-hero">
         <div className="login-copy">
-          <span>Finance Flow Login</span>
+          <span>Finance Flow Access</span>
           <h1>Start with a secure front door for your finance dashboard.</h1>
           <p>
-            Sign in first, then review budgets, savings, and saved profile details.
-            This is frontend-only for now, so it is ready to connect to your backend later.
+            Create an account, sign in with real saved credentials, and keep the session active until logout.
+            This stays frontend-only, but the authentication flow itself is fully wired.
           </p>
 
           <div className="login-feature-grid">
@@ -83,12 +106,30 @@ function LoginPage({ onLogin }) {
 
         <form className="login-card" onSubmit={handleSubmit}>
           <div>
-            <span className="login-kicker">Welcome back</span>
-            <h2>Log in to continue</h2>
-            <p>Use any valid email and a 6+ character password for the frontend demo.</p>
+            <span className="login-kicker">{mode === 'login' ? 'Welcome back' : 'New account'}</span>
+            <h2>{mode === 'login' ? 'Log in to continue' : 'Create your account'}</h2>
+            <p>
+              {mode === 'login'
+                ? 'Use the same credentials you created in sign up.'
+                : 'Sign up stores your account locally so login can validate it later.'}
+            </p>
           </div>
 
           {message ? <p className="login-error">{message}</p> : null}
+
+          {mode === 'signup' ? (
+            <label htmlFor="fullName">
+              Full Name
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Regan Amanor"
+              />
+            </label>
+          ) : null}
 
           <label htmlFor="email">
             Email
@@ -119,6 +160,20 @@ function LoginPage({ onLogin }) {
             </div>
           </label>
 
+          {mode === 'signup' ? (
+            <label htmlFor="confirmPassword">
+              Confirm Password
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Repeat password"
+              />
+            </label>
+          ) : null}
+
           <div className="login-options">
             <label className="remember-row" htmlFor="rememberEmail">
               <input
@@ -129,21 +184,20 @@ function LoginPage({ onLogin }) {
               />
               Remember my email
             </label>
-            <button
-              className="link-button"
-              type="button"
-              onClick={() => setMessage('Password reset will be connected when the backend is ready.')}
-            >
-              Forgot password?
-            </button>
+
+            {mode === 'login' ? (
+              <Link className="link-button" to="/signup">
+                Need an account? Sign up
+              </Link>
+            ) : (
+              <Link className="link-button" to="/login">
+                Already registered? Log in
+              </Link>
+            )}
           </div>
 
           <button className="primary-login" type="submit">
-            Log in
-          </button>
-
-          <button className="secondary-login" type="button" onClick={handleDemoLogin}>
-            Demo login
+            {mode === 'login' ? 'Log in' : 'Create account'}
           </button>
         </form>
       </section>

@@ -96,13 +96,7 @@
   gap: 1.25rem;
 }
 
-.workspace {
-  display: grid;
-  grid-template-columns: 0.95fr 1.05fr;
-  gap: 1.25rem;
-  margin-top: 2rem;
-}
-
+.overview-card,
 .workspace-panel,
 .status-card {
   background: #ffffff;
@@ -110,6 +104,57 @@
   padding: 1.4rem;
   border: 1px solid #e5e0d6;
   box-shadow: 0 12px 30px rgba(16, 37, 66, 0.08);
+}
+
+.overview-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 220px;
+}
+
+.card-label {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: #f4f1ea;
+  color: #2e7d6b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.overview-card h3,
+.workspace-panel h2 {
+  margin: 1rem 0 0.65rem;
+  color: #102542;
+}
+
+.workspace-panel h2 {
+  margin-top: 0;
+}
+
+.overview-card p,
+.workspace-panel p,
+.workspace-panel li {
+  margin: 0;
+  color: #596574;
+  line-height: 1.7;
+}
+
+.overview-card strong {
+  margin-top: 1.4rem;
+  font-size: 1.8rem;
+  color: #e76f51;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 1.25rem;
+  margin-top: 2rem;
 }
 
 .status-strip {
@@ -155,6 +200,59 @@
 .status-badges img {
   width: 34px;
   height: 34px;
+}
+
+.detail-list {
+  display: grid;
+  gap: 0.95rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.detail-list li,
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: #fcfbf8;
+  border: 1px solid #ece5d9;
+}
+
+.detail-list span,
+.account-item p {
+  color: #5a6775;
+}
+
+.detail-list strong,
+.account-item strong {
+  color: #102542;
+}
+
+.account-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.account-item {
+  align-items: center;
+}
+
+.account-item p {
+  margin: 0.25rem 0 0;
+}
+
+.account-item span {
+  color: #2e7d6b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.inline-note {
+  margin-top: 0.85rem;
 }
 
 @media (max-width: 920px) {

@@ -180,6 +180,7 @@
 .link-button {
   padding: 0;
   color: #2e7d6b;
+  text-decoration: none;
 }
 
 .link-button:hover,

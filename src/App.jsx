@@ -1,148 +1,81 @@
 import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import hero from './assets/hero.png';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import Card from './components/Card';
-import Counter from './components/Counter';
+import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import Navbar from './components/Navbar';
-import RegisterForm from './components/RegisterForm';
-
-const cardData = [
-  {
-    title: 'Budget Snapshot',
-    description: 'Keep your monthly budget clear by tracking groceries, bills, and everyday spending in one place.',
-    amount: '$2,450',
-  },
-  {
-    title: 'Savings Goal',
-    description: 'Build a realistic emergency fund with small weekly progress updates and visible milestones.',
-    amount: '$1,200',
-  },
-  {
-    title: 'Upcoming Bills',
-    description: 'Stay ahead of rent, subscriptions, and due dates so your dashboard feels useful during demos.',
-    amount: '4 due',
-  },
-];
+import ProtectedRoute from './components/ProtectedRoute';
+import { authStore } from './utils/authStore';
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [profiles, setProfiles] = useState(() => {
-    if (typeof window === 'undefined') {
-      return [];
-    }
-
-    const savedProfiles = window.localStorage.getItem('finance-profiles');
-    return savedProfiles ? JSON.parse(savedProfiles) : [];
-  });
+  const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
+  const [registeredUsers, setRegisteredUsers] = useState(() => authStore.getUsers());
 
   useEffect(() => {
-    document.title = profiles.length
-      ? `Finance App (${profiles.length} saved)`
-      : 'Finance App';
-    window.localStorage.setItem('finance-profiles', JSON.stringify(profiles));
-  }, [profiles]);
+    document.title = currentUser ? 'Finance Flow | Dashboard' : 'Finance Flow | Access';
+  }, [currentUser]);
 
-  const handleRegister = (newProfile) => {
-    setProfiles((currentProfiles) => [newProfile, ...currentProfiles].slice(0, 3));
+  const refreshUsers = () => {
+    setRegisteredUsers(authStore.getUsers());
   };
 
-  const latestProfile = profiles[0];
+  const handleLogin = (credentials) => {
+    const user = authStore.login(credentials);
+    setCurrentUser(user);
+    refreshUsers();
+  };
 
-  if (!currentUser) {
-    return <LoginPage onLogin={setCurrentUser} />;
-  }
+  const handleSignUp = (payload) => {
+    const user = authStore.signup(payload);
+    setCurrentUser(user);
+    refreshUsers();
+  };
+
+  const handleLogout = () => {
+    authStore.logout();
+    setCurrentUser(null);
+  };
 
   return (
-    <>
-      <Navbar user={currentUser} onLogout={() => setCurrentUser(null)} />
+    <Routes>
+      <Route path="/" element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />} />
 
-      <main className="app-shell">
-        <section className="hero">
-          <div className="hero-copy">
-            <span>Personal Finance Dashboard</span>
-            <h1>Build a clean React shell that feels ready to grow.</h1>
-            <p>
-              Personal finace tracker.
-            </p>
+      <Route
+        path="/login"
+        element={
+          currentUser ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <LoginPage mode="login" onLogin={handleLogin} onSignUp={handleSignUp} />
+          )
+        }
+      />
 
-            <div className="hero-stats">
-              <div>
-                <strong>3</strong>
-                <small>Reusable finance cards</small>
-              </div>
-              <div>
-                <strong>1</strong>
-                <small>Validated React form</small>
-              </div>
-              <div>
-                <strong>Live</strong>
-                <small>useState updates</small>
-              </div>
-            </div>
-          </div>
+      <Route
+        path="/signup"
+        element={
+          currentUser ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <LoginPage mode="signup" onLogin={handleLogin} onSignUp={handleSignUp} />
+          )
+        }
+      />
 
-          <div className="hero-visual">
-            <img src={hero} alt="Personal finance dashboard preview" />
-          </div>
-        </section>
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <>
+              <Navbar user={currentUser} onLogout={handleLogout} />
+              <DashboardPage currentUser={currentUser} registeredUsers={registeredUsers} />
+            </>
+          </ProtectedRoute>
+        }
+      />
 
-        <div className="section-heading">
-          <h2>Finance Overview</h2>
-          <p>Each card is reusable and receives different props from the main app.</p>
-        </div>
-
-        <section className="card-grid">
-          {cardData.map((card) => (
-            <Card
-              key={card.title}
-              title={card.title}
-              description={card.description}
-              amount={card.amount}
-            />
-          ))}
-        </section>
-
-        <section className="workspace">
-          <div className="workspace-panel">
-            <Counter />
-          </div>
-          <div className="workspace-panel">
-            <RegisterForm onRegister={handleRegister} />
-          </div>
-        </section>
-
-        <section className="status-strip">
-          <div className="status-card">
-            <h3>Latest Saved Profile</h3>
-            {latestProfile ? (
-              <ul>
-                <li>Name: {latestProfile.fullName}</li>
-                <li>Email: {latestProfile.email}</li>
-                <li>Monthly income: ${latestProfile.monthlyIncome}</li>
-              </ul>
-            ) : (
-              <p>
-                SPRINT 2.
-              </p>
-            )}
-          </div>
-
-          <div className="status-badges">
-            <div>
-              <img src={reactLogo} alt="React logo" />
-              <span>React</span>
-            </div>
-            <div>
-              <img src={viteLogo} alt="Vite logo" />
-              <span>Vite</span>
-            </div>
-          </div>
-        </section>
-      </main>
-    </>
+      <Route path="*" element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />} />
+    </Routes>
   );
 }
 

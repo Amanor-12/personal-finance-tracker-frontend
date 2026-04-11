@@ -1,21 +1,24 @@
+import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 
 function Navbar({ user, onLogout }) {
   return (
     <nav className="navbar">
-      <div>
-        <h2>Finance Flow</h2>
+      <div className="navbar-brand">
+        <Link className="navbar-logo" to="/dashboard">
+          <h2>Finance Flow</h2>
+        </Link>
         <p>Signed in as {user?.email}</p>
       </div>
-      <ul>
-        <li>Dashboard</li>
-        <li>Budget</li>
-        <li>Savings</li>
-        <li>Profile</li>
-      </ul>
-      <button type="button" onClick={onLogout}>
-        Logout
-      </button>
+
+      <div className="navbar-actions">
+        <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/dashboard">
+          Dashboard
+        </NavLink>
+        <button type="button" onClick={onLogout}>
+          Logout
+        </button>
+      </div>
     </nav>
   );
 }
