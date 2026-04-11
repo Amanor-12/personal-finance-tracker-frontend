@@ -16,10 +16,10 @@ const menuItems = [
 const otherItems = [{ label: 'Help & Support', icon: 'support' }];
 
 const walletActions = [
-  { key: 'send', label: 'Send', detail: 'Add card', icon: 'S', tone: 'lavender' },
-  { key: 'receive', label: 'Receive', detail: 'Protected', icon: 'R', tone: 'mint' },
-  { key: 'invoice', label: 'Invoicing', detail: 'Private', icon: 'I', tone: 'amber' },
-  { key: 'more', label: 'More', detail: 'Logout', icon: 'M', tone: 'sky' },
+  { key: 'send', label: 'Send', detail: 'Add card', icon: 'send', tone: 'lavender' },
+  { key: 'receive', label: 'Receive', detail: 'Protected', icon: 'receive', tone: 'mint' },
+  { key: 'invoice', label: 'Invoicing', detail: 'Private', icon: 'invoice', tone: 'amber' },
+  { key: 'more', label: 'More', detail: 'Logout', icon: 'more', tone: 'sky' },
 ];
 
 const themeLabels = {
@@ -142,10 +142,48 @@ function TopbarIcon({ type }) {
       />
     ),
     chevron: <path d="m5.2 6.3 2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />,
+    dots: (
+      <>
+        <circle cx="8" cy="4.4" r="1.1" fill="currentColor" />
+        <circle cx="8" cy="8" r="1.1" fill="currentColor" />
+        <circle cx="8" cy="11.6" r="1.1" fill="currentColor" />
+      </>
+    ),
   };
 
   return (
     <svg aria-hidden="true" className="topbar-icon-svg" viewBox="0 0 16 16">
+      {icons[type]}
+    </svg>
+  );
+}
+
+function WalletActionIcon({ type }) {
+  const icons = {
+    send: <path d="M3.2 8 12.8 3.5 9.7 12.8 8.1 8.8 3.2 8Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />,
+    receive: (
+      <>
+        <path d="M8 3.2v9.2M8 12.4 4.8 9.2M8 12.4l3.2-3.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+        <path d="M3.8 13.2h8.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    invoice: (
+      <>
+        <rect x="3.4" y="2.8" width="9.2" height="10.4" rx="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5.4 5.4h5.2M5.4 8h5.2M5.4 10.6h3.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    more: (
+      <>
+        <circle cx="4.4" cy="8" r="1.1" fill="currentColor" />
+        <circle cx="8" cy="8" r="1.1" fill="currentColor" />
+        <circle cx="11.6" cy="8" r="1.1" fill="currentColor" />
+      </>
+    ),
+  };
+
+  return (
+    <svg aria-hidden="true" className="wallet-action-svg" viewBox="0 0 16 16">
       {icons[type]}
     </svg>
   );
@@ -248,7 +286,9 @@ function DashboardPage({ currentUser, onLogout }) {
               <strong>{currentUser?.fullName}</strong>
               <span>Private workspace</span>
             </div>
-            <div className="workspace-chevron">^</div>
+            <div className="workspace-chevron">
+              <TopbarIcon type="chevron" />
+            </div>
           </div>
         </div>
 
@@ -575,7 +615,7 @@ function DashboardPage({ currentUser, onLogout }) {
                   <p>{primaryCard ? 'Masked card details for this account' : 'Add a card to personalize this wallet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Card options">
-                  ...
+                  <TopbarIcon type="dots" />
                 </button>
               </div>
 
@@ -615,7 +655,9 @@ function DashboardPage({ currentUser, onLogout }) {
                     type="button"
                     onClick={() => handleWalletAction(action.key)}
                   >
-                    <div className={`wallet-action-icon ${action.tone}`}>{action.icon}</div>
+                    <div className={`wallet-action-icon ${action.tone}`}>
+                      <WalletActionIcon type={action.icon} />
+                    </div>
                     <span>{action.label}</span>
                   </button>
                 ))}
@@ -629,7 +671,7 @@ function DashboardPage({ currentUser, onLogout }) {
                   <p>{cards.length ? 'Waiting for real spending to appear here' : 'No spend recorded yet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Expense options">
-                  ...
+                  <TopbarIcon type="dots" />
                 </button>
               </div>
 

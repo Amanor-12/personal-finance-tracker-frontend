@@ -1,47 +1,47 @@
 .login-shell {
   min-height: 100vh;
-  padding: 32px;
+  padding: 24px;
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at top left, rgba(91, 131, 255, 0.24), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(181, 95, 255, 0.2), transparent 34%),
-    linear-gradient(135deg, #e9f1ff 0%, #f6f8ff 44%, #f4eeff 100%);
+    radial-gradient(circle at top left, rgba(29, 112, 129, 0.18), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(239, 178, 79, 0.14), transparent 34%),
+    linear-gradient(135deg, #edf5f6 0%, #f7fafb 48%, #f8f5ef 100%);
 }
 
 .login-stage {
-  width: min(1380px, 100%);
+  width: min(1260px, 100%);
   display: grid;
-  grid-template-columns: minmax(0, 1.34fr) 520px;
+  grid-template-columns: minmax(0, 1.22fr) 480px;
   gap: 0;
-  border-radius: 34px;
+  border-radius: 36px;
   overflow: hidden;
-  border: 1px solid rgba(227, 233, 245, 0.86);
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 34px 80px rgba(74, 90, 150, 0.16);
+  border: 1px solid rgba(217, 227, 232, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 34px 80px rgba(18, 39, 63, 0.14);
   backdrop-filter: blur(18px);
 }
 
 .login-visual-panel {
   position: relative;
   overflow: hidden;
-  min-height: 760px;
+  min-height: 780px;
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 34%),
-    linear-gradient(135deg, #dce7ff 0%, #edf3ff 46%, #eadfff 100%);
+    linear-gradient(135deg, #e2eef1 0%, #eef5f6 48%, #f5efe3 100%);
 }
 
 .login-visual-backdrop {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.38), transparent 11%),
-    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.22), transparent 10%),
+    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.42), transparent 11%),
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.24), transparent 10%),
     linear-gradient(125deg, rgba(255, 255, 255, 0.36), transparent 42%),
     repeating-linear-gradient(
       -24deg,
-      rgba(255, 255, 255, 0.16) 0,
-      rgba(255, 255, 255, 0.16) 2px,
+      rgba(255, 255, 255, 0.14) 0,
+      rgba(255, 255, 255, 0.14) 2px,
       transparent 2px,
       transparent 34px
     );
@@ -68,11 +68,11 @@
 }
 
 .login-brand .brand-logo-copy strong {
-  font-size: 1.34rem;
+  font-size: 1.46rem;
 }
 
 .login-brand .brand-logo-copy span {
-  font-size: 1rem;
+  font-size: 0.98rem;
 }
 
 .login-visual-copy {
@@ -86,7 +86,7 @@
   width: fit-content;
   padding: 0.38rem 0.8rem;
   border-radius: 999px;
-  color: #5970e7;
+  color: var(--finance-brand-mid);
   background: rgba(255, 255, 255, 0.72);
   font-size: 0.8rem;
   font-weight: 700;
@@ -96,17 +96,17 @@
 
 .login-visual-copy h1 {
   margin: 0;
-  color: #2d3d84;
-  font-size: clamp(2.1rem, 3.2vw, 3rem);
+  color: var(--finance-ink);
+  font-size: clamp(2.3rem, 3.3vw, 3.4rem);
   line-height: 1.08;
 }
 
 .login-visual-copy p {
   max-width: 580px;
   margin: 0;
-  color: #66779a;
-  font-size: 0.98rem;
-  line-height: 1.68;
+  color: var(--finance-muted);
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .login-scene-topbar {
@@ -116,9 +116,9 @@
   gap: 14px;
   padding: 14px 18px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(225, 232, 244, 0.9);
-  box-shadow: 0 18px 40px rgba(78, 95, 149, 0.08);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(217, 227, 232, 0.92);
+  box-shadow: 0 18px 40px rgba(18, 39, 63, 0.08);
 }
 
 .login-scene-search {
@@ -128,9 +128,9 @@
   align-items: center;
   padding: 0 18px;
   border-radius: 999px;
-  color: #96a2b8;
+  color: #94a1b0;
   background: rgba(255, 255, 255, 0.96);
-  border: 1px solid #e4ebf7;
+  border: 1px solid var(--finance-line);
 }
 
 .login-scene-actions {
@@ -144,7 +144,7 @@
   height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.94);
-  border: 1px solid #e4ebf7;
+  border: 1px solid var(--finance-line);
 }
 
 .login-scene-user {
@@ -158,19 +158,19 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4dd0a0, #77a8ff);
-  box-shadow: 0 12px 22px rgba(83, 130, 255, 0.18);
+  background: linear-gradient(135deg, var(--finance-brand-mid), var(--finance-brand-bright));
+  box-shadow: 0 12px 22px rgba(29, 112, 129, 0.18);
 }
 
 .login-scene-user strong {
   display: block;
-  color: #26355f;
+  color: var(--finance-ink);
 }
 
 .login-scene-user span {
   display: block;
   margin-top: 3px;
-  color: #7a869c;
+  color: var(--finance-muted);
   font-size: 0.88rem;
 }
 
@@ -192,8 +192,10 @@
   padding: 22px 24px;
   border-radius: 26px;
   color: #ffffff;
-  background: linear-gradient(135deg, #5e7eff 0%, #6f56ff 48%, #5f38ff 100%);
-  box-shadow: 0 24px 50px rgba(96, 83, 255, 0.22);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.1), transparent 24%),
+    linear-gradient(135deg, var(--finance-brand-deep) 0%, var(--finance-brand-mid) 58%, var(--finance-brand-bright) 100%);
+  box-shadow: 0 24px 50px rgba(21, 58, 96, 0.2);
 }
 
 .login-scene-hero-copy {
@@ -236,7 +238,7 @@
 .login-scene-hero-ring {
   position: absolute;
   border-radius: 50%;
-  border: 12px solid rgba(255, 255, 255, 0.22);
+  border: 12px solid rgba(255, 255, 255, 0.18);
 }
 
 .login-scene-hero-ring.ring-back {
@@ -251,7 +253,7 @@
   height: 110px;
   right: 26px;
   top: 22px;
-  border-color: rgba(255, 255, 255, 0.86);
+  border-color: rgba(246, 228, 194, 0.94);
 }
 
 .login-scene-hero-shine {
@@ -267,9 +269,9 @@
 .login-scene-wallet-card,
 .login-scene-graph-card,
 .login-scene-expense-card {
-  border: 1px solid rgba(228, 235, 246, 0.92);
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 22px 44px rgba(73, 92, 146, 0.08);
+  border: 1px solid rgba(217, 227, 232, 0.92);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 44px rgba(18, 39, 63, 0.08);
 }
 
 .login-scene-wallet-card {
@@ -279,7 +281,7 @@
   border-radius: 24px;
   color: #ffffff;
   overflow: hidden;
-  background: linear-gradient(135deg, #2b48ff, #5c3dff);
+  background: linear-gradient(135deg, var(--finance-brand-deep), #2b6a8f);
 }
 
 .login-scene-wallet-card::after {
@@ -312,11 +314,11 @@
 }
 
 .wallet-mini-dot.red {
-  background: #ff5b63;
+  background: var(--finance-coral);
 }
 
 .wallet-mini-dot.gold {
-  background: #f7cb49;
+  background: var(--finance-gold);
 }
 
 .login-scene-card-chip {
@@ -367,11 +369,11 @@
 }
 
 .login-scene-panel-header strong {
-  color: #1f2a46;
+  color: var(--finance-ink);
 }
 
 .login-scene-panel-header span {
-  color: #7a869c;
+  color: var(--finance-muted);
   font-size: 0.88rem;
 }
 
@@ -381,16 +383,16 @@
   margin-top: 16px;
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
-  border: 1px solid #e7edf8;
+  background: linear-gradient(180deg, #ffffff 0%, #f6faf9 100%);
+  border: 1px solid var(--finance-line);
 }
 
 .login-scene-graph-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(to right, rgba(195, 205, 223, 0.22) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(195, 205, 223, 0.22) 1px, transparent 1px);
+    linear-gradient(to right, rgba(189, 201, 212, 0.24) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(189, 201, 212, 0.24) 1px, transparent 1px);
   background-size: 46px 46px;
 }
 
@@ -408,11 +410,11 @@
 }
 
 .login-scene-graph-line path:first-child {
-  stroke: #41c799;
+  stroke: var(--finance-brand-bright);
 }
 
 .login-scene-graph-line path:last-child {
-  stroke: #f39a2f;
+  stroke: var(--finance-gold);
 }
 
 .login-scene-expense-card {
@@ -436,7 +438,7 @@
 }
 
 .login-track {
-  stroke: #edf1f7;
+  stroke: #e9eff1;
 }
 
 .login-arc {
@@ -445,21 +447,21 @@
 }
 
 .login-arc-violet {
-  stroke: #6f32ff;
+  stroke: #17486e;
 }
 
 .login-arc-blue {
-  stroke: #3f8cff;
+  stroke: #2c77a1;
   stroke-dashoffset: 112;
 }
 
 .login-arc-green {
-  stroke: #21c18a;
+  stroke: #2ea890;
   stroke-dashoffset: 138;
 }
 
 .login-arc-orange {
-  stroke: #f39a2f;
+  stroke: #efb24f;
   stroke-dashoffset: 168;
 }
 
@@ -470,21 +472,22 @@
 }
 
 .login-scene-expense-summary strong {
-  color: #22304e;
+  color: var(--finance-ink);
 }
 
 .login-scene-expense-summary span {
   margin-top: 4px;
-  color: #40c596;
+  color: var(--finance-brand-bright);
   font-weight: 700;
 }
 
 .login-form-panel {
-  padding: 56px 54px;
+  padding: 60px 48px;
   display: grid;
   align-content: center;
   gap: 18px;
-  background: rgba(255, 255, 255, 0.92);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 250, 0.96) 100%);
 }
 
 .login-form-header {
@@ -498,8 +501,8 @@
   width: fit-content;
   padding: 0.38rem 0.8rem;
   border-radius: 999px;
-  color: #6474ff;
-  background: #eef2ff;
+  color: var(--finance-brand-mid);
+  background: #e9f2f4;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -508,16 +511,16 @@
 
 .login-form-header h2 {
   margin: 0;
-  color: #33458f;
-  font-size: clamp(2.4rem, 4vw, 3.3rem);
-  line-height: 1.06;
+  color: var(--finance-ink);
+  font-size: clamp(2.6rem, 4vw, 3.5rem);
+  line-height: 1.02;
 }
 
 .login-form-header p {
   margin: 0;
-  color: #7784a0;
-  font-size: 1.04rem;
-  line-height: 1.7;
+  color: var(--finance-muted);
+  font-size: 1rem;
+  line-height: 1.68;
 }
 
 .login-form-error {
@@ -540,14 +543,14 @@
   min-height: 64px;
   padding: 0 18px;
   border-radius: 18px;
-  border: 1px solid #dde5f3;
+  border: 1px solid var(--finance-line);
   background: #ffffff;
-  box-shadow: 0 10px 24px rgba(116, 132, 178, 0.06);
+  box-shadow: 0 10px 24px rgba(18, 39, 63, 0.05);
 }
 
 .login-field-shell:focus-within {
-  border-color: #6474ff;
-  box-shadow: 0 0 0 4px rgba(100, 116, 255, 0.12);
+  border-color: var(--finance-brand-mid);
+  box-shadow: 0 0 0 4px rgba(29, 112, 129, 0.12);
 }
 
 .auth-input-icon {
@@ -555,7 +558,7 @@
   place-items: center;
   width: 22px;
   height: 22px;
-  color: #a4acc0;
+  color: #9aa8b7;
   flex-shrink: 0;
 }
 
@@ -570,7 +573,7 @@
   height: auto;
   padding: 0;
   border: none;
-  color: #2a3555;
+  color: var(--finance-ink);
   background: transparent;
   font-size: 1.02rem;
 }
@@ -582,8 +585,8 @@
 
 .password-toggle {
   padding: 0.58rem 0.92rem;
-  color: #7b57ff;
-  background: #f1edff;
+  color: var(--finance-brand-mid);
+  background: #ebf4f5;
   box-shadow: none;
 }
 
@@ -599,7 +602,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #66758d;
+  color: var(--finance-muted);
   font-weight: 600;
 }
 
@@ -614,10 +617,14 @@
   accent-color: #6270ff;
 }
 
+.remember-row input {
+  accent-color: var(--finance-brand-mid);
+}
+
 .login-forgot-link,
 .login-alt-link {
   padding: 0;
-  color: #6474ff;
+  color: var(--finance-brand-mid);
   background: transparent;
   box-shadow: none;
   font-weight: 600;
@@ -628,19 +635,19 @@
   min-height: 60px;
   color: #ffffff;
   font-size: 1rem;
-  background: linear-gradient(135deg, #6678ff 0%, #8961ff 100%);
-  box-shadow: 0 20px 34px rgba(110, 101, 255, 0.24);
+  background: linear-gradient(135deg, var(--finance-brand-deep) 0%, var(--finance-brand-mid) 100%);
+  box-shadow: 0 20px 34px rgba(21, 58, 96, 0.22);
 }
 
 .login-switch-copy {
   margin: 10px 0 0;
   text-align: center;
-  color: #7885a0;
+  color: var(--finance-muted);
   font-size: 0.98rem;
 }
 
 .login-switch-link {
-  color: #6474ff;
+  color: var(--finance-brand-mid);
   font-weight: 700;
   text-decoration: none;
 }

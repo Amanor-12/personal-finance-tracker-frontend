@@ -6,11 +6,22 @@
   font-family: Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #18243d;
+  color: #16263d;
+  --finance-ink: #16263d;
+  --finance-muted: #708195;
+  --finance-line: #d9e3e8;
+  --finance-surface: #ffffff;
+  --finance-soft: #f4f7f8;
+  --finance-brand-deep: #153a60;
+  --finance-brand-mid: #1d7081;
+  --finance-brand-bright: #2ea890;
+  --finance-gold: #efb24f;
+  --finance-coral: #e07b63;
+  --finance-shadow: 0 18px 40px rgba(18, 39, 63, 0.08);
   background:
-    radial-gradient(circle at top left, rgba(111, 134, 255, 0.12), transparent 24%),
-    radial-gradient(circle at top right, rgba(112, 211, 255, 0.12), transparent 22%),
-    linear-gradient(180deg, #f6f8fc 0%, #edf2fa 100%);
+    radial-gradient(circle at top left, rgba(29, 112, 129, 0.12), transparent 24%),
+    radial-gradient(circle at top right, rgba(239, 178, 79, 0.12), transparent 22%),
+    linear-gradient(180deg, #f7fafb 0%, #eef3f5 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -20,7 +31,7 @@
 body {
   margin: 0;
   min-width: 320px;
-  color: #18243d;
+  color: var(--finance-ink);
   background: transparent;
 }
 
@@ -66,7 +77,7 @@ img {
   width: 46px;
   height: 46px;
   flex-shrink: 0;
-  filter: drop-shadow(0 14px 22px rgba(102, 120, 255, 0.2));
+  filter: drop-shadow(0 14px 22px rgba(21, 58, 96, 0.18));
 }
 
 .brand-logo-copy {
@@ -79,14 +90,14 @@ img {
 }
 
 .brand-logo-copy strong {
-  color: #1c2740;
+  color: var(--finance-ink);
   font-size: 1.22rem;
   line-height: 1.05;
 }
 
 .brand-logo-copy span {
   margin-top: 5px;
-  color: #7a869c;
+  color: var(--finance-muted);
   font-size: 0.95rem;
   line-height: 1.35;
 }
