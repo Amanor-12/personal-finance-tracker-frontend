@@ -271,7 +271,7 @@ function DashboardPage({ currentUser, onLogout }) {
     <main className="dashboard-shell">
       <aside className="dashboard-sidebar">
         <div className="brand-block">
-          <BrandLogo className="sidebar-brand-logo" compact title="Ledgr" subtitle="Private finance workspace" />
+          <BrandLogo className="sidebar-brand-logo" compact title="Ledgr" subtitle="" />
           <div className="brand-chevron">&lt;&lt;</div>
         </div>
 
@@ -281,7 +281,7 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="workspace-avatar">{initials}</div>
             <div className="workspace-copy">
               <strong>{currentUser?.fullName}</strong>
-              <span>Private space</span>
+              <span>Private</span>
             </div>
             <div className="workspace-chevron">
               <TopbarIcon type="chevron" />
@@ -387,7 +387,6 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="hero-banner-copy">
                 <span className="banner-kicker">Private wallet</span>
                 <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start building your secure wallet.'}</h2>
-                <p>Add your first card to get started.</p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
                 </button>
@@ -405,7 +404,6 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="panel-header">
                   <div>
                     <h3>Add a Card</h3>
-                    <p>Display-only details stay private.</p>
                   </div>
                 </div>
 
@@ -515,7 +513,6 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="graph-grid" aria-hidden="true" />
                 <div className="graph-placeholder">
                   <strong>No activity yet</strong>
-                  <p>Connect data later.</p>
                 </div>
               </div>
             </article>
@@ -551,7 +548,6 @@ function DashboardPage({ currentUser, onLogout }) {
                 ) : (
                   <div className="empty-panel-state">
                     <strong>No cards added yet</strong>
-                    <p>Add a card to populate this area.</p>
                   </div>
                 )}
               </article>

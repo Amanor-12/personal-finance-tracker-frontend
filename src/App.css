@@ -1,10 +1,10 @@
 .dashboard-shell {
   min-height: 100vh;
-  width: min(1260px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
   padding: 24px;
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
+  grid-template-columns: 148px minmax(0, 1fr);
   gap: 18px;
   background:
     radial-gradient(circle at top left, rgba(29, 112, 129, 0.08), transparent 26%),
@@ -84,12 +84,6 @@
   font-size: 1.02rem;
 }
 
-.sidebar-brand-logo .brand-logo-copy span {
-  max-width: 94px;
-  font-size: 0.8rem;
-  line-height: 1.28;
-}
-
 .workspace-switcher,
 .sidebar-section {
   display: grid;
@@ -148,12 +142,12 @@
 }
 
 .workspace-copy strong {
-  font-size: 0.96rem;
+  font-size: 0.92rem;
 }
 
 .workspace-copy span {
   margin-top: 4px;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
 .workspace-chevron {
@@ -364,7 +358,7 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 276px;
+  grid-template-columns: minmax(0, 1fr) 252px;
   gap: 16px;
   align-items: start;
 }
@@ -386,12 +380,7 @@
 
 .dashboard-heading h1 {
   margin: 0;
-  font-size: clamp(1.92rem, 2.8vw, 2.45rem);
-}
-
-.dashboard-heading p {
-  margin: 4px 0 0;
-  font-size: 0.92rem;
+  font-size: clamp(1.88rem, 2.6vw, 2.28rem);
 }
 
 .primary-card-action,
@@ -405,7 +394,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 156px;
   gap: 12px;
-  min-height: 168px;
+  min-height: 156px;
   padding: 20px 22px;
   border-radius: 24px;
   color: #ffffff;
@@ -416,8 +405,8 @@
 }
 
 .hero-banner-copy h2 {
-  margin: 12px 0 10px;
-  font-size: clamp(1.72rem, 2.5vw, 2.1rem);
+  margin: 12px 0 0;
+  font-size: clamp(1.64rem, 2.35vw, 1.94rem);
   line-height: 1.06;
 }
 
@@ -442,7 +431,7 @@
 }
 
 .banner-cta {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .hero-banner-art {
@@ -483,7 +472,7 @@
 
 .content-panel {
   border-radius: 24px;
-  padding: 16px;
+  padding: 18px;
 }
 
 .panel-header {
@@ -495,12 +484,6 @@
 
 .panel-header h3 {
   margin: 0;
-}
-
-.panel-header p {
-  margin: 4px 0 0;
-  line-height: 1.5;
-  font-size: 0.88rem;
 }
 
 .panel-badge,
@@ -533,8 +516,8 @@
 
 .graph-surface {
   position: relative;
-  min-height: 290px;
-  margin-top: 16px;
+  min-height: 266px;
+  margin-top: 14px;
   border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #f6faf9 100%);
   border: 1px solid var(--finance-line);
@@ -572,7 +555,7 @@
   position: absolute;
   left: 22px;
   bottom: 22px;
-  width: min(420px, calc(100% - 44px));
+  width: min(360px, calc(100% - 44px));
   padding: 16px 18px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.92);
@@ -620,7 +603,7 @@
 .saved-card-list {
   display: grid;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .saved-card-row {
@@ -661,7 +644,7 @@
 .empty-panel-state {
   display: grid;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 14px;
   padding: 16px 18px;
   border-radius: 18px;
   background: linear-gradient(180deg, #f8fbfb 0%, #f3f8f8 100%);
@@ -673,7 +656,7 @@
   grid-template-columns: 150px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 14px;
 }
 
 .stats-donut {
@@ -731,7 +714,7 @@
 
 .wallet-card {
   position: relative;
-  margin-top: 18px;
+  margin-top: 14px;
   padding: 16px;
   border-radius: 24px;
   color: #ffffff;
@@ -844,7 +827,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .wallet-action-tile {
@@ -902,7 +885,7 @@
 }
 
 .expenses-panel .panel-header {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .expense-rings-wrap {
