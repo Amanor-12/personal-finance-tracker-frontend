@@ -8,29 +8,34 @@ function BrandLogo({
     <div className={`brand-logo${compact ? ' brand-logo-compact' : ''}${className ? ` ${className}` : ''}`}>
       <svg aria-hidden="true" className="brand-logo-mark" viewBox="0 0 64 64">
         <defs>
-          <linearGradient id="brandLogoCore" x1="10" y1="10" x2="54" y2="54">
-            <stop offset="0%" stopColor="#5f7bff" />
-            <stop offset="58%" stopColor="#6b55ff" />
-            <stop offset="100%" stopColor="#8f4dff" />
+          <linearGradient id="brandLogoCore" x1="8" y1="10" x2="56" y2="54">
+            <stop offset="0%" stopColor="#6a8aff" />
+            <stop offset="62%" stopColor="#5b63ff" />
+            <stop offset="100%" stopColor="#7a4eff" />
           </linearGradient>
-          <linearGradient id="brandLogoGold" x1="30" y1="8" x2="52" y2="52">
+          <linearGradient id="brandLogoGold" x1="35" y1="12" x2="52" y2="40">
             <stop offset="0%" stopColor="#ffd76a" />
             <stop offset="100%" stopColor="#ff9f43" />
           </linearGradient>
+          <linearGradient id="brandLogoStroke" x1="17" y1="18" x2="47" y2="46">
+            <stop offset="0%" stopColor="#6e7bff" />
+            <stop offset="100%" stopColor="#4d5cf0" />
+          </linearGradient>
         </defs>
 
-        <circle cx="32" cy="32" r="26" fill="url(#brandLogoCore)" />
+        <circle cx="32" cy="32" r="26" fill="#ffffff" />
+        <circle cx="32" cy="32" r="24" fill="none" stroke="url(#brandLogoCore)" strokeWidth="6" />
+        <circle cx="32" cy="32" r="16.5" fill="#ffffff" />
         <path
-          d="M17 31.5c0-8.6 6.9-15.5 15.5-15.5 6.5 0 12 3.7 14.6 9.2H32.8v7.2h17.7c0 10.3-8.3 18.6-18.6 18.6-10.5 0-18.9-8.5-18.9-18.9Z"
+          d="M18.5 31.8c0-7.5 6-13.6 13.5-13.6 5.6 0 10.4 3 12.9 7.6H32.7v5.9h14.5c0 8.5-6.9 15.4-15.4 15.4-8.9 0-16.1-7.2-16.1-16.1Z"
           fill="none"
-          opacity="0.92"
-          stroke="#ffffff"
+          stroke="url(#brandLogoStroke)"
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth="5"
+          strokeWidth="4.8"
         />
-        <path d="M35 27h17c3 0 5.5 2.5 5.5 5.5S55 38 52 38H39.8Z" fill="url(#brandLogoGold)" />
-        <circle cx="24.5" cy="24.5" r="8.2" fill="#ffffff" opacity="0.92" />
+        <path d="M40 20.5h10.2a5.2 5.2 0 0 1 0 10.4H40.4Z" fill="url(#brandLogoGold)" />
+        <rect x="21.5" y="22" width="8.4" height="8.4" rx="2.8" fill="#ffffff" stroke="#dbe5ff" strokeWidth="1.6" />
       </svg>
 
       <div className="brand-logo-copy">

@@ -1,9 +1,9 @@
 .dashboard-shell {
   min-height: 100vh;
-  padding: 32px;
+  padding: 20px;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 18px;
   background: linear-gradient(180deg, #f4f7fc 0%, #eef3fa 100%);
 }
 
@@ -17,17 +17,17 @@
 
 .dashboard-sidebar {
   border-radius: 26px;
-  padding: 18px 14px 20px;
+  padding: 18px 12px 18px;
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 16px;
 }
 
 .brand-block {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 24px;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .workspace-avatar,
@@ -62,7 +62,7 @@
   width: 24px;
   height: 24px;
   color: #b0b9ca;
-  font-size: 0.82rem;
+  font-size: 0.94rem;
   font-weight: 600;
 }
 
@@ -70,13 +70,19 @@
   min-width: 0;
 }
 
+.sidebar-brand-logo .brand-logo-mark {
+  width: 38px;
+  height: 38px;
+}
+
 .sidebar-brand-logo .brand-logo-copy strong {
-  font-size: 1.06rem;
+  font-size: 0.98rem;
 }
 
 .sidebar-brand-logo .brand-logo-copy span {
-  max-width: 112px;
-  font-size: 0.86rem;
+  max-width: 104px;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .workspace-switcher,
@@ -96,23 +102,32 @@
 
 .workspace-profile {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 18px;
+  grid-template-columns: 38px minmax(0, 1fr) 14px;
   align-items: center;
-  gap: 12px;
-  padding: 12px 12px 12px 10px;
-  border-radius: 16px;
+  gap: 10px;
+  padding: 11px 10px;
+  border-radius: 18px;
   background: #f5f8fe;
   border: 1px solid #e4ebf8;
 }
 
-.workspace-avatar,
-.topbar-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+.workspace-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   color: #1c2740;
   background: linear-gradient(135deg, #fefefe, #dce7fb);
   border: 1px solid #d5def0;
+}
+
+.topbar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6c8dff, #4dd0a0);
+  border: 3px solid #ffffff;
+  box-shadow: 0 14px 24px rgba(83, 130, 255, 0.18);
 }
 
 .workspace-copy {
@@ -128,12 +143,12 @@
 }
 
 .workspace-copy strong {
-  font-size: 1.05rem;
+  font-size: 0.96rem;
 }
 
 .workspace-copy span {
   margin-top: 4px;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
 }
 
 .workspace-chevron {
@@ -154,7 +169,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 46px;
+  min-height: 44px;
   padding: 0 12px;
   border-radius: 14px;
   color: #67758d;
@@ -201,7 +216,7 @@
 .sidebar-item.active {
   color: #ffffff;
   background: linear-gradient(135deg, #6270ff, #7c4eff);
-  box-shadow: 0 14px 24px rgba(98, 112, 255, 0.28);
+  box-shadow: 0 12px 22px rgba(98, 112, 255, 0.24);
 }
 
 .sidebar-item-support {
@@ -225,14 +240,14 @@
 .dashboard-stage {
   display: grid;
   align-content: start;
-  gap: 22px;
+  gap: 18px;
 }
 
 .dashboard-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
 }
 
 .search-shell {
@@ -241,7 +256,7 @@
 
 .search-shell input {
   width: 100%;
-  height: 48px;
+  height: 46px;
   padding: 0 18px;
   border: 1px solid #e3e9f5;
   border-radius: 999px;
@@ -266,7 +281,6 @@
 
 .topbar-icon-button,
 .icon-dots,
-.subtle-logout,
 .wallet-action-tile,
 .secondary-button,
 .primary-card-action,
@@ -275,7 +289,8 @@
 }
 
 .topbar-icon-button,
-.icon-dots {
+.icon-dots,
+.topbar-user-caret {
   display: grid;
   place-items: center;
   width: 42px;
@@ -287,31 +302,67 @@
   background: rgba(255, 255, 255, 0.9);
 }
 
+.topbar-icon-svg {
+  width: 16px;
+  height: 16px;
+}
+
+.topbar-user-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .topbar-user {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 0 4px 4px;
+  min-width: 0;
+  padding: 0 2px 0 4px;
 }
 
-.subtle-logout {
-  padding: 0.74rem 1rem;
-  color: #66748b;
-  background: rgba(255, 255, 255, 0.84);
+.topbar-user-copy {
+  display: grid;
+  min-width: 0;
+}
+
+.topbar-user-copy strong,
+.topbar-user-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-user-copy strong {
+  font-size: 0.94rem;
+  line-height: 1.1;
+}
+
+.topbar-user-copy span {
+  margin-top: 2px;
+  font-size: 0.79rem;
+}
+
+.topbar-logout-button {
+  min-height: 42px;
+  padding: 0 16px;
+  color: #65758d;
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid #e3e9f5;
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.05);
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.48fr) 320px;
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) 286px;
+  gap: 18px;
 }
 
 .dashboard-main,
 .dashboard-rail {
   display: grid;
   align-content: start;
-  gap: 22px;
+  gap: 18px;
 }
 
 .dashboard-heading {
@@ -323,7 +374,7 @@
 
 .dashboard-heading h1 {
   margin: 0;
-  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-size: clamp(1.9rem, 2.9vw, 2.35rem);
 }
 
 .dashboard-heading p {
@@ -339,9 +390,10 @@
 
 .hero-banner {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) 220px;
-  gap: 16px;
-  padding: 26px;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 14px;
+  min-height: 176px;
+  padding: 22px 24px;
   border-radius: 24px;
   color: #ffffff;
   background: linear-gradient(135deg, #5e7eff 0%, #6f56ff 48%, #5f38ff 100%);
@@ -350,7 +402,7 @@
 
 .hero-banner-copy h2 {
   margin: 12px 0 10px;
-  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  font-size: clamp(1.9rem, 3vw, 2.2rem);
   line-height: 1.06;
 }
 
@@ -374,12 +426,12 @@
 }
 
 .banner-cta {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .hero-banner-art {
   position: relative;
-  min-height: 170px;
+  min-height: 140px;
 }
 
 .banner-ring {
@@ -389,17 +441,17 @@
 }
 
 .ring-back {
-  width: 180px;
-  height: 180px;
+  width: 154px;
+  height: 154px;
   right: 4px;
   top: 0;
 }
 
 .ring-front {
-  width: 128px;
-  height: 128px;
-  right: 36px;
-  top: 26px;
+  width: 112px;
+  height: 112px;
+  right: 28px;
+  top: 20px;
   border-color: rgba(255, 255, 255, 0.86);
 }
 
@@ -415,7 +467,7 @@
 
 .content-panel {
   border-radius: 24px;
-  padding: 20px;
+  padding: 18px;
 }
 
 .panel-header {
@@ -463,8 +515,8 @@
 
 .graph-surface {
   position: relative;
-  min-height: 340px;
-  margin-top: 18px;
+  min-height: 304px;
+  margin-top: 16px;
   border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
   border: 1px solid #e7edf8;
@@ -532,7 +584,7 @@
 .dashboard-bottom-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
+  gap: 18px;
 }
 
 .add-card-panel {
@@ -593,15 +645,15 @@
 
 .stats-visual-wrap {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 164px minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
   margin-top: 18px;
 }
 
 .stats-donut {
-  width: 180px;
-  height: 180px;
+  width: 164px;
+  height: 164px;
   border-radius: 50%;
   background:
     radial-gradient(circle at center, #ffffff 38%, transparent 39%),
@@ -653,7 +705,7 @@
 .wallet-card {
   position: relative;
   margin-top: 18px;
-  padding: 20px;
+  padding: 18px;
   border-radius: 24px;
   color: #ffffff;
   overflow: hidden;
@@ -740,7 +792,7 @@
 .wallet-card-balance strong {
   margin-top: 6px;
   color: #ffffff;
-  font-size: 1.8rem;
+  font-size: 1.22rem;
   line-height: 1;
 }
 
@@ -764,15 +816,15 @@
 .wallet-action-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .wallet-action-tile {
   display: grid;
   gap: 4px;
-  min-height: 94px;
-  padding: 14px;
+  min-height: 84px;
+  padding: 12px 8px;
   justify-items: center;
   text-align: center;
   border: 1px solid #e6edf8;
@@ -794,7 +846,7 @@
 
 .wallet-action-tile span {
   color: #7a869c;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
 }
 
 .wallet-action-icon.lavender {
@@ -823,13 +875,13 @@
 
 .expense-rings-wrap {
   position: relative;
-  width: 240px;
+  width: 214px;
   margin: 0 auto;
 }
 
 .expense-chart {
-  width: 240px;
-  height: 240px;
+  width: 214px;
+  height: 214px;
   display: block;
 }
 
@@ -872,7 +924,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 32px;
+  bottom: 28px;
   display: grid;
   place-items: center;
   text-align: center;
@@ -897,7 +949,7 @@
 .expense-legend {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .expense-legend-row,
@@ -1033,6 +1085,11 @@
   .topbar-actions {
     flex-wrap: wrap;
   }
+
+   .topbar-user-block {
+    width: 100%;
+    justify-content: space-between;
+   }
 
   .hero-banner {
     grid-template-columns: 1fr;

@@ -117,6 +117,40 @@ function SidebarIcon({ type }) {
   );
 }
 
+function TopbarIcon({ type }) {
+  const icons = {
+    notification: (
+      <>
+        <path
+          d="M8 2.8a3.2 3.2 0 0 0-3.2 3.2v1.3c0 .9-.3 1.7-.8 2.5L3 11.4h10l-1-1.6a4.7 4.7 0 0 1-.8-2.5V6A3.2 3.2 0 0 0 8 2.8Z"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.4"
+        />
+        <path d="M6.4 12.5c.3 1 1 1.5 1.6 1.5.7 0 1.4-.5 1.7-1.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    message: (
+      <path
+        d="M3.2 4.5a2 2 0 0 1 2-2h5.6a2 2 0 0 1 2 2v4.8a2 2 0 0 1-2 2H7.1l-2.6 2v-2H5.2a2 2 0 0 1-2-2Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.4"
+      />
+    ),
+    chevron: <path d="m5.2 6.3 2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />,
+  };
+
+  return (
+    <svg aria-hidden="true" className="topbar-icon-svg" viewBox="0 0 16 16">
+      {icons[type]}
+    </svg>
+  );
+}
+
 function DashboardPage({ currentUser, onLogout }) {
   const [cards, setCards] = useState([]);
   const [isAddingCard, setIsAddingCard] = useState(false);
@@ -280,18 +314,26 @@ function DashboardPage({ currentUser, onLogout }) {
 
           <div className="topbar-actions">
             <button className="topbar-icon-button" type="button" aria-label="Notifications">
-              !
+              <TopbarIcon type="notification" />
             </button>
             <button className="topbar-icon-button" type="button" aria-label="Messages">
-              +
+              <TopbarIcon type="message" />
             </button>
-            <div className="topbar-user">
-              <div className="topbar-avatar">{initials}</div>
-              <div>
-                <strong>{currentUser?.fullName}</strong>
-                <span>Member since {joinedDate}</span>
+            <div className="topbar-user-block">
+              <div className="topbar-user">
+                <div className="topbar-avatar">{initials}</div>
+                <div className="topbar-user-copy">
+                  <strong>{currentUser?.fullName}</strong>
+                  <span>Member since {joinedDate}</span>
+                </div>
               </div>
+              <button className="topbar-user-caret" type="button" aria-label="Open account menu">
+                <TopbarIcon type="chevron" />
+              </button>
             </div>
+            <button className="topbar-logout-button" type="button" onClick={onLogout}>
+              Log out
+            </button>
           </div>
         </header>
 
@@ -310,10 +352,10 @@ function DashboardPage({ currentUser, onLogout }) {
             <article className="hero-banner">
               <div className="hero-banner-copy">
                 <span className="banner-kicker">Private wallet</span>
-                <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start by adding your first card.'}</h2>
+                <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start building your secure wallet.'}</h2>
                 <p>
-                  The layout is intentionally premium and complete, but it still avoids fake balances,
-                  fake expenses, and fake transactions.
+                  The design stays fully populated and structured without pretending you already have
+                  balances, expenses, or transaction history.
                 </p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
@@ -530,7 +572,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Your Card</h3>
-                  <p>{primaryCard ? 'Masked card details for this account' : 'No card saved yet'}</p>
+                  <p>{primaryCard ? 'Masked card details for this account' : 'Add a card to personalize this wallet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Card options">
                   ...
@@ -584,7 +626,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Expenses</h3>
-                  <p>You have {cards.length} saved {cards.length === 1 ? 'card' : 'cards'}</p>
+                  <p>{cards.length ? 'Waiting for real spending to appear here' : 'No spend recorded yet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Expense options">
                   ...

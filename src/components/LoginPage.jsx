@@ -115,15 +115,15 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         <section className="login-visual-panel">
           <div className="login-visual-backdrop" />
           <div className="login-visual-content">
-            <BrandLogo className="login-brand" title="Finance Flow" subtitle="Private finance workspace" />
+            <BrandLogo className="login-brand" title="Fina Inc" subtitle="Private finance workspace" />
 
             <div className="login-visual-copy">
               <span className="login-visual-kicker">Secure Access</span>
-              <h1>{isLogin ? 'Welcome back to your finance flow.' : 'Create your finance flow account.'}</h1>
+              <h1>{isLogin ? 'Secure access for your wallet workspace.' : 'Create your private wallet workspace.'}</h1>
               <p>
                 {isLogin
-                  ? 'The login experience matches the dashboard visual system. It stays premium, but it does not invent user data.'
-                  : 'Create an account first, then access the dashboard with your own saved credentials and card details.'}
+                  ? 'The auth view follows the same dashboard system: premium layout, real account flow, and no invented finance data.'
+                  : 'Create an account first, then return here to access the dashboard with your own saved credentials and card details.'}
               </p>
             </div>
 
@@ -135,12 +135,25 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                 <div className="login-scene-user">
                   <div className="login-scene-user-avatar" />
                   <div>
-                    <strong>Finance Flow</strong>
+                    <strong>Fina Inc</strong>
                     <span>Private workspace</span>
                   </div>
                 </div>
               </div>
             </div>
+
+            <article className="login-scene-hero">
+              <div className="login-scene-hero-copy">
+                <span className="login-scene-hero-kicker">Private Wallet</span>
+                <strong>{isLogin ? 'Sign in to continue from a clean dashboard shell.' : 'Create an account before you add your first card.'}</strong>
+                <p>No fake balances, no fake transactions, and no other user data leaking into the interface.</p>
+              </div>
+              <div className="login-scene-hero-art" aria-hidden="true">
+                <div className="login-scene-hero-ring ring-back" />
+                <div className="login-scene-hero-ring ring-front" />
+                <div className="login-scene-hero-shine" />
+              </div>
+            </article>
 
             <div className="login-scene-grid">
               <article className="login-scene-wallet-card">
@@ -155,7 +168,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                   <strong>**** **** **** 4242</strong>
                 </div>
                 <div className="login-scene-card-meta">
-                  <span>01/27</span>
+                  <span>--/--</span>
                   <small>Private view</small>
                 </div>
               </article>
