@@ -3,11 +3,14 @@
 }
 
 :root {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #102542;
-  background: #faf7f1;
+  color: #18243d;
+  background:
+    radial-gradient(circle at top left, rgba(111, 134, 255, 0.12), transparent 24%),
+    radial-gradient(circle at top right, rgba(112, 211, 255, 0.12), transparent 22%),
+    linear-gradient(180deg, #f6f8fc 0%, #edf2fa 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,9 +20,8 @@
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    radial-gradient(circle at top, rgba(247, 201, 72, 0.18), transparent 32%),
-    #faf7f1;
+  color: #18243d;
+  background: transparent;
 }
 
 a {
@@ -37,13 +39,14 @@ button {
   padding: 0.85rem 1.2rem;
   font-weight: 700;
   cursor: pointer;
-  color: #102542;
-  background: #f7c948;
-  box-shadow: 0 10px 24px rgba(247, 201, 72, 0.3);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(247, 201, 72, 0.35);
+  transform: translateY(-1px);
+}
+
+img {
+  max-width: 100%;
+  display: block;
 }

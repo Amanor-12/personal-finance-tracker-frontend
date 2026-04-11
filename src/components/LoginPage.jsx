@@ -4,11 +4,19 @@ import './LoginPage.css';
 
 const REMEMBERED_EMAIL_KEY = 'finance-flow-remembered-email';
 
-const loginFeatures = [
-  'Real sign up and login flow',
-  'Remembered email option',
-  'Password visibility toggle',
-  'Persistent session until logout',
+const authHighlights = [
+  {
+    title: 'Real auth flow',
+    detail: 'Sign up creates a reusable account. Login validates saved credentials.',
+  },
+  {
+    title: 'No fake balances',
+    detail: 'The dashboard stays empty until real finance data exists for the signed-in user.',
+  },
+  {
+    title: 'Protected access',
+    detail: 'The dashboard route stays locked until a session exists.',
+  },
 ];
 
 const createInitialForm = (rememberedEmail = '') => ({
@@ -20,6 +28,7 @@ const createInitialForm = (rememberedEmail = '') => ({
 
 function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const navigate = useNavigate();
+  const isLogin = mode === 'login';
   const rememberedEmail = typeof window !== 'undefined'
     ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
     : '';
@@ -40,7 +49,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (mode === 'signup' && !formData.fullName.trim()) {
+    if (!isLogin && !formData.fullName.trim()) {
       setMessage('Full name is required.');
       return;
     }
@@ -55,7 +64,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
       return;
     }
 
-    if (mode === 'signup' && formData.password !== formData.confirmPassword) {
+    if (!isLogin && formData.password !== formData.confirmPassword) {
       setMessage('Passwords do not match.');
       return;
     }
@@ -67,7 +76,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
       }
 
-      if (mode === 'login') {
+      if (isLogin) {
         onLogin({
           email: formData.email.trim(),
           password: formData.password,
@@ -87,119 +96,181 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   };
 
   return (
-    <main className="login-page">
-      <section className="login-hero">
-        <div className="login-copy">
-          <span>Finance Flow Access</span>
-          <h1>Start with a secure front door for your finance dashboard.</h1>
-          <p>
-            Create an account, sign in with real saved credentials, and keep the session active until logout.
-            This stays frontend-only, but the authentication flow itself is fully wired.
-          </p>
-
-          <div className="login-feature-grid">
-            {loginFeatures.map((feature) => (
-              <div key={feature}>{feature}</div>
-            ))}
+    <main className="auth-shell">
+      <aside className="auth-sidebar">
+        <div className="auth-brand">
+          <div className="auth-brand-mark">F</div>
+          <div>
+            <strong>Fina Inc</strong>
+            <span>Personal finance workspace</span>
           </div>
         </div>
 
-        <form className="login-card" onSubmit={handleSubmit}>
-          <div>
-            <span className="login-kicker">{mode === 'login' ? 'Welcome back' : 'New account'}</span>
-            <h2>{mode === 'login' ? 'Log in to continue' : 'Create your account'}</h2>
-            <p>
-              {mode === 'login'
-                ? 'Use the same credentials you created in sign up.'
-                : 'Sign up stores your account locally so login can validate it later.'}
-            </p>
-          </div>
+        <div className="auth-sidebar-copy">
+          <span className="auth-kicker">Secure access</span>
+          <h1>{isLogin ? 'Welcome back to your private workspace.' : 'Create a private finance workspace.'}</h1>
+          <p>
+            {isLogin
+              ? 'Use the credentials you created during sign up. The dashboard stays clean and avoids sample balances or placeholder transactions.'
+              : 'Sign up first, then log in with the same credentials. The interface is ready now, while personal finance data can be connected later.'}
+          </p>
+        </div>
 
-          {message ? <p className="login-error">{message}</p> : null}
+        <div className="auth-highlight-list">
+          {authHighlights.map((item) => (
+            <article key={item.title} className="auth-highlight-card">
+              <strong>{item.title}</strong>
+              <p>{item.detail}</p>
+            </article>
+          ))}
+        </div>
 
-          {mode === 'signup' ? (
-            <label htmlFor="fullName">
-              Full Name
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Regan Amanor"
-              />
-            </label>
-          ) : null}
+        <div className="auth-privacy-card">
+          <span>Privacy rule</span>
+          <p>
+            If financial data does not belong to the signed-in user, it should not appear on the
+            screen. The UI stays elegant without inventing numbers.
+          </p>
+        </div>
+      </aside>
 
-          <label htmlFor="email">
-            Email
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="regan@example.com"
-            />
-          </label>
+      <section className="auth-stage">
+        <header className="auth-topbar">
+          <div className="auth-topbar-pill">React Router</div>
+          <div className="auth-topbar-pill">Protected Route</div>
+          <div className="auth-topbar-pill">Local Session</div>
+        </header>
 
-          <label htmlFor="password">
-            Password
-            <div className="password-control">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-              />
-              <button type="button" onClick={() => setShowPassword((current) => !current)}>
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
+        <div className="auth-stage-grid">
+          <form className="auth-form-card" onSubmit={handleSubmit}>
+            <div className="auth-form-header">
+              <span className="auth-kicker subtle">{isLogin ? 'Welcome back' : 'New account'}</span>
+              <h2>{isLogin ? 'Log in to continue' : 'Create your account'}</h2>
+              <p>
+                {isLogin
+                  ? 'Sign in with the exact credentials you created during sign up.'
+                  : 'Your account is stored locally so this frontend can validate login properly.'}
+              </p>
             </div>
-          </label>
 
-          {mode === 'signup' ? (
-            <label htmlFor="confirmPassword">
-              Confirm Password
+            {message ? <p className="auth-error">{message}</p> : null}
+
+            {!isLogin ? (
+              <label htmlFor="fullName">
+                Full name
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Regan Amanor"
+                />
+              </label>
+            ) : null}
+
+            <label htmlFor="email">
+              Email
               <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="Repeat password"
+                placeholder="regan@example.com"
+                autoComplete="email"
               />
             </label>
-          ) : null}
 
-          <div className="login-options">
-            <label className="remember-row" htmlFor="rememberEmail">
-              <input
-                id="rememberEmail"
-                type="checkbox"
-                checked={rememberEmail}
-                onChange={(event) => setRememberEmail(event.target.checked)}
-              />
-              Remember my email
+            <label htmlFor="password">
+              Password
+              <div className="password-control">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter password"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                />
+                <button type="button" className="ghost-control" onClick={() => setShowPassword((current) => !current)}>
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
             </label>
 
-            {mode === 'login' ? (
-              <Link className="link-button" to="/signup">
-                Need an account? Sign up
-              </Link>
-            ) : (
-              <Link className="link-button" to="/login">
-                Already registered? Log in
-              </Link>
-            )}
+            {!isLogin ? (
+              <label htmlFor="confirmPassword">
+                Confirm password
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Repeat password"
+                  autoComplete="new-password"
+                />
+              </label>
+            ) : null}
+
+            <div className="auth-form-row">
+              <label className="remember-row" htmlFor="rememberEmail">
+                <input
+                  id="rememberEmail"
+                  type="checkbox"
+                  checked={rememberEmail}
+                  onChange={(event) => setRememberEmail(event.target.checked)}
+                />
+                Remember my email
+              </label>
+
+              {isLogin ? (
+                <Link className="text-link" to="/signup">
+                  Need an account?
+                </Link>
+              ) : (
+                <Link className="text-link" to="/login">
+                  Already registered?
+                </Link>
+              )}
+            </div>
+
+            <button className="primary-action" type="submit">
+              {isLogin ? 'Log in' : 'Create account'}
+            </button>
+          </form>
+
+          <div className="auth-info-column">
+            <article className="auth-info-card accent">
+              <span className="auth-info-label">After access</span>
+              <h3>Dashboard states are truthful.</h3>
+              <p>
+                The layout is polished now, but balances, charts, and transactions remain empty
+                until they belong to the signed-in person.
+              </p>
+            </article>
+
+            <article className="auth-info-card">
+              <span className="auth-info-label">What is live now</span>
+              <div className="auth-info-list">
+                <div>
+                  <span>Sign up</span>
+                  <strong>Enabled</strong>
+                </div>
+                <div>
+                  <span>Login validation</span>
+                  <strong>Enabled</strong>
+                </div>
+                <div>
+                  <span>Dashboard protection</span>
+                  <strong>Enabled</strong>
+                </div>
+              </div>
+            </article>
           </div>
-
-          <button className="primary-login" type="submit">
-            {mode === 'login' ? 'Log in' : 'Create account'}
-          </button>
-        </form>
+        </div>
       </section>
     </main>
   );
