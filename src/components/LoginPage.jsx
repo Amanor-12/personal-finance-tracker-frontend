@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 import './LoginPage.css';
 
 const REMEMBERED_EMAIL_KEY = 'finance-flow-remembered-email';
-
-const previewMenu = ['Home', 'Cards', 'Schedule', 'Support'];
 
 const createInitialForm = (rememberedEmail = '') => ({
   fullName: '',
@@ -13,12 +12,40 @@ const createInitialForm = (rememberedEmail = '') => ({
   confirmPassword: '',
 });
 
+function AuthIcon({ type }) {
+  const icons = {
+    user: (
+      <>
+        <circle cx="10" cy="7" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4.8 15c.6-2.4 2.5-3.8 5.2-3.8s4.6 1.4 5.2 3.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </>
+    ),
+    mail: (
+      <>
+        <rect x="3.6" y="5" width="12.8" height="10" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="m4.9 6.6 5.1 4 5.1-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </>
+    ),
+    lock: (
+      <>
+        <rect x="4.6" y="8.2" width="10.8" height="7.6" rx="2.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M6.8 8.2V6.6A3.2 3.2 0 0 1 10 3.4a3.2 3.2 0 0 1 3.2 3.2v1.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      </>
+    ),
+  };
+
+  return (
+    <svg aria-hidden="true" className="auth-input-icon-svg" viewBox="0 0 20 20">
+      {icons[type]}
+    </svg>
+  );
+}
+
 function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const navigate = useNavigate();
   const isLogin = mode === 'login';
-  const rememberedEmail = typeof window !== 'undefined'
-    ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
-    : '';
+  const rememberedEmail =
+    typeof window !== 'undefined' ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || '' : '';
   const [formData, setFormData] = useState(createInitialForm(rememberedEmail));
   const [rememberEmail, setRememberEmail] = useState(Boolean(rememberedEmail));
   const [showPassword, setShowPassword] = useState(false);
@@ -83,115 +110,103 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   };
 
   return (
-    <main className="auth-shell">
-      <section className="auth-scene">
-        <div className="auth-preview">
-          <aside className="auth-preview-sidebar">
-            <div className="preview-brand">
-              <div className="preview-brand-mark">F</div>
-              <div>
-                <strong>Fina Inc</strong>
-                <span>Private finance workspace</span>
-              </div>
-            </div>
+    <main className="login-shell">
+      <section className="login-stage">
+        <section className="login-visual-panel">
+          <div className="login-visual-backdrop" />
+          <div className="login-visual-content">
+            <BrandLogo className="login-brand" title="Finance Flow" subtitle="Private finance workspace" />
 
-            <div className="preview-workspace">
-              <span>Workspace</span>
-              <div className="preview-workspace-card">
-                <div className="preview-workspace-avatar" />
-                <div>
-                  <strong>{isLogin ? 'Returning access' : 'New workspace'}</strong>
-                  <small>{isLogin ? 'Login flow' : 'Sign up flow'}</small>
-                </div>
-              </div>
-            </div>
-
-            <nav className="preview-menu">
-              {previewMenu.map((item, index) => (
-                <div key={item} className={`preview-menu-item${index === 0 ? ' active' : ''}`}>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </nav>
-          </aside>
-
-          <section className="auth-preview-stage">
-            <header className="auth-preview-topbar">
-              <div className="preview-search">Search anything...</div>
-              <div className="preview-topbar-actions">
-                <div className="preview-topbar-dot" />
-                <div className="preview-topbar-dot" />
-                <div className="preview-topbar-user">
-                  <div className="preview-topbar-avatar" />
-                  <div>
-                    <strong>{isLogin ? 'Welcome Back' : 'Create Access'}</strong>
-                    <span>{isLogin ? 'Private sign in' : 'Private sign up'}</span>
-                  </div>
-                </div>
-              </div>
-            </header>
-
-            <div className="auth-preview-copy">
-              <h1>{isLogin ? 'Log in to your finance dashboard.' : 'Create your finance dashboard access.'}</h1>
+            <div className="login-visual-copy">
+              <span className="login-visual-kicker">Secure Access</span>
+              <h1>{isLogin ? 'Welcome back to your finance flow.' : 'Create your finance flow account.'}</h1>
               <p>
-                A cleaner entry point with the same visual language as the app you open after authentication.
+                {isLogin
+                  ? 'The login experience matches the dashboard visual system. It stays premium, but it does not invent user data.'
+                  : 'Create an account first, then access the dashboard with your own saved credentials and card details.'}
               </p>
             </div>
 
-            <article className="preview-hero-banner">
-              <div>
-                <span>Secure Access</span>
-                <strong>{isLogin ? 'Welcome back.' : 'New workspace setup.'}</strong>
-                <p>Authentication is real. Fake finance data is not.</p>
+            <div className="login-scene-topbar">
+              <div className="login-scene-search">Search anything...</div>
+              <div className="login-scene-actions">
+                <div className="login-scene-dot" />
+                <div className="login-scene-dot" />
+                <div className="login-scene-user">
+                  <div className="login-scene-user-avatar" />
+                  <div>
+                    <strong>Finance Flow</strong>
+                    <span>Private workspace</span>
+                  </div>
+                </div>
               </div>
-              <div className="preview-hero-rings" aria-hidden="true">
-                <div className="preview-hero-ring outer" />
-                <div className="preview-hero-ring inner" />
-              </div>
-            </article>
+            </div>
 
-            <div className="auth-preview-grid">
-              <article className="preview-panel preview-graph-panel">
-                <h3>Money Flow</h3>
-                <div className="preview-graph-area">
-                  <div className="preview-graph-grid" />
-                  <div className="preview-graph-note">Charts stay empty until real user transactions exist.</div>
+            <div className="login-scene-grid">
+              <article className="login-scene-wallet-card">
+                <div className="login-scene-card-brand">
+                  <span className="wallet-mini-dot red" />
+                  <span className="wallet-mini-dot gold" />
+                  <strong>Master Credit</strong>
+                </div>
+                <div className="login-scene-card-chip" />
+                <div className="login-scene-card-balance">
+                  <span>Secure wallet</span>
+                  <strong>**** **** **** 4242</strong>
+                </div>
+                <div className="login-scene-card-meta">
+                  <span>01/27</span>
+                  <small>Private view</small>
                 </div>
               </article>
 
-              <div className="preview-side-column">
-                <article className="preview-panel preview-card-panel">
-                  <h3>Your Card</h3>
-                  <div className="preview-card-visual">
-                    <span>Secure Wallet</span>
-                    <strong>**** **** **** 4242</strong>
-                    <small>Preview only. Real cards are user-added later.</small>
-                  </div>
-                </article>
+              <article className="login-scene-graph-card">
+                <div className="login-scene-panel-header">
+                  <strong>Money Flow</strong>
+                  <span>Current layout</span>
+                </div>
+                <div className="login-scene-graph-area">
+                  <div className="login-scene-graph-grid" />
+                  <svg aria-hidden="true" className="login-scene-graph-line" viewBox="0 0 320 170" preserveAspectRatio="none">
+                    <path d="M8 118 C42 110, 66 74, 96 84 S152 132, 188 102 242 60, 314 88" />
+                    <path d="M8 136 C52 144, 82 112, 118 122 S186 150, 220 136 272 108, 314 124" />
+                  </svg>
+                </div>
+              </article>
 
-                <article className="preview-panel preview-expense-panel">
-                  <h3>Expenses</h3>
-                  <div className="preview-rings">
-                    <div className="preview-ring ring-one" />
-                    <div className="preview-ring ring-two" />
-                    <div className="preview-ring ring-three" />
-                    <div className="preview-ring-center">No fake data</div>
-                  </div>
-                </article>
-              </div>
+              <article className="login-scene-expense-card">
+                <div className="login-scene-panel-header">
+                  <strong>Expenses</strong>
+                  <span>No fake values</span>
+                </div>
+
+                <svg className="login-scene-expense-chart" viewBox="0 0 220 220" aria-hidden="true">
+                  <g transform="rotate(140 110 110)">
+                    <circle className="login-track" cx="110" cy="110" r="76" />
+                    <circle className="login-track" cx="110" cy="110" r="58" />
+                    <circle className="login-track" cx="110" cy="110" r="40" />
+                    <circle className="login-track" cx="110" cy="110" r="22" />
+
+                    <circle className="login-arc login-arc-violet" cx="110" cy="110" r="76" />
+                    <circle className="login-arc login-arc-blue" cx="110" cy="110" r="58" />
+                    <circle className="login-arc login-arc-green" cx="110" cy="110" r="40" />
+                    <circle className="login-arc login-arc-orange" cx="110" cy="110" r="22" />
+                  </g>
+                </svg>
+
+                <div className="login-scene-expense-summary">
+                  <strong>$0.00</strong>
+                  <span>Ready for real transactions</span>
+                </div>
+              </article>
             </div>
-          </section>
-        </div>
-
-        <form className="auth-form-panel" onSubmit={handleSubmit}>
-          <div className="auth-form-brand">
-            <div className="auth-form-brand-mark">F</div>
-            <span>Finance Flow</span>
           </div>
+        </section>
 
-          <div className="auth-form-header">
-            <span className="auth-kicker">{isLogin ? 'Welcome back' : 'Create access'}</span>
-            <h2>{isLogin ? 'Log in' : 'Sign up'}</h2>
+        <form className="login-form-panel" onSubmit={handleSubmit}>
+          <div className="login-form-header">
+            <span className="login-form-kicker">{isLogin ? 'Welcome Back' : 'Create Account'}</span>
+            <h2>{isLogin ? 'Login to your account to continue.' : 'Create your account to continue.'}</h2>
             <p>
               {isLogin
                 ? 'Use the same credentials you created during sign up.'
@@ -199,69 +214,83 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
             </p>
           </div>
 
-          {message ? <p className="auth-error">{message}</p> : null}
+          {message ? <p className="login-form-error">{message}</p> : null}
 
           {!isLogin ? (
-            <label htmlFor="fullName">
-              Full Name
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Regan Amanor"
-              />
+            <label className="login-field" htmlFor="fullName">
+              <span className="login-field-shell">
+                <span className="auth-input-icon">
+                  <AuthIcon type="user" />
+                </span>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                />
+              </span>
             </label>
           ) : null}
 
-          <label htmlFor="email">
-            Email
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="regan@example.com"
-              autoComplete="email"
-            />
+          <label className="login-field" htmlFor="email">
+            <span className="login-field-shell">
+              <span className="auth-input-icon">
+                <AuthIcon type="mail" />
+              </span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email"
+                autoComplete="email"
+              />
+            </span>
           </label>
 
-          <label htmlFor="password">
-            Password
-            <div className="password-control">
+          <label className="login-field" htmlFor="password">
+            <span className="login-field-shell">
+              <span className="auth-input-icon">
+                <AuthIcon type="lock" />
+              </span>
               <input
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter password"
+                placeholder="Password"
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
               />
               <button className="password-toggle" type="button" onClick={() => setShowPassword((current) => !current)}>
                 {showPassword ? 'Hide' : 'Show'}
               </button>
-            </div>
+            </span>
           </label>
 
           {!isLogin ? (
-            <label htmlFor="confirmPassword">
-              Confirm Password
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Repeat password"
-                autoComplete="new-password"
-              />
+            <label className="login-field" htmlFor="confirmPassword">
+              <span className="login-field-shell">
+                <span className="auth-input-icon">
+                  <AuthIcon type="lock" />
+                </span>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  autoComplete="new-password"
+                />
+              </span>
             </label>
           ) : null}
 
-          <div className="auth-form-row">
+          <div className="login-meta-row">
             <label className="remember-row" htmlFor="rememberEmail">
               <input
                 id="rememberEmail"
@@ -269,23 +298,30 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                 checked={rememberEmail}
                 onChange={(event) => setRememberEmail(event.target.checked)}
               />
-              Remember my email
+              Remember me
             </label>
 
             {isLogin ? (
-              <Link className="auth-link" to="/signup">
-                Need an account?
-              </Link>
+              <button className="login-forgot-link" type="button" onClick={() => setMessage('Password reset will be connected when your backend is ready.')}>
+                Forgot password?
+              </button>
             ) : (
-              <Link className="auth-link" to="/login">
+              <Link className="login-alt-link" to="/login">
                 Already registered?
               </Link>
             )}
           </div>
 
-          <button className="auth-primary-button" type="submit">
-            {isLogin ? 'Log in' : 'Create account'}
+          <button className="login-primary-button" type="submit">
+            {isLogin ? 'Login' : 'Create account'}
           </button>
+
+          <p className="login-switch-copy">
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <Link className="login-switch-link" to={isLogin ? '/signup' : '/login'}>
+              {isLogin ? 'Sign up' : 'Log in'}
+            </Link>
+          </p>
         </form>
       </section>
     </main>

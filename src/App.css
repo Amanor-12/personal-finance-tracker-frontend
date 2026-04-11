@@ -25,12 +25,11 @@
 
 .brand-block {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 24px;
+  grid-template-columns: minmax(0, 1fr) 24px;
   align-items: center;
   gap: 12px;
 }
 
-.brand-mark,
 .workspace-avatar,
 .topbar-avatar,
 .saved-card-badge,
@@ -41,15 +40,6 @@
   font-weight: 700;
 }
 
-.brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  color: #ffffff;
-  background: linear-gradient(135deg, #6678ff, #8654ff);
-}
-
-.brand-block strong,
 .workspace-profile strong,
 .topbar-user strong,
 .saved-card-copy strong,
@@ -58,30 +48,12 @@
   color: #1c2740;
 }
 
-.brand-block span,
 .workspace-profile span,
 .topbar-user span,
 .saved-card-copy span,
 .panel-header p,
 .dashboard-heading p {
   color: #7a869c;
-}
-
-.brand-copy {
-  min-width: 0;
-}
-
-.brand-copy strong {
-  display: block;
-  font-size: 1.48rem;
-  line-height: 1;
-}
-
-.brand-copy span {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.92rem;
-  line-height: 1.4;
 }
 
 .brand-chevron {
@@ -92,6 +64,19 @@
   color: #b0b9ca;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+.sidebar-brand-logo {
+  min-width: 0;
+}
+
+.sidebar-brand-logo .brand-logo-copy strong {
+  font-size: 1.06rem;
+}
+
+.sidebar-brand-logo .brand-logo-copy span {
+  max-width: 112px;
+  font-size: 0.86rem;
 }
 
 .workspace-switcher,

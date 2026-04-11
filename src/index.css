@@ -50,3 +50,56 @@ img {
   max-width: 100%;
   display: block;
 }
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.brand-logo-compact {
+  gap: 12px;
+}
+
+.brand-logo-mark {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 14px 22px rgba(102, 120, 255, 0.2));
+}
+
+.brand-logo-copy {
+  min-width: 0;
+}
+
+.brand-logo-copy strong,
+.brand-logo-copy span {
+  display: block;
+}
+
+.brand-logo-copy strong {
+  color: #1c2740;
+  font-size: 1.22rem;
+  line-height: 1.05;
+}
+
+.brand-logo-copy span {
+  margin-top: 5px;
+  color: #7a869c;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.brand-logo-compact .brand-logo-mark {
+  width: 42px;
+  height: 42px;
+}
+
+.brand-logo-compact .brand-logo-copy strong {
+  font-size: 1.08rem;
+}
+
+.brand-logo-compact .brand-logo-copy span {
+  font-size: 0.88rem;
+}

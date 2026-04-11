@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 import { cardStore } from '../utils/cardStore';
 
 const menuItems = [
@@ -201,11 +202,7 @@ function DashboardPage({ currentUser, onLogout }) {
     <main className="dashboard-shell">
       <aside className="dashboard-sidebar">
         <div className="brand-block">
-          <div className="brand-mark">F</div>
-          <div className="brand-copy">
-            <strong>Fina Inc</strong>
-            <span>Private finance workspace</span>
-          </div>
+          <BrandLogo className="sidebar-brand-logo" compact title="Fina Inc" subtitle="Private finance workspace" />
           <div className="brand-chevron">&lt;&lt;</div>
         </div>
 
