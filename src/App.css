@@ -1,11 +1,11 @@
 .dashboard-shell {
   min-height: 100vh;
-  width: min(1368px, 100%);
+  width: min(1260px, 100%);
   margin: 0 auto;
-  padding: 20px;
+  padding: 18px;
   display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 16px;
   background: linear-gradient(180deg, #f4f7fc 0%, #eef3fa 100%);
 }
 
@@ -19,10 +19,10 @@
 
 .dashboard-sidebar {
   border-radius: 26px;
-  padding: 18px 12px 18px;
+  padding: 16px 10px;
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 14px;
 }
 
 .brand-block {
@@ -82,9 +82,9 @@
 }
 
 .sidebar-brand-logo .brand-logo-copy span {
-  max-width: 104px;
-  font-size: 0.8rem;
-  line-height: 1.35;
+  max-width: 94px;
+  font-size: 0.78rem;
+  line-height: 1.28;
 }
 
 .workspace-switcher,
@@ -106,8 +106,8 @@
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) 14px;
   align-items: center;
-  gap: 10px;
-  padding: 11px 10px;
+  gap: 8px;
+  padding: 10px 9px;
   border-radius: 18px;
   background: #f5f8fe;
   border: 1px solid #e4ebf8;
@@ -171,8 +171,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 44px;
-  padding: 0 12px;
+  min-height: 42px;
+  padding: 0 10px;
   border-radius: 14px;
   color: #67758d;
   text-decoration: none;
@@ -231,10 +231,10 @@
 
 .sidebar-footer-link {
   margin-top: auto;
-  min-height: 42px;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 14px;
   color: #67758d;
 }
@@ -243,14 +243,14 @@
   display: grid;
   align-content: start;
   min-width: 0;
-  gap: 18px;
+  gap: 16px;
 }
 
 .dashboard-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
 }
 
 .search-shell {
@@ -259,7 +259,7 @@
 
 .search-shell input {
   width: 100%;
-  height: 46px;
+  height: 44px;
   padding: 0 18px;
   border: 1px solid #e3e9f5;
   border-radius: 999px;
@@ -313,7 +313,7 @@
 .topbar-user-block {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .topbar-user {
@@ -348,7 +348,7 @@
 
 .topbar-logout-button {
   min-height: 42px;
-  padding: 0 16px;
+  padding: 0 14px;
   color: #65758d;
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid #e3e9f5;
@@ -357,8 +357,8 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 304px;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 276px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -367,7 +367,7 @@
   display: grid;
   align-content: start;
   min-width: 0;
-  gap: 18px;
+  gap: 16px;
 }
 
 .dashboard-heading {
@@ -395,10 +395,10 @@
 
 .hero-banner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 180px;
-  gap: 14px;
-  min-height: 190px;
-  padding: 22px 24px;
+  grid-template-columns: minmax(0, 1fr) 156px;
+  gap: 12px;
+  min-height: 168px;
+  padding: 20px 22px;
   border-radius: 24px;
   color: #ffffff;
   background: linear-gradient(135deg, #5e7eff 0%, #6f56ff 48%, #5f38ff 100%);
@@ -407,15 +407,16 @@
 
 .hero-banner-copy h2 {
   margin: 12px 0 10px;
-  font-size: clamp(1.9rem, 3vw, 2.2rem);
+  font-size: clamp(1.72rem, 2.5vw, 2.1rem);
   line-height: 1.06;
 }
 
 .hero-banner-copy p {
-  max-width: 540px;
+  max-width: 480px;
   margin: 0;
   color: rgba(255, 255, 255, 0.84);
-  line-height: 1.7;
+  line-height: 1.62;
+  font-size: 0.94rem;
 }
 
 .banner-kicker {
@@ -431,12 +432,12 @@
 }
 
 .banner-cta {
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .hero-banner-art {
   position: relative;
-  min-height: 140px;
+  min-height: 124px;
 }
 
 .banner-ring {
@@ -446,17 +447,17 @@
 }
 
 .ring-back {
-  width: 154px;
-  height: 154px;
+  width: 136px;
+  height: 136px;
   right: 4px;
   top: 0;
 }
 
 .ring-front {
-  width: 112px;
-  height: 112px;
-  right: 28px;
-  top: 20px;
+  width: 98px;
+  height: 98px;
+  right: 24px;
+  top: 18px;
   border-color: rgba(255, 255, 255, 0.86);
 }
 
@@ -472,7 +473,7 @@
 
 .content-panel {
   border-radius: 24px;
-  padding: 18px;
+  padding: 16px;
 }
 
 .panel-header {
@@ -520,7 +521,7 @@
 
 .graph-surface {
   position: relative;
-  min-height: 326px;
+  min-height: 290px;
   margin-top: 16px;
   border-radius: 22px;
   background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
@@ -589,7 +590,7 @@
 .dashboard-bottom-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -656,15 +657,15 @@
 
 .stats-visual-wrap {
   display: grid;
-  grid-template-columns: 164px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
   margin-top: 18px;
 }
 
 .stats-donut {
-  width: 164px;
-  height: 164px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background:
     radial-gradient(circle at center, #ffffff 38%, transparent 39%),
@@ -716,7 +717,7 @@
 .wallet-card {
   position: relative;
   margin-top: 18px;
-  padding: 18px;
+  padding: 16px;
   border-radius: 24px;
   color: #ffffff;
   overflow: hidden;
@@ -803,7 +804,7 @@
 .wallet-card-balance strong {
   margin-top: 6px;
   color: #ffffff;
-  font-size: 1.22rem;
+  font-size: 1.16rem;
   line-height: 1;
 }
 
@@ -827,15 +828,15 @@
 .wallet-action-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 12px;
 }
 
 .wallet-action-tile {
   display: grid;
   gap: 4px;
-  min-height: 84px;
-  padding: 12px 8px;
+  min-height: 74px;
+  padding: 10px 6px;
   justify-items: center;
   text-align: center;
   border: 1px solid #e6edf8;
@@ -844,20 +845,20 @@
 }
 
 .wallet-action-icon {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border-radius: 10px;
   color: #6678ff;
   background: #edf2ff;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
 .wallet-action-tile span {
   color: #7a869c;
-  font-size: 0.84rem;
+  font-size: 0.79rem;
 }
 
 .wallet-action-icon.lavender {
@@ -886,13 +887,13 @@
 
 .expense-rings-wrap {
   position: relative;
-  width: 214px;
+  width: 198px;
   margin: 0 auto;
 }
 
 .expense-chart {
-  width: 214px;
-  height: 214px;
+  width: 198px;
+  height: 198px;
   display: block;
 }
 
@@ -935,7 +936,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 28px;
+  bottom: 24px;
   display: grid;
   place-items: center;
   text-align: center;
@@ -959,7 +960,7 @@
 
 .expense-legend {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   margin-top: 10px;
 }
 
