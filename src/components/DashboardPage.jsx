@@ -5,12 +5,12 @@ import { cardStore } from '../utils/cardStore';
 
 const menuItems = [
   { label: 'Home', active: true, icon: 'home' },
-  { label: 'Projects', caption: 'Soon', icon: 'projects' },
-  { label: 'Schedule', caption: 'Soon', icon: 'schedule' },
-  { label: 'Performance', caption: 'Soon', icon: 'performance' },
-  { label: 'Task List', caption: 'Soon', icon: 'task' },
-  { label: 'Team', caption: 'Soon', icon: 'team' },
-  { label: 'Message', caption: 'Soon', icon: 'message' },
+  { label: 'Projects', icon: 'projects' },
+  { label: 'Schedule', icon: 'schedule' },
+  { label: 'Performance', icon: 'performance' },
+  { label: 'Task List', icon: 'task' },
+  { label: 'Team', icon: 'team' },
+  { label: 'Message', icon: 'message' },
 ];
 
 const otherItems = [{ label: 'Help & Support', icon: 'support' }];
@@ -51,8 +51,6 @@ const getInitials = (fullName = '') =>
     .slice(0, 2)
     .map((value) => value[0]?.toUpperCase())
     .join('') || 'FF';
-
-const formatJoinedDate = (value) => new Date(value).toLocaleDateString('en-CA');
 
 function SidebarIcon({ type }) {
   const icons = {
@@ -267,7 +265,6 @@ function DashboardPage({ currentUser, onLogout }) {
 
   const initials = getInitials(currentUser?.fullName);
   const firstName = currentUser?.fullName?.split(' ')[0] || 'there';
-  const joinedDate = currentUser?.createdAt ? formatJoinedDate(currentUser.createdAt) : 'Not available';
   const primaryCard = cards[0];
 
   return (
@@ -284,7 +281,7 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="workspace-avatar">{initials}</div>
             <div className="workspace-copy">
               <strong>{currentUser?.fullName}</strong>
-              <span>Private workspace</span>
+              <span>Private space</span>
             </div>
             <div className="workspace-chevron">
               <TopbarIcon type="chevron" />
@@ -313,7 +310,6 @@ function DashboardPage({ currentUser, onLogout }) {
                     </span>
                     <span>{item.label}</span>
                   </span>
-                  <small>{item.caption}</small>
                 </div>
               )
             )}
@@ -364,7 +360,6 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="topbar-avatar">{initials}</div>
                 <div className="topbar-user-copy">
                   <strong>{currentUser?.fullName}</strong>
-                  <span>Member since {joinedDate}</span>
                 </div>
               </div>
               <button className="topbar-user-caret" type="button" aria-label="Open account menu">
@@ -382,7 +377,6 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="dashboard-heading">
               <div>
                 <h1>Welcome Back {firstName}</h1>
-                <p>Here is what is happening in your finance workspace today.</p>
               </div>
               <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
                 + New Card
@@ -393,10 +387,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="hero-banner-copy">
                 <span className="banner-kicker">Private wallet</span>
                 <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start building your secure wallet.'}</h2>
-                <p>
-                  The design stays fully populated and structured without pretending you already have
-                  balances, expenses, or transaction history.
-                </p>
+                <p>Add your first card to get started.</p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
                 </button>
@@ -414,7 +405,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="panel-header">
                   <div>
                     <h3>Add a Card</h3>
-                    <p>Only masked card display details are stored for this user.</p>
+                    <p>Display-only details stay private.</p>
                   </div>
                 </div>
 
@@ -509,10 +500,9 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Money Flow</h3>
-                  <p>{cards.length ? 'Waiting for your real transactions.' : 'Add a card first, then connect real finance activity later.'}</p>
                 </div>
                 <div className="tab-strip">
-                  <span className="tab-pill active">All Card</span>
+                  <span className="tab-pill active">All cards</span>
                   {cards.slice(0, 3).map((card) => (
                     <span key={card.id} className="tab-pill">
                       {card.nickname}
@@ -524,11 +514,8 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="graph-surface">
                 <div className="graph-grid" aria-hidden="true" />
                 <div className="graph-placeholder">
-                  <strong>No transaction history yet</strong>
-                  <p>
-                    This chart area stays blank until you connect real transactions for the
-                    signed-in user.
-                  </p>
+                  <strong>No activity yet</strong>
+                  <p>Connect data later.</p>
                 </div>
               </div>
             </article>
@@ -538,9 +525,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="panel-header">
                   <div>
                     <h3>Saved Cards</h3>
-                    <p>Your own masked cards stored in this frontend workspace.</p>
                   </div>
-                  <span className="panel-badge">This user</span>
                 </div>
 
                 {cards.length ? (
@@ -566,7 +551,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 ) : (
                   <div className="empty-panel-state">
                     <strong>No cards added yet</strong>
-                    <p>Use the new card button to save your own masked card details.</p>
+                    <p>Add a card to populate this area.</p>
                   </div>
                 )}
               </article>
@@ -575,9 +560,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="panel-header">
                   <div>
                     <h3>Statistics</h3>
-                    <p>Real system state without fake finance amounts.</p>
                   </div>
-                  <span className="panel-link">View all</span>
                 </div>
 
                 <div className="stats-visual-wrap">
@@ -590,7 +573,7 @@ function DashboardPage({ currentUser, onLogout }) {
 
                   <div className="stats-list">
                     <div>
-                      <span>Profile</span>
+                      <span>User</span>
                       <strong>{firstName}</strong>
                     </div>
                     <div>
@@ -612,7 +595,6 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Your Card</h3>
-                  <p>{primaryCard ? 'Masked card details for this account' : 'Add a card to personalize this wallet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Card options">
                   <TopbarIcon type="dots" />
@@ -668,7 +650,6 @@ function DashboardPage({ currentUser, onLogout }) {
               <div className="panel-header">
                 <div>
                   <h3>Expenses</h3>
-                  <p>{cards.length ? 'Waiting for real spending to appear here' : 'No spend recorded yet'}</p>
                 </div>
                 <button className="icon-dots" type="button" aria-label="Expense options">
                   <TopbarIcon type="dots" />

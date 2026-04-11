@@ -175,7 +175,7 @@
 .sidebar-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   min-height: 42px;
   padding: 0 10px;
@@ -333,6 +333,7 @@
 .topbar-user-copy {
   display: grid;
   min-width: 0;
+  gap: 0;
 }
 
 .topbar-user-copy strong,
@@ -343,13 +344,13 @@
 }
 
 .topbar-user-copy strong {
-  font-size: 0.94rem;
+  font-size: 0.98rem;
   line-height: 1.1;
 }
 
 .topbar-user-copy span {
   margin-top: 2px;
-  font-size: 0.79rem;
+  font-size: 0.76rem;
 }
 
 .topbar-logout-button {
@@ -389,7 +390,8 @@
 }
 
 .dashboard-heading p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
+  font-size: 0.92rem;
 }
 
 .primary-card-action,
@@ -423,8 +425,8 @@
   max-width: 480px;
   margin: 0;
   color: rgba(255, 255, 255, 0.84);
-  line-height: 1.62;
-  font-size: 0.94rem;
+  line-height: 1.56;
+  font-size: 0.92rem;
 }
 
 .banner-kicker {
@@ -496,8 +498,9 @@
 }
 
 .panel-header p {
-  margin: 6px 0 0;
-  line-height: 1.6;
+  margin: 4px 0 0;
+  line-height: 1.5;
+  font-size: 0.88rem;
 }
 
 .panel-badge,
@@ -506,6 +509,7 @@
   color: var(--finance-brand-mid);
   font-size: 0.86rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .tab-strip {
@@ -567,9 +571,9 @@
 .graph-placeholder {
   position: absolute;
   left: 22px;
-  right: 22px;
   bottom: 22px;
-  padding: 18px;
+  width: min(420px, calc(100% - 44px));
+  padding: 16px 18px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--finance-line);
@@ -592,7 +596,8 @@
 .saved-card-expiry {
   margin: 8px 0 0;
   color: #7a869c;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
 .dashboard-bottom-grid {
@@ -657,7 +662,7 @@
   display: grid;
   gap: 8px;
   margin-top: 12px;
-  padding: 18px;
+  padding: 16px 18px;
   border-radius: 18px;
   background: linear-gradient(180deg, #f8fbfb 0%, #f3f8f8 100%);
   border: 1px solid var(--finance-line);
@@ -708,7 +713,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 18px;
   background: linear-gradient(180deg, #f8fbfb 0%, #f3f8f8 100%);
   border: 1px solid var(--finance-line);
@@ -716,10 +721,12 @@
 
 .stats-list span {
   color: #7a869c;
+  font-size: 0.88rem;
 }
 
 .stats-list strong {
   color: #1c2740;
+  font-size: 0.92rem;
 }
 
 .wallet-card {
@@ -969,6 +976,7 @@
 .expense-summary small {
   margin-top: 4px;
   color: #7a869c;
+  font-size: 0.84rem;
 }
 
 .expense-legend {
@@ -988,6 +996,11 @@
 .expense-legend-label {
   justify-content: start;
   color: #7a869c;
+  font-size: 0.9rem;
+}
+
+.expense-legend-row strong {
+  font-size: 0.92rem;
 }
 
 .legend-dot {
