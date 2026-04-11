@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cardStore } from '../utils/cardStore';
 
-const navigationItems = [
-  { label: 'Home', active: true },
-  { label: 'Projects', caption: 'Soon' },
-  { label: 'Schedule', caption: 'Soon' },
-  { label: 'Performance', caption: 'Soon' },
-  { label: 'Task List', caption: 'Soon' },
-  { label: 'Team', caption: 'Soon' },
-  { label: 'Message', caption: 'Soon' },
+const menuItems = [
+  { label: 'Home', active: true, icon: 'home' },
+  { label: 'Projects', caption: 'Soon', icon: 'projects' },
+  { label: 'Schedule', caption: 'Soon', icon: 'schedule' },
+  { label: 'Performance', caption: 'Soon', icon: 'performance' },
+  { label: 'Task List', caption: 'Soon', icon: 'task' },
+  { label: 'Team', caption: 'Soon', icon: 'team' },
+  { label: 'Message', caption: 'Soon', icon: 'message' },
 ];
+
+const otherItems = [{ label: 'Help & Support', icon: 'support' }];
 
 const walletActions = [
   { key: 'send', label: 'Send', detail: 'Add card', icon: 'S', tone: 'lavender' },
@@ -50,6 +52,69 @@ const getInitials = (fullName = '') =>
     .join('') || 'FF';
 
 const formatJoinedDate = (value) => new Date(value).toLocaleDateString('en-CA');
+
+function SidebarIcon({ type }) {
+  const icons = {
+    home: (
+      <path
+        d="M3.5 8.2 8 4.5l4.5 3.7v4.3a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z M6.3 13V9.8h3.4V13"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.4"
+      />
+    ),
+    projects: (
+      <>
+        <rect x="2.5" y="3.5" width="11" height="9" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5 6.2h6M5 9h4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    schedule: (
+      <>
+        <rect x="2.8" y="3.8" width="10.4" height="9.6" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5.2 2.8v2M10.8 2.8v2M4.7 7.2h6.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    performance: (
+      <>
+        <rect x="3" y="3.5" width="10" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5.2 10.4 7 8.5l1.6 1.6 2.6-3" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+      </>
+    ),
+    task: (
+      <>
+        <path d="M4 5.2h1.4l.9 1.1L8 4.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+        <path d="M9.7 5.2h2.8M9.7 8.1h2.8M4 10h1.4l.9 1.1L8 9.2M9.7 10h2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+      </>
+    ),
+    team: (
+      <>
+        <circle cx="6" cy="6.1" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <circle cx="10.8" cy="6.8" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M3.6 12.6c.4-1.8 1.8-2.8 4-2.8 2.1 0 3.5 1 3.9 2.8M10.1 12.3c.2-.8.8-1.4 1.8-1.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+    message: (
+      <>
+        <path d="M3.2 4.5a2 2 0 0 1 2-2h5.6a2 2 0 0 1 2 2v4.8a2 2 0 0 1-2 2H7.1l-2.6 2v-2H5.2a2 2 0 0 1-2-2Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
+      </>
+    ),
+    support: (
+      <>
+        <circle cx="8" cy="8" r="5.3" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M6.6 6.4a1.7 1.7 0 1 1 2.5 1.5c-.8.4-1.1.8-1.1 1.5M8 11.9h.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </>
+    ),
+  };
+
+  return (
+    <svg aria-hidden="true" className="sidebar-icon-svg" viewBox="0 0 16 16">
+      {icons[type]}
+    </svg>
+  );
+}
 
 function DashboardPage({ currentUser, onLogout }) {
   const [cards, setCards] = useState([]);
@@ -137,35 +202,46 @@ function DashboardPage({ currentUser, onLogout }) {
       <aside className="dashboard-sidebar">
         <div className="brand-block">
           <div className="brand-mark">F</div>
-          <div>
+          <div className="brand-copy">
             <strong>Fina Inc</strong>
             <span>Private finance workspace</span>
           </div>
-          <div className="brand-chevron">+</div>
+          <div className="brand-chevron">&lt;&lt;</div>
         </div>
 
         <div className="workspace-switcher">
           <span className="workspace-label">Workspace</span>
           <div className="workspace-profile">
             <div className="workspace-avatar">{initials}</div>
-            <div>
+            <div className="workspace-copy">
               <strong>{currentUser?.fullName}</strong>
-              <span>{currentUser?.email}</span>
+              <span>Private workspace</span>
             </div>
+            <div className="workspace-chevron">^</div>
           </div>
         </div>
 
         <div className="sidebar-section">
           <span className="sidebar-label">Menu</span>
           <nav className="sidebar-list">
-            {navigationItems.map((item) =>
+            {menuItems.map((item) =>
               item.active ? (
                 <NavLink key={item.label} className="sidebar-item active" to="/dashboard">
-                  <span>{item.label}</span>
+                  <span className="sidebar-item-main">
+                    <span className="sidebar-icon-shell">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </span>
                 </NavLink>
               ) : (
                 <div key={item.label} className="sidebar-item">
-                  <span>{item.label}</span>
+                  <span className="sidebar-item-main">
+                    <span className="sidebar-icon-shell">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </span>
                   <small>{item.caption}</small>
                 </div>
               )
@@ -173,9 +249,29 @@ function DashboardPage({ currentUser, onLogout }) {
           </nav>
         </div>
 
-        <div className="sidebar-support">
-          <span>Help & Support</span>
-          <p>Cards shown here belong only to the signed-in user. Transactions and balances stay empty until they are real.</p>
+        <div className="sidebar-section sidebar-others">
+          <span className="sidebar-label">Others</span>
+          <div className="sidebar-list">
+            {otherItems.map((item) => (
+              <div key={item.label} className="sidebar-item sidebar-item-support">
+                <span className="sidebar-item-main">
+                  <span className="sidebar-icon-shell">
+                    <SidebarIcon type={item.icon} />
+                  </span>
+                  <span>{item.label}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="sidebar-footer-link">
+          <span className="sidebar-item-main">
+            <span className="sidebar-icon-shell">
+              <SidebarIcon type="support" />
+            </span>
+            <span>Support</span>
+          </span>
         </div>
       </aside>
 
