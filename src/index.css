@@ -89,15 +89,28 @@ img {
   display: block;
 }
 
-.brand-logo-copy strong {
+.brand-logo-dark .brand-logo-copy strong {
   color: var(--finance-ink);
   font-size: 1.22rem;
   line-height: 1.05;
 }
 
-.brand-logo-copy span {
+.brand-logo-dark .brand-logo-copy span {
   margin-top: 5px;
   color: var(--finance-muted);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.brand-logo-light .brand-logo-copy strong {
+  color: #ffffff;
+  font-size: 1.22rem;
+  line-height: 1.05;
+}
+
+.brand-logo-light .brand-logo-copy span {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.76);
   font-size: 0.95rem;
   line-height: 1.35;
 }

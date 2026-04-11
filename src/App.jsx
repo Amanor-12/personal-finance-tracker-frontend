@@ -10,7 +10,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
 
   useEffect(() => {
-    document.title = currentUser ? 'Finance Flow | Dashboard' : 'Finance Flow | Access';
+    document.title = currentUser ? 'Ledgr | Dashboard' : 'Ledgr | Access';
   }, [currentUser]);
 
   const handleLogin = (credentials) => {

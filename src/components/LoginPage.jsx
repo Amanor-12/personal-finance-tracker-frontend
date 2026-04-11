@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
 import './LoginPage.css';
 
-const REMEMBERED_EMAIL_KEY = 'finance-flow-remembered-email';
+const REMEMBERED_EMAIL_KEY = 'ledgr-remembered-email';
 
 const createInitialForm = (rememberedEmail = '') => ({
   fullName: '',
@@ -112,229 +112,198 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   return (
     <main className="login-shell">
       <section className="login-stage">
-        <section className="login-visual-panel">
-          <div className="login-visual-backdrop" />
-          <div className="login-visual-content">
-            <BrandLogo className="login-brand" title="Fina Inc" subtitle="Private finance workspace" />
+        <section className="login-showcase">
+          <div className="login-showcase-ambient login-showcase-ambient-one" aria-hidden="true" />
+          <div className="login-showcase-ambient login-showcase-ambient-two" aria-hidden="true" />
 
-            <div className="login-visual-copy">
-              <span className="login-visual-kicker">Secure Access</span>
-              <h1>{isLogin ? 'Secure access for your wallet workspace.' : 'Create your private wallet workspace.'}</h1>
-              <p>
-                {isLogin
-                  ? 'The auth view follows the same dashboard system: premium layout, real account flow, and no invented finance data.'
-                  : 'Create an account first, then return here to access the dashboard with your own saved credentials and card details.'}
-              </p>
-            </div>
+          <BrandLogo className="login-brand" title="Ledgr" subtitle="Private finance workspace" tone="light" />
 
-            <div className="login-scene-topbar">
-              <div className="login-scene-search">Search anything...</div>
-              <div className="login-scene-actions">
-                <div className="login-scene-dot" />
-                <div className="login-scene-dot" />
-                <div className="login-scene-user">
-                  <div className="login-scene-user-avatar" />
-                  <div>
-                    <strong>Fina Inc</strong>
-                    <span>Private workspace</span>
-                  </div>
+          <div className="login-showcase-copy">
+            <span className="login-showcase-kicker">Ledgr Access</span>
+            <h1>
+              {isLogin
+                ? 'A sharper, cleaner way to enter your finance workspace.'
+                : 'Create your Ledgr account and start from a more precise workspace.'}
+            </h1>
+            <p>
+              Minimal by design, private by default, and ready for your backend when you are.
+              The auth flow is real now, while the money data stays honest.
+            </p>
+          </div>
+
+          <div className="login-showcase-stack">
+            <article className="login-showcase-panel login-showcase-panel-primary">
+              <span>Private session</span>
+              <strong>{isLogin ? 'Sign in with your own saved credentials.' : 'Create a real account before entering the app.'}</strong>
+              <p>No fake balances, no fake transactions, no borrowed demo state.</p>
+            </article>
+
+            <article className="login-showcase-wallet">
+              <div className="login-showcase-wallet-top">
+                <div className="login-showcase-wallet-dots" aria-hidden="true">
+                  <span />
+                  <span />
                 </div>
+                <small>Ledgr Wallet</small>
               </div>
-            </div>
 
-            <article className="login-scene-hero">
-              <div className="login-scene-hero-copy">
-                <span className="login-scene-hero-kicker">Private Wallet</span>
-                <strong>{isLogin ? 'Sign in to continue from a clean dashboard shell.' : 'Create an account before you add your first card.'}</strong>
-                <p>No fake balances, no fake transactions, and no other user data leaking into the interface.</p>
+              <div className="login-showcase-wallet-chip" aria-hidden="true" />
+
+              <div className="login-showcase-wallet-copy">
+                <span>{isLogin ? 'Secure access' : 'Account setup'}</span>
+                <strong>{isLogin ? 'Continue cleanly' : 'Open your workspace'}</strong>
               </div>
-              <div className="login-scene-hero-art" aria-hidden="true">
-                <div className="login-scene-hero-ring ring-back" />
-                <div className="login-scene-hero-ring ring-front" />
-                <div className="login-scene-hero-shine" />
+
+              <div className="login-showcase-wallet-foot">
+                <span>•••• 4242</span>
+                <span>Protected</span>
               </div>
             </article>
 
-            <div className="login-scene-grid">
-              <article className="login-scene-wallet-card">
-                <div className="login-scene-card-brand">
-                  <span className="wallet-mini-dot red" />
-                  <span className="wallet-mini-dot gold" />
-                  <strong>Master Credit</strong>
-                </div>
-                <div className="login-scene-card-chip" />
-                <div className="login-scene-card-balance">
-                  <span>Secure wallet</span>
-                  <strong>**** **** **** 4242</strong>
-                </div>
-                <div className="login-scene-card-meta">
-                  <span>--/--</span>
-                  <small>Private view</small>
-                </div>
+            <div className="login-showcase-stats">
+              <article className="login-showcase-stat">
+                <span>Validation</span>
+                <strong>Frontend-ready</strong>
               </article>
-
-              <article className="login-scene-graph-card">
-                <div className="login-scene-panel-header">
-                  <strong>Money Flow</strong>
-                  <span>Current layout</span>
-                </div>
-                <div className="login-scene-graph-area">
-                  <div className="login-scene-graph-grid" />
-                  <svg aria-hidden="true" className="login-scene-graph-line" viewBox="0 0 320 170" preserveAspectRatio="none">
-                    <path d="M8 118 C42 110, 66 74, 96 84 S152 132, 188 102 242 60, 314 88" />
-                    <path d="M8 136 C52 144, 82 112, 118 122 S186 150, 220 136 272 108, 314 124" />
-                  </svg>
-                </div>
+              <article className="login-showcase-stat">
+                <span>Session</span>
+                <strong>Local and private</strong>
               </article>
-
-              <article className="login-scene-expense-card">
-                <div className="login-scene-panel-header">
-                  <strong>Expenses</strong>
-                  <span>No fake values</span>
-                </div>
-
-                <svg className="login-scene-expense-chart" viewBox="0 0 220 220" aria-hidden="true">
-                  <g transform="rotate(140 110 110)">
-                    <circle className="login-track" cx="110" cy="110" r="76" />
-                    <circle className="login-track" cx="110" cy="110" r="58" />
-                    <circle className="login-track" cx="110" cy="110" r="40" />
-                    <circle className="login-track" cx="110" cy="110" r="22" />
-
-                    <circle className="login-arc login-arc-violet" cx="110" cy="110" r="76" />
-                    <circle className="login-arc login-arc-blue" cx="110" cy="110" r="58" />
-                    <circle className="login-arc login-arc-green" cx="110" cy="110" r="40" />
-                    <circle className="login-arc login-arc-orange" cx="110" cy="110" r="22" />
-                  </g>
-                </svg>
-
-                <div className="login-scene-expense-summary">
-                  <strong>$0.00</strong>
-                  <span>Ready for real transactions</span>
-                </div>
+              <article className="login-showcase-stat">
+                <span>Brand</span>
+                <strong>Ledgr</strong>
               </article>
             </div>
           </div>
         </section>
 
         <form className="login-form-panel" onSubmit={handleSubmit}>
-          <div className="login-form-header">
-            <span className="login-form-kicker">{isLogin ? 'Welcome Back' : 'Create Account'}</span>
-            <h2>{isLogin ? 'Login to your account to continue.' : 'Create your account to continue.'}</h2>
-            <p>
-              {isLogin
-                ? 'Use the same credentials you created during sign up.'
-                : 'Create a secure local account, then use it to access your dashboard.'}
+          <div className="login-form-wrap">
+            <div className="login-form-header">
+              <span className="login-form-kicker">{isLogin ? 'Welcome Back' : 'Create Account'}</span>
+              <h2>{isLogin ? 'Sign in to Ledgr' : 'Create your Ledgr account'}</h2>
+              <p>
+                {isLogin
+                  ? 'Use the same credentials you created during sign up.'
+                  : 'Create a secure account now and use it to access your personal dashboard.'}
+              </p>
+            </div>
+
+            {message ? <p className="login-form-error">{message}</p> : null}
+
+            <div className="login-fields">
+              {!isLogin ? (
+                <label className="login-field" htmlFor="fullName">
+                  <span className="login-field-shell">
+                    <span className="auth-input-icon">
+                      <AuthIcon type="user" />
+                    </span>
+                    <input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="Full name"
+                    />
+                  </span>
+                </label>
+              ) : null}
+
+              <label className="login-field" htmlFor="email">
+                <span className="login-field-shell">
+                  <span className="auth-input-icon">
+                    <AuthIcon type="mail" />
+                  </span>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Email address"
+                    autoComplete="email"
+                  />
+                </span>
+              </label>
+
+              <label className="login-field" htmlFor="password">
+                <span className="login-field-shell">
+                  <span className="auth-input-icon">
+                    <AuthIcon type="lock" />
+                  </span>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                  />
+                  <button className="password-toggle" type="button" onClick={() => setShowPassword((current) => !current)}>
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </span>
+              </label>
+
+              {!isLogin ? (
+                <label className="login-field" htmlFor="confirmPassword">
+                  <span className="login-field-shell">
+                    <span className="auth-input-icon">
+                      <AuthIcon type="lock" />
+                    </span>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm password"
+                      autoComplete="new-password"
+                    />
+                  </span>
+                </label>
+              ) : null}
+            </div>
+
+            <div className="login-meta-row">
+              <label className="remember-row" htmlFor="rememberEmail">
+                <input
+                  id="rememberEmail"
+                  type="checkbox"
+                  checked={rememberEmail}
+                  onChange={(event) => setRememberEmail(event.target.checked)}
+                />
+                Remember me
+              </label>
+
+              {isLogin ? (
+                <button
+                  className="login-forgot-link"
+                  type="button"
+                  onClick={() => setMessage('Password reset will be connected when your backend is ready.')}
+                >
+                  Forgot password?
+                </button>
+              ) : (
+                <Link className="login-alt-link" to="/login">
+                  Already registered?
+                </Link>
+              )}
+            </div>
+
+            <button className="login-primary-button" type="submit">
+              {isLogin ? 'Sign in' : 'Create account'}
+            </button>
+
+            <p className="login-switch-copy">
+              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              <Link className="login-switch-link" to={isLogin ? '/signup' : '/login'}>
+                {isLogin ? 'Sign up' : 'Log in'}
+              </Link>
             </p>
           </div>
-
-          {message ? <p className="login-form-error">{message}</p> : null}
-
-          {!isLogin ? (
-            <label className="login-field" htmlFor="fullName">
-              <span className="login-field-shell">
-                <span className="auth-input-icon">
-                  <AuthIcon type="user" />
-                </span>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Full Name"
-                />
-              </span>
-            </label>
-          ) : null}
-
-          <label className="login-field" htmlFor="email">
-            <span className="login-field-shell">
-              <span className="auth-input-icon">
-                <AuthIcon type="mail" />
-              </span>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                autoComplete="email"
-              />
-            </span>
-          </label>
-
-          <label className="login-field" htmlFor="password">
-            <span className="login-field-shell">
-              <span className="auth-input-icon">
-                <AuthIcon type="lock" />
-              </span>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
-              />
-              <button className="password-toggle" type="button" onClick={() => setShowPassword((current) => !current)}>
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </span>
-          </label>
-
-          {!isLogin ? (
-            <label className="login-field" htmlFor="confirmPassword">
-              <span className="login-field-shell">
-                <span className="auth-input-icon">
-                  <AuthIcon type="lock" />
-                </span>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm Password"
-                  autoComplete="new-password"
-                />
-              </span>
-            </label>
-          ) : null}
-
-          <div className="login-meta-row">
-            <label className="remember-row" htmlFor="rememberEmail">
-              <input
-                id="rememberEmail"
-                type="checkbox"
-                checked={rememberEmail}
-                onChange={(event) => setRememberEmail(event.target.checked)}
-              />
-              Remember me
-            </label>
-
-            {isLogin ? (
-              <button className="login-forgot-link" type="button" onClick={() => setMessage('Password reset will be connected when your backend is ready.')}>
-                Forgot password?
-              </button>
-            ) : (
-              <Link className="login-alt-link" to="/login">
-                Already registered?
-              </Link>
-            )}
-          </div>
-
-          <button className="login-primary-button" type="submit">
-            {isLogin ? 'Login' : 'Create account'}
-          </button>
-
-          <p className="login-switch-copy">
-            {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <Link className="login-switch-link" to={isLogin ? '/signup' : '/login'}>
-              {isLogin ? 'Sign up' : 'Log in'}
-            </Link>
-          </p>
         </form>
       </section>
     </main>

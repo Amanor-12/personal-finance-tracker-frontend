@@ -274,7 +274,7 @@ function DashboardPage({ currentUser, onLogout }) {
     <main className="dashboard-shell">
       <aside className="dashboard-sidebar">
         <div className="brand-block">
-          <BrandLogo className="sidebar-brand-logo" compact title="Fina Inc" subtitle="Private finance workspace" />
+          <BrandLogo className="sidebar-brand-logo" compact title="Ledgr" subtitle="Private finance workspace" />
           <div className="brand-chevron">&lt;&lt;</div>
         </div>
 
