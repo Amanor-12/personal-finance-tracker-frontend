@@ -1,10 +1,10 @@
 .dashboard-shell {
   min-height: 100vh;
-  width: min(1180px, 100%);
+  width: min(1210px, 100%);
   margin: 0 auto;
   padding: 24px;
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
+  grid-template-columns: 176px minmax(0, 1fr);
   gap: 18px;
   background:
     radial-gradient(circle at top left, rgba(29, 112, 129, 0.08), transparent 26%),
@@ -22,17 +22,17 @@
 
 .dashboard-sidebar {
   border-radius: 28px;
-  padding: 20px 12px;
+  padding: 20px 14px;
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 18px;
 }
 
 .brand-block {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .workspace-avatar,
@@ -64,10 +64,10 @@
 .brand-chevron {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   color: #a9b5c3;
-  font-size: 0.94rem;
+  font-size: 0.76rem;
   font-weight: 600;
 }
 
@@ -76,12 +76,13 @@
 }
 
 .sidebar-brand-logo .brand-logo-mark {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
 }
 
 .sidebar-brand-logo .brand-logo-copy strong {
-  font-size: 1.02rem;
+  font-size: 1rem;
+  white-space: nowrap;
 }
 
 .workspace-switcher,
@@ -104,7 +105,7 @@
   grid-template-columns: 38px minmax(0, 1fr) 14px;
   align-items: center;
   gap: 8px;
-  padding: 10px 9px;
+  padding: 8px;
   border-radius: 18px;
   background: linear-gradient(180deg, #f8fafb 0%, #f1f6f7 100%);
   border: 1px solid #dce6ea;
@@ -142,12 +143,12 @@
 }
 
 .workspace-copy strong {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
 .workspace-copy span {
-  margin-top: 4px;
-  font-size: 0.76rem;
+  margin-top: 3px;
+  font-size: 0.72rem;
 }
 
 .workspace-chevron {

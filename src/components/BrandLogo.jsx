@@ -33,7 +33,7 @@ function BrandLogo({
 
       <div className="brand-logo-copy">
         <strong>{title}</strong>
-        {subtitle ? <span>{subtitle}</span> : null}
+        {!compact && subtitle ? <span>{subtitle}</span> : null}
       </div>
     </div>
   );
