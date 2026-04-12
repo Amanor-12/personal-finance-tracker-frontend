@@ -6,24 +6,24 @@
   font-family: "Plus Jakarta Sans", Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #0f172a;
-  --finance-ink: #0f172a;
-  --finance-muted: #64748b;
-  --finance-line: rgba(148, 163, 184, 0.22);
-  --finance-surface: rgba(255, 255, 255, 0.82);
+  color: #111827;
+  --finance-ink: #111827;
+  --finance-muted: #667085;
+  --finance-line: rgba(15, 23, 42, 0.08);
+  --finance-surface: rgba(255, 255, 255, 0.76);
   --finance-surface-strong: #ffffff;
   --finance-soft: #f8fafc;
-  --finance-brand-deep: #2f3da8;
-  --finance-brand-mid: #4b6bff;
-  --finance-brand-bright: #2ac7c4;
-  --finance-gold: #f2b85b;
-  --finance-coral: #ff7d6e;
-  --finance-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
+  --finance-brand-deep: #3730a3;
+  --finance-brand-mid: #6366f1;
+  --finance-brand-bright: #14b8a6;
+  --finance-gold: #f59e0b;
+  --finance-coral: #f97316;
+  --finance-shadow: 0 28px 70px rgba(15, 23, 42, 0.08);
   background:
-    radial-gradient(circle at top left, rgba(75, 107, 255, 0.16), transparent 26%),
-    radial-gradient(circle at top right, rgba(42, 199, 196, 0.14), transparent 20%),
-    radial-gradient(circle at bottom right, rgba(242, 184, 91, 0.12), transparent 18%),
-    linear-gradient(180deg, #f8fbff 0%, #edf2f8 100%);
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 24%),
+    radial-gradient(circle at top right, rgba(20, 184, 166, 0.12), transparent 18%),
+    radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 18%),
+    linear-gradient(180deg, #fbfcff 0%, #eff4fb 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -53,7 +53,11 @@ button {
   padding: 0.85rem 1.2rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    opacity 0.18s ease;
 }
 
 button:hover {
@@ -80,7 +84,7 @@ img {
   width: 46px;
   height: 46px;
   flex-shrink: 0;
-  filter: drop-shadow(0 16px 28px rgba(47, 61, 168, 0.18));
+  filter: drop-shadow(0 18px 28px rgba(55, 48, 163, 0.16));
 }
 
 .brand-logo-copy {
@@ -94,29 +98,29 @@ img {
 
 .brand-logo-dark .brand-logo-copy strong {
   color: var(--finance-ink);
-  font-size: 1.18rem;
+  font-size: 1.16rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .brand-logo-dark .brand-logo-copy span {
-  margin-top: 5px;
+  margin-top: 4px;
   color: var(--finance-muted);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.35;
 }
 
 .brand-logo-light .brand-logo-copy strong {
   color: #ffffff;
-  font-size: 1.18rem;
+  font-size: 1.16rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .brand-logo-light .brand-logo-copy span {
-  margin-top: 5px;
+  margin-top: 4px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.35;
 }
 
@@ -126,5 +130,5 @@ img {
 }
 
 .brand-logo-compact .brand-logo-copy strong {
-  font-size: 1rem;
+  font-size: 0.98rem;
 }

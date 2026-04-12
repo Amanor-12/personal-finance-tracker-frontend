@@ -125,13 +125,10 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
           <div className="login-showcase-copy">
             <h1>
               {isLogin
-                ? 'Sign in to a cleaner money workspace.'
-                : 'Create a Ledgr account built for calm control.'}
+                ? 'A cleaner way into your money workspace.'
+                : 'Create a Ledgr account with a cleaner first step.'}
             </h1>
-            <p>
-              Real authentication now. Clean surfaces, private state, and no fake finance data
-              pretending to be yours.
-            </p>
+            <p>Real authentication now. Your backend can connect later.</p>
           </div>
 
           <div className="login-showcase-visual">
@@ -142,8 +139,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               </div>
               <strong>
                 {isLogin
-                  ? 'Use the account you created and step straight into your private dashboard.'
-                  : 'Create your account once and keep access tied to your own workspace.'}
+                  ? 'Sign in with the account you already created and move straight into Ledgr.'
+                  : 'Create the account once and keep access tied to your own workspace.'}
               </strong>
               <div className="login-showcase-card-footer">
                 <span>Private by default</span>
@@ -165,7 +162,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
                 <div className="login-showcase-wallet-copy">
                   <span>{isLogin ? 'Secure entry' : 'Account setup'}</span>
-                  <strong>{isLogin ? 'Ledgr unlock' : 'Ledgr onboarding'}</strong>
+                  <strong>{isLogin ? 'Ledgr access' : 'Ledgr onboarding'}</strong>
                 </div>
 
                 <div className="login-showcase-wallet-foot">
@@ -200,7 +197,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               <p>
                 {isLogin
                   ? 'Use the credentials you created during sign up.'
-                  : 'Create a secure account to access your personal workspace.'}
+                  : 'Create an account to open your private workspace.'}
               </p>
             </div>
 

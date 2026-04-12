@@ -16,10 +16,10 @@ const menuItems = [
 const otherItems = [{ label: 'Help & Support', icon: 'support' }];
 
 const walletActions = [
-  { key: 'send', label: 'Send', detail: 'Add card', icon: 'send', tone: 'lavender' },
-  { key: 'receive', label: 'Receive', detail: 'Protected', icon: 'receive', tone: 'mint' },
-  { key: 'invoice', label: 'Invoicing', detail: 'Private', icon: 'invoice', tone: 'amber' },
-  { key: 'more', label: 'More', detail: 'Logout', icon: 'more', tone: 'sky' },
+  { key: 'send', label: 'Send', icon: 'send', tone: 'lavender' },
+  { key: 'receive', label: 'Receive', icon: 'receive', tone: 'mint' },
+  { key: 'invoice', label: 'Invoices', icon: 'invoice', tone: 'amber' },
+  { key: 'more', label: 'More', icon: 'more', tone: 'sky' },
 ];
 
 const themeLabels = {
@@ -280,7 +280,7 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="workspace-avatar">{initials}</div>
             <div className="workspace-copy">
               <strong>{currentUser?.fullName}</strong>
-              <span>Personal ledger</span>
+              <span>Private workspace</span>
             </div>
             <div className="workspace-chevron">
               <TopbarIcon type="chevron" />
@@ -344,7 +344,7 @@ function DashboardPage({ currentUser, onLogout }) {
       <section className="dashboard-stage">
         <header className="dashboard-topbar">
           <label className="search-shell">
-            <input aria-label="Search anything" placeholder="Search cards, activity, workspace" readOnly value="" />
+            <input aria-label="Search anything" placeholder="Search" readOnly value="" />
           </label>
 
           <div className="topbar-actions">
@@ -359,7 +359,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="topbar-avatar">{initials}</div>
                 <div className="topbar-user-copy">
                   <strong>{currentUser?.fullName}</strong>
-                  <span>Secure mode</span>
+                  <span>Private workspace</span>
                 </div>
               </div>
               <button className="topbar-user-caret" type="button" aria-label="Open account menu">
@@ -375,9 +375,9 @@ function DashboardPage({ currentUser, onLogout }) {
         <div className="dashboard-grid">
           <section className="dashboard-main">
             <div className="dashboard-heading">
-              <div>
-                <span className="dashboard-heading-kicker">Ledgr dashboard</span>
+              <div className="dashboard-heading-copy">
                 <h1>Welcome back, {firstName}</h1>
+                <p>Your private card workspace is ready.</p>
               </div>
               <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
                 + Add card
@@ -387,8 +387,12 @@ function DashboardPage({ currentUser, onLogout }) {
             <article className="hero-banner">
               <div className="hero-banner-copy">
                 <span className="banner-kicker">Wallet space</span>
-                <h2>{cards.length ? 'Your saved cards are neatly stored in Ledgr.' : 'Build a calmer card workspace.'}</h2>
-                <p>{cards.length ? 'Everything here belongs to this account only.' : 'Start by saving one card. Real activity can connect later.'}</p>
+                <h2>{cards.length ? 'Your cards are ready.' : 'Set up your wallet.'}</h2>
+                <p>
+                  {cards.length
+                    ? 'Everything here belongs to this account only.'
+                    : 'Add one card to start personalizing Ledgr.'}
+                </p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
                 </button>
@@ -515,7 +519,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="graph-grid" aria-hidden="true" />
                 <div className="graph-placeholder">
                   <strong>No activity yet</strong>
-                  <p>Connect your backend when ready.</p>
+                  <p>Connect the backend when you are ready.</p>
                 </div>
               </div>
             </article>
@@ -559,7 +563,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <article className="content-panel statistics-panel">
                 <div className="panel-header">
                   <div>
-                    <h3>Statistics</h3>
+                    <h3>Overview</h3>
                   </div>
                 </div>
 
@@ -674,7 +678,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="expense-summary">
                   <strong>$0.00</strong>
                   <span>0%</span>
-                  <small>No spend recorded this month</small>
+                  <small>No spend yet</small>
                 </div>
               </div>
 
