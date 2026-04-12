@@ -17,25 +17,93 @@ function AuthIcon({ type }) {
     user: (
       <>
         <circle cx="10" cy="7" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M4.8 15c.6-2.4 2.5-3.8 5.2-3.8s4.6 1.4 5.2 3.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+        <path
+          d="M4.8 15c.6-2.4 2.5-3.8 5.2-3.8s4.6 1.4 5.2 3.8"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
       </>
     ),
     mail: (
       <>
-        <rect x="3.6" y="5" width="12.8" height="10" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="m4.9 6.6 5.1 4 5.1-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+        <rect
+          x="3.6"
+          y="5"
+          width="12.8"
+          height="10"
+          rx="2.2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+        <path
+          d="m4.9 6.6 5.1 4 5.1-4"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.8"
+        />
       </>
     ),
     lock: (
       <>
-        <rect x="4.6" y="8.2" width="10.8" height="7.6" rx="2.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M6.8 8.2V6.6A3.2 3.2 0 0 1 10 3.4a3.2 3.2 0 0 1 3.2 3.2v1.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+        <rect
+          x="4.6"
+          y="8.2"
+          width="10.8"
+          height="7.6"
+          rx="2.1"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
+        <path
+          d="M6.8 8.2V6.6A3.2 3.2 0 0 1 10 3.4a3.2 3.2 0 0 1 3.2 3.2v1.6"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="1.8"
+        />
+      </>
+    ),
+    shield: (
+      <>
+        <path
+          d="M10 2.8 15 4.7v4.5c0 3.3-2.1 5.9-5 7-2.9-1.1-5-3.7-5-7V4.7l5-1.9Z"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
+        <path
+          d="m7.4 9.5 1.6 1.6 3.6-3.8"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
+      </>
+    ),
+    spark: (
+      <>
+        <path
+          d="m10 2.8 1.4 3.8L15 8l-3.6 1.4L10 13.2 8.6 9.4 5 8l3.6-1.4L10 2.8Z"
+          fill="none"
+          stroke="currentColor"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+        />
       </>
     ),
   };
 
   return (
-    <svg aria-hidden="true" className="auth-input-icon-svg" viewBox="0 0 20 20">
+    <svg aria-hidden="true" className="authx-icon-svg" viewBox="0 0 20 20">
       {icons[type]}
     </svg>
   );
@@ -45,7 +113,9 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const navigate = useNavigate();
   const isLogin = mode === 'login';
   const rememberedEmail =
-    typeof window !== 'undefined' ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || '' : '';
+    typeof window !== 'undefined'
+      ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
+      : '';
   const [formData, setFormData] = useState(createInitialForm(rememberedEmail));
   const [rememberEmail, setRememberEmail] = useState(Boolean(rememberedEmail));
   const [showPassword, setShowPassword] = useState(false);
@@ -110,104 +180,144 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   };
 
   return (
-    <main className="login-shell">
-      <section className="login-stage">
-        <section className="login-showcase">
-          <div className="login-showcase-ambient login-showcase-ambient-one" aria-hidden="true" />
-          <div className="login-showcase-ambient login-showcase-ambient-two" aria-hidden="true" />
-          <div className="login-showcase-grid" aria-hidden="true" />
+    <main className="authx-page">
+      <section className="authx-shell">
+        <section className="authx-visual">
+          <div className="authx-glow authx-glow-one" aria-hidden="true" />
+          <div className="authx-glow authx-glow-two" aria-hidden="true" />
+          <div className="authx-grid" aria-hidden="true" />
 
-          <div className="login-showcase-head">
-            <BrandLogo className="login-brand" title="Ledgr" subtitle="Private money workspace" tone="light" />
-            <span className="login-showcase-badge">{isLogin ? 'Private access' : 'New account'}</span>
+          <div className="authx-visual-head">
+            <BrandLogo
+              className="authx-brand"
+              title="Ledgr"
+              subtitle="Finance with clarity"
+              tone="light"
+            />
+            <span className="authx-visual-pill">
+              {isLogin ? 'Private access' : 'New workspace'}
+            </span>
           </div>
 
-          <div className="login-showcase-copy">
+          <div className="authx-visual-copy">
+            <span className="authx-kicker">Private finance workspace</span>
             <h1>
               {isLogin
-                ? 'A cleaner way into your money workspace.'
-                : 'Create a Ledgr account with a cleaner first step.'}
+                ? 'Sign in to the workspace built for calm financial control.'
+                : 'Create a Ledgr account with a premium first impression.'}
             </h1>
-            <p>Real authentication now. Your backend can connect later.</p>
+            <p>
+              Designed for modern finance teams and private operators who want clarity, trust, and
+              clean control from the first screen.
+            </p>
           </div>
 
-          <div className="login-showcase-visual">
-            <article className="login-showcase-card login-showcase-card-primary">
-              <div className="login-showcase-card-head">
-                <span className="login-showcase-card-label">Ledgr session</span>
-                <span className="login-showcase-card-dot" aria-hidden="true" />
+          <div className="authx-app-preview">
+            <div className="authx-preview-topbar">
+              <div className="authx-preview-dots" aria-hidden="true">
+                <span />
+                <span />
+                <span />
               </div>
-              <strong>
-                {isLogin
-                  ? 'Sign in with the account you already created and move straight into Ledgr.'
-                  : 'Create the account once and keep access tied to your own workspace.'}
-              </strong>
-              <div className="login-showcase-card-footer">
-                <span>Private by default</span>
-                <span>Real auth flow</span>
-              </div>
-            </article>
+              <div className="authx-preview-search">Search Ledgr</div>
+            </div>
 
-            <div className="login-showcase-row">
-              <article className="login-showcase-card login-showcase-card-secondary">
-                <div className="login-showcase-wallet-top">
-                  <div className="login-showcase-wallet-dots" aria-hidden="true">
+            <div className="authx-preview-body">
+              <div className="authx-preview-main">
+                <div className="authx-preview-hero">
+                  <span className="authx-preview-hero-kicker">Capital overview</span>
+                  <strong>One place for cards, balances, and your next financial move.</strong>
+                  <div className="authx-preview-hero-bars" aria-hidden="true">
+                    <span />
+                    <span />
                     <span />
                     <span />
                   </div>
-                  <small>Wallet access</small>
                 </div>
 
-                <div className="login-showcase-wallet-chip" aria-hidden="true" />
-
-                <div className="login-showcase-wallet-copy">
-                  <span>{isLogin ? 'Secure entry' : 'Account setup'}</span>
-                  <strong>{isLogin ? 'Ledgr access' : 'Ledgr onboarding'}</strong>
+                <div className="authx-preview-chart" aria-hidden="true">
+                  <span className="authx-preview-line authx-preview-line-one" />
+                  <span className="authx-preview-line authx-preview-line-two" />
                 </div>
 
-                <div className="login-showcase-wallet-foot">
-                  <span>**** 4242</span>
-                  <span>Protected</span>
+                <div className="authx-preview-stats" aria-hidden="true">
+                  <div className="authx-preview-stat">
+                    <span>Cash flow</span>
+                    <strong>Monitored</strong>
+                  </div>
+                  <div className="authx-preview-stat">
+                    <span>Wallets</span>
+                    <strong>Private</strong>
+                  </div>
+                  <div className="authx-preview-stat">
+                    <span>Workspace</span>
+                    <strong>Secure</strong>
+                  </div>
                 </div>
-              </article>
-
-              <div className="login-showcase-metrics">
-                <article className="login-showcase-stat">
-                  <span>Validation</span>
-                  <strong>Real account rules</strong>
-                </article>
-                <article className="login-showcase-stat">
-                  <span>Session</span>
-                  <strong>Local and private</strong>
-                </article>
-                <article className="login-showcase-stat">
-                  <span>Design</span>
-                  <strong>Minimal with color</strong>
-                </article>
               </div>
+
+              <aside className="authx-preview-rail">
+                <div className="authx-preview-card">
+                  <div className="authx-preview-card-top">
+                    <div className="authx-preview-card-dots" aria-hidden="true">
+                      <span />
+                      <span />
+                    </div>
+                    <small>Primary card</small>
+                  </div>
+                  <div className="authx-preview-chip" aria-hidden="true" />
+                  <strong>{isLogin ? 'Protected access' : 'Account setup'}</strong>
+                  <span>{isLogin ? 'Private and ready' : 'Secure and ready'}</span>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <div className="authx-visual-footer">
+            <div className="authx-feature-pill">
+              <AuthIcon type="shield" />
+              <span>Private by default</span>
+            </div>
+            <div className="authx-feature-pill">
+              <AuthIcon type="spark" />
+              <span>Premium fintech design</span>
             </div>
           </div>
         </section>
 
-        <form className="login-form-panel" onSubmit={handleSubmit}>
-          <div className="login-form-wrap">
-            <div className="login-form-header">
-              <span className="login-form-kicker">{isLogin ? 'Welcome back' : 'Create account'}</span>
+        <section className="authx-panel">
+          <div className="authx-card">
+            <div className="authx-card-top">
+              <nav className="authx-switch" aria-label="Authentication mode">
+                <Link className={`authx-switch-link${isLogin ? ' active' : ''}`} to="/login">
+                  Log in
+                </Link>
+                <Link className={`authx-switch-link${isLogin ? '' : ' active'}`} to="/signup">
+                  Sign up
+                </Link>
+              </nav>
+
+              <span className="authx-status">Workspace access</span>
+            </div>
+
+            <div className="authx-card-copy">
+              <span className="authx-card-kicker">{isLogin ? 'Welcome back' : 'Create account'}</span>
               <h2>{isLogin ? 'Sign in to Ledgr' : 'Create your Ledgr account'}</h2>
               <p>
                 {isLogin
-                  ? 'Use the credentials you created during sign up.'
-                  : 'Create an account to open your private workspace.'}
+                  ? 'Use the credentials linked to your private finance workspace.'
+                  : 'Set up one secure account and start with a clean private workspace.'}
               </p>
             </div>
 
-            {message ? <p className="login-form-error">{message}</p> : null}
+            {message ? <p className="authx-error">{message}</p> : null}
 
-            <div className="login-fields">
+            <form className="authx-form" onSubmit={handleSubmit}>
               {!isLogin ? (
-                <label className="login-field" htmlFor="fullName">
-                  <span className="login-field-shell">
-                    <span className="auth-input-icon">
+                <label className="authx-field" htmlFor="fullName">
+                  <span className="authx-field-label">Full name</span>
+                  <span className="authx-field-shell">
+                    <span className="authx-field-icon">
                       <AuthIcon type="user" />
                     </span>
                     <input
@@ -216,15 +326,17 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                       type="text"
                       value={formData.fullName}
                       onChange={handleChange}
-                      placeholder="Full name"
+                      placeholder="Enter your full name"
+                      autoComplete="name"
                     />
                   </span>
                 </label>
               ) : null}
 
-              <label className="login-field" htmlFor="email">
-                <span className="login-field-shell">
-                  <span className="auth-input-icon">
+              <label className="authx-field" htmlFor="email">
+                <span className="authx-field-label">Email</span>
+                <span className="authx-field-shell">
+                  <span className="authx-field-icon">
                     <AuthIcon type="mail" />
                   </span>
                   <input
@@ -233,15 +345,16 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="Email address"
+                    placeholder="Enter your email"
                     autoComplete="email"
                   />
                 </span>
               </label>
 
-              <label className="login-field" htmlFor="password">
-                <span className="login-field-shell">
-                  <span className="auth-input-icon">
+              <label className="authx-field" htmlFor="password">
+                <span className="authx-field-label">Password</span>
+                <span className="authx-field-shell">
+                  <span className="authx-field-icon">
                     <AuthIcon type="lock" />
                   </span>
                   <input
@@ -250,19 +363,24 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Password"
+                    placeholder={isLogin ? 'Enter your password' : 'Create a password'}
                     autoComplete={isLogin ? 'current-password' : 'new-password'}
                   />
-                  <button className="password-toggle" type="button" onClick={() => setShowPassword((current) => !current)}>
+                  <button
+                    className="authx-password-toggle"
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                  >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </span>
               </label>
 
               {!isLogin ? (
-                <label className="login-field" htmlFor="confirmPassword">
-                  <span className="login-field-shell">
-                    <span className="auth-input-icon">
+                <label className="authx-field" htmlFor="confirmPassword">
+                  <span className="authx-field-label">Confirm password</span>
+                  <span className="authx-field-shell">
+                    <span className="authx-field-icon">
                       <AuthIcon type="lock" />
                     </span>
                     <input
@@ -271,52 +389,67 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                       type={showPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      placeholder="Confirm password"
+                      placeholder="Repeat your password"
                       autoComplete="new-password"
                     />
                   </span>
                 </label>
               ) : null}
-            </div>
 
-            <div className="login-meta-row">
-              <label className="remember-row" htmlFor="rememberEmail">
-                <input
-                  id="rememberEmail"
-                  type="checkbox"
-                  checked={rememberEmail}
-                  onChange={(event) => setRememberEmail(event.target.checked)}
-                />
-                Remember me
-              </label>
+              <div className="authx-form-meta">
+                <label className="authx-remember" htmlFor="rememberEmail">
+                  <input
+                    id="rememberEmail"
+                    type="checkbox"
+                    checked={rememberEmail}
+                    onChange={(event) => setRememberEmail(event.target.checked)}
+                  />
+                  <span>Remember me on this device</span>
+                </label>
 
-              {isLogin ? (
-                <button
-                  className="login-forgot-link"
-                  type="button"
-                  onClick={() => setMessage('Password reset will be connected when your backend is ready.')}
-                >
-                  Forgot password?
-                </button>
-              ) : (
-                <Link className="login-alt-link" to="/login">
-                  Already registered?
+                {isLogin ? (
+                  <button
+                    className="authx-text-link"
+                    type="button"
+                    onClick={() =>
+                      setMessage(
+                        'Password recovery will be available soon. Use your current credentials for now.'
+                      )
+                    }
+                  >
+                    Forgot password?
+                  </button>
+                ) : (
+                  <span className="authx-note">Use at least 8 characters.</span>
+                )}
+              </div>
+
+              <button className="authx-primary" type="submit">
+                {isLogin ? 'Log in' : 'Create account'}
+              </button>
+            </form>
+
+            <div className="authx-card-foot">
+              <p className="authx-switch-copy">
+                {isLogin ? "Don't have an account yet? " : 'Already have an account? '}
+                <Link className="authx-inline-link" to={isLogin ? '/signup' : '/login'}>
+                  {isLogin ? 'Sign up' : 'Log in'}
                 </Link>
-              )}
+              </p>
+
+              <div className="authx-mini-notes">
+                <span className="authx-mini-note">
+                  <AuthIcon type="shield" />
+                  Secure session
+                </span>
+                <span className="authx-mini-note">
+                  <AuthIcon type="spark" />
+                  Premium experience
+                </span>
+              </div>
             </div>
-
-            <button className="login-primary-button" type="submit">
-              {isLogin ? 'Sign in' : 'Create account'}
-            </button>
-
-            <p className="login-switch-copy">
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <Link className="login-switch-link" to={isLogin ? '/signup' : '/login'}>
-                {isLogin ? 'Sign up' : 'Log in'}
-              </Link>
-            </p>
           </div>
-        </form>
+        </section>
       </section>
     </main>
   );
