@@ -115,64 +115,79 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         <section className="login-showcase">
           <div className="login-showcase-ambient login-showcase-ambient-one" aria-hidden="true" />
           <div className="login-showcase-ambient login-showcase-ambient-two" aria-hidden="true" />
+          <div className="login-showcase-grid" aria-hidden="true" />
 
-          <BrandLogo className="login-brand" title="Ledgr" subtitle="Private finance workspace" tone="light" />
+          <div className="login-showcase-head">
+            <BrandLogo className="login-brand" title="Ledgr" subtitle="Private money workspace" tone="light" />
+            <span className="login-showcase-badge">{isLogin ? 'Private access' : 'New account'}</span>
+          </div>
 
           <div className="login-showcase-copy">
-            <span className="login-showcase-kicker">Ledgr Access</span>
             <h1>
               {isLogin
-                ? 'A sharper, cleaner way to enter your finance workspace.'
-                : 'Create your Ledgr account and start from a more precise workspace.'}
+                ? 'Sign in to a cleaner money workspace.'
+                : 'Create a Ledgr account built for calm control.'}
             </h1>
             <p>
-              Minimal by design, private by default, and ready for your backend when you are.
-              The auth flow is real now, while the money data stays honest.
+              Real authentication now. Clean surfaces, private state, and no fake finance data
+              pretending to be yours.
             </p>
           </div>
 
-          <div className="login-showcase-stack">
-            <article className="login-showcase-panel login-showcase-panel-primary">
-              <span>Private session</span>
-              <strong>{isLogin ? 'Sign in with your own saved credentials.' : 'Create a real account before entering the app.'}</strong>
-              <p>No fake balances, no fake transactions, no borrowed demo state.</p>
+          <div className="login-showcase-visual">
+            <article className="login-showcase-card login-showcase-card-primary">
+              <div className="login-showcase-card-head">
+                <span className="login-showcase-card-label">Ledgr session</span>
+                <span className="login-showcase-card-dot" aria-hidden="true" />
+              </div>
+              <strong>
+                {isLogin
+                  ? 'Use the account you created and step straight into your private dashboard.'
+                  : 'Create your account once and keep access tied to your own workspace.'}
+              </strong>
+              <div className="login-showcase-card-footer">
+                <span>Private by default</span>
+                <span>Real auth flow</span>
+              </div>
             </article>
 
-            <article className="login-showcase-wallet">
-              <div className="login-showcase-wallet-top">
-                <div className="login-showcase-wallet-dots" aria-hidden="true">
-                  <span />
-                  <span />
+            <div className="login-showcase-row">
+              <article className="login-showcase-card login-showcase-card-secondary">
+                <div className="login-showcase-wallet-top">
+                  <div className="login-showcase-wallet-dots" aria-hidden="true">
+                    <span />
+                    <span />
+                  </div>
+                  <small>Wallet access</small>
                 </div>
-                <small>Ledgr Wallet</small>
-              </div>
 
-              <div className="login-showcase-wallet-chip" aria-hidden="true" />
+                <div className="login-showcase-wallet-chip" aria-hidden="true" />
 
-              <div className="login-showcase-wallet-copy">
-                <span>{isLogin ? 'Secure access' : 'Account setup'}</span>
-                <strong>{isLogin ? 'Continue cleanly' : 'Open your workspace'}</strong>
-              </div>
+                <div className="login-showcase-wallet-copy">
+                  <span>{isLogin ? 'Secure entry' : 'Account setup'}</span>
+                  <strong>{isLogin ? 'Ledgr unlock' : 'Ledgr onboarding'}</strong>
+                </div>
 
-              <div className="login-showcase-wallet-foot">
-                <span>•••• 4242</span>
-                <span>Protected</span>
-              </div>
-            </article>
-
-            <div className="login-showcase-stats">
-              <article className="login-showcase-stat">
-                <span>Validation</span>
-                <strong>Frontend-ready</strong>
+                <div className="login-showcase-wallet-foot">
+                  <span>**** 4242</span>
+                  <span>Protected</span>
+                </div>
               </article>
-              <article className="login-showcase-stat">
-                <span>Session</span>
-                <strong>Local and private</strong>
-              </article>
-              <article className="login-showcase-stat">
-                <span>Brand</span>
-                <strong>Ledgr</strong>
-              </article>
+
+              <div className="login-showcase-metrics">
+                <article className="login-showcase-stat">
+                  <span>Validation</span>
+                  <strong>Real account rules</strong>
+                </article>
+                <article className="login-showcase-stat">
+                  <span>Session</span>
+                  <strong>Local and private</strong>
+                </article>
+                <article className="login-showcase-stat">
+                  <span>Design</span>
+                  <strong>Minimal with color</strong>
+                </article>
+              </div>
             </div>
           </div>
         </section>
@@ -180,12 +195,12 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         <form className="login-form-panel" onSubmit={handleSubmit}>
           <div className="login-form-wrap">
             <div className="login-form-header">
-              <span className="login-form-kicker">{isLogin ? 'Welcome Back' : 'Create Account'}</span>
+              <span className="login-form-kicker">{isLogin ? 'Welcome back' : 'Create account'}</span>
               <h2>{isLogin ? 'Sign in to Ledgr' : 'Create your Ledgr account'}</h2>
               <p>
                 {isLogin
-                  ? 'Use the same credentials you created during sign up.'
-                  : 'Create a secure account now and use it to access your personal dashboard.'}
+                  ? 'Use the credentials you created during sign up.'
+                  : 'Create a secure account to access your personal workspace.'}
               </p>
             </div>
 

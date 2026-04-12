@@ -272,7 +272,6 @@ function DashboardPage({ currentUser, onLogout }) {
       <aside className="dashboard-sidebar">
         <div className="brand-block">
           <BrandLogo className="sidebar-brand-logo" compact title="Ledgr" subtitle="" />
-          <div className="brand-chevron">&lt;&lt;</div>
         </div>
 
         <div className="workspace-switcher">
@@ -281,7 +280,7 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="workspace-avatar">{initials}</div>
             <div className="workspace-copy">
               <strong>{currentUser?.fullName}</strong>
-              <span>Private</span>
+              <span>Personal ledger</span>
             </div>
             <div className="workspace-chevron">
               <TopbarIcon type="chevron" />
@@ -345,7 +344,7 @@ function DashboardPage({ currentUser, onLogout }) {
       <section className="dashboard-stage">
         <header className="dashboard-topbar">
           <label className="search-shell">
-            <input aria-label="Search anything" placeholder="Search anything..." readOnly value="" />
+            <input aria-label="Search anything" placeholder="Search cards, activity, workspace" readOnly value="" />
           </label>
 
           <div className="topbar-actions">
@@ -360,6 +359,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="topbar-avatar">{initials}</div>
                 <div className="topbar-user-copy">
                   <strong>{currentUser?.fullName}</strong>
+                  <span>Secure mode</span>
                 </div>
               </div>
               <button className="topbar-user-caret" type="button" aria-label="Open account menu">
@@ -376,17 +376,19 @@ function DashboardPage({ currentUser, onLogout }) {
           <section className="dashboard-main">
             <div className="dashboard-heading">
               <div>
-                <h1>Welcome Back {firstName}</h1>
+                <span className="dashboard-heading-kicker">Ledgr dashboard</span>
+                <h1>Welcome back, {firstName}</h1>
               </div>
               <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
-                + New Card
+                + Add card
               </button>
             </div>
 
             <article className="hero-banner">
               <div className="hero-banner-copy">
-                <span className="banner-kicker">Private wallet</span>
-                <h2>{cards.length ? 'Your saved cards are ready to use.' : 'Start building your secure wallet.'}</h2>
+                <span className="banner-kicker">Wallet space</span>
+                <h2>{cards.length ? 'Your saved cards are neatly stored in Ledgr.' : 'Build a calmer card workspace.'}</h2>
+                <p>{cards.length ? 'Everything here belongs to this account only.' : 'Start by saving one card. Real activity can connect later.'}</p>
                 <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
                   {cards.length ? 'Add another card' : 'Add first card'}
                 </button>
@@ -513,6 +515,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <div className="graph-grid" aria-hidden="true" />
                 <div className="graph-placeholder">
                   <strong>No activity yet</strong>
+                  <p>Connect your backend when ready.</p>
                 </div>
               </div>
             </article>
@@ -548,6 +551,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 ) : (
                   <div className="empty-panel-state">
                     <strong>No cards added yet</strong>
+                    <p>Your saved cards will appear here.</p>
                   </div>
                 )}
               </article>
