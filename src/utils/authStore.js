@@ -92,6 +92,47 @@ export const authStore = {
     writeStoredValue(STORAGE_KEYS.session, safeUser);
     return safeUser;
   },
+  updateProfile(userId, { fullName, email }) {
+    const users = readStoredValue(STORAGE_KEYS.users, []);
+    const normalizedEmail = normalizeEmail(email);
+    const trimmedName = fullName.trim();
+    const existingUser = users.find((user) => user.id === userId);
+
+    if (!existingUser) {
+      throw new Error('Account not found.');
+    }
+
+    if (!trimmedName) {
+      throw new Error('Full name is required.');
+    }
+
+    if (!normalizedEmail.includes('@')) {
+      throw new Error('Please enter a valid email address.');
+    }
+
+    const emailInUse = users.some(
+      (user) => user.id !== userId && normalizeEmail(user.email) === normalizedEmail
+    );
+
+    if (emailInUse) {
+      throw new Error('An account with this email already exists.');
+    }
+
+    const nextUser = {
+      ...existingUser,
+      fullName: trimmedName,
+      email: normalizedEmail,
+    };
+
+    writeStoredValue(
+      STORAGE_KEYS.users,
+      users.map((user) => (user.id === userId ? nextUser : user))
+    );
+
+    const safeUser = sanitizeUser(nextUser);
+    writeStoredValue(STORAGE_KEYS.session, safeUser);
+    return safeUser;
+  },
   logout() {
     if (canUseStorage()) {
       window.localStorage.removeItem(STORAGE_KEYS.session);
