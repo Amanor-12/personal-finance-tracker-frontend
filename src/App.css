@@ -307,6 +307,10 @@
   align-items: start;
 }
 
+.ref-content-grid.is-single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .ref-main,
 .ref-rail {
   display: grid;

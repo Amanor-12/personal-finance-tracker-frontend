@@ -4,14 +4,14 @@ import { settingsStore } from '../utils/settingsStore';
 
 const navItems = [
   { label: 'Overview', to: '/dashboard', icon: 'overview' },
-  { label: 'Transactions', icon: 'transactions' },
-  { label: 'Budget', icon: 'budget' },
-  { label: 'Goals', icon: 'goals' },
+  { label: 'Transactions', to: '/transactions', icon: 'transactions' },
+  { label: 'Budget', to: '/budget', icon: 'budget' },
+  { label: 'Goals', to: '/goals', icon: 'goals' },
 ];
 
 const otherItems = [
   { label: 'Settings', to: '/settings', icon: 'settings' },
-  { label: 'Help & Support', icon: 'help' },
+  { label: 'Help & Support', to: '/help', icon: 'help' },
 ];
 
 function SidebarIcon({ type }) {
@@ -114,6 +114,7 @@ function FinanceLayout({
   const initials = getInitials(currentUser?.fullName);
   const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
   const workspaceName = settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName).workspaceName;
+  const hasRail = Boolean(rail);
 
   return (
     <main className="ref-shell">
@@ -193,12 +194,12 @@ function FinanceLayout({
         </div>
 
         <div className="ref-sidebar-bottom">
-          <div className="ref-support-link">
+          <NavLink className={({ isActive }) => `ref-support-link${isActive ? ' is-active' : ''}`} to="/help">
             <span className="ref-nav-icon">
               <SidebarIcon type="help" />
             </span>
             <span>Support</span>
-          </div>
+          </NavLink>
         </div>
       </aside>
 
@@ -239,7 +240,7 @@ function FinanceLayout({
         <div className="ref-heading-row">
           <div className="ref-heading-copy">
             <h1>{pageTitle}</h1>
-            <p>{pageSubtitle}</p>
+            {pageSubtitle ? <p>{pageSubtitle}</p> : null}
           </div>
 
           {primaryActionLabel ? (
@@ -249,9 +250,9 @@ function FinanceLayout({
           ) : null}
         </div>
 
-        <div className="ref-content-grid">
+        <div className={`ref-content-grid${hasRail ? '' : ' is-single-column'}`}>
           <section className="ref-main">{children}</section>
-          {rail ? <aside className="ref-rail">{rail}</aside> : null}
+          {hasRail ? <aside className="ref-rail">{rail}</aside> : null}
         </div>
       </section>
     </main>

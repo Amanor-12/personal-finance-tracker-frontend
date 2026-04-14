@@ -3,9 +3,19 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
+import PlaceholderPage from './components/PlaceholderPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SettingsPage from './components/SettingsPage';
 import { authStore } from './utils/authStore';
+
+const pageTitles = {
+  '/dashboard': 'Dashboard',
+  '/transactions': 'Transactions',
+  '/budget': 'Budget',
+  '/goals': 'Goals',
+  '/settings': 'Settings',
+  '/help': 'Help',
+};
 
 function App() {
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
@@ -17,7 +27,8 @@ function App() {
       return;
     }
 
-    document.title = location.pathname === '/settings' ? 'Ledgr | Settings' : 'Ledgr | Dashboard';
+    const pageTitle = pageTitles[location.pathname] || 'Dashboard';
+    document.title = `Ledgr | ${pageTitle}`;
   }, [currentUser, location.pathname]);
 
   const handleLogin = (credentials) => {
@@ -85,6 +96,42 @@ function App() {
               onLogout={handleLogout}
               onUpdateProfile={handleUpdateProfile}
             />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/transactions"
+        element={
+          <ProtectedRoute>
+            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Transactions" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/budget"
+        element={
+          <ProtectedRoute>
+            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Budget" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/goals"
+        element={
+          <ProtectedRoute>
+            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Goals" />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/help"
+        element={
+          <ProtectedRoute>
+            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Help & Support" />
           </ProtectedRoute>
         }
       />
