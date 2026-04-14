@@ -26,7 +26,13 @@ function BrandLogo({
         <rect x="15.4" y="39.2" width="6.2" height="15.6" rx="1.2" fill="#0d1623" />
         <rect x="24.6" y="28.6" width="6.8" height="26.2" rx="1.2" fill="#0d1623" />
         <rect x="35.2" y="19.6" width="7" height="35.2" rx="1.2" fill="#0d1623" />
-        <path d="M20.4 40.4 31.2 40.4 41.8 30.2 53.8 19.4 53.8 15.4 19.8 15.4 15.4 19.8 15.4 45.4Z" fill="none" opacity="0.14" stroke="#ffffff" strokeWidth="2.2" />
+        <path
+          d="M20.4 40.4 31.2 40.4 41.8 30.2 53.8 19.4 53.8 15.4 19.8 15.4 15.4 19.8 15.4 45.4Z"
+          fill="none"
+          opacity="0.14"
+          stroke="#ffffff"
+          strokeWidth="2.2"
+        />
         <path d="M18.2 48.6 27.4 43.2 33.8 49.8 58 24.6 54.8 35.4 34.2 57.4 26.8 49.6 15.2 53.8Z" fill="#0d1623" />
         <path d="M23.6 42 31 49.4 54.4 24.8 58 24.2 33.6 56.2 26.6 48.6 18.4 48.8Z" fill="url(#ledgrLogoCheck)" />
       </svg>
