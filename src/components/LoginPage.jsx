@@ -69,36 +69,26 @@ function AuthIcon({ type }) {
         />
       </>
     ),
-    shield: (
+    eye: (
       <>
         <path
-          d="M10 2.8 15 4.7v4.5c0 3.3-2.1 5.9-5 7-2.9-1.1-5-3.7-5-7V4.7l5-1.9Z"
+          d="M2.8 10c1.7-3 4.3-4.6 7.2-4.6s5.5 1.6 7.2 4.6c-1.7 3-4.3 4.6-7.2 4.6S4.5 13 2.8 10Z"
           fill="none"
           stroke="currentColor"
-          strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="1.7"
         />
-        <path
-          d="m7.4 9.5 1.6 1.6 3.6-3.8"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.7"
-        />
+        <circle cx="10" cy="10" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
       </>
     ),
-    spark: (
-      <>
-        <path
-          d="m10 2.8 1.4 3.8L15 8l-3.6 1.4L10 13.2 8.6 9.4 5 8l3.6-1.4L10 2.8Z"
-          fill="none"
-          stroke="currentColor"
-          strokeLinejoin="round"
-          strokeWidth="1.7"
-        />
-      </>
+    shield: (
+      <path
+        d="M10 2.8 4.8 4.6v4.6c0 3.1 2.1 5.7 5.2 7 3.1-1.3 5.2-3.9 5.2-7V4.6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
     ),
   };
 
@@ -182,131 +172,28 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   return (
     <main className="authx-page">
       <section className="authx-shell">
-        <section className="authx-visual">
-          <div className="authx-glow authx-glow-one" aria-hidden="true" />
-          <div className="authx-glow authx-glow-two" aria-hidden="true" />
-          <div className="authx-grid" aria-hidden="true" />
-
-          <div className="authx-visual-head">
-            <BrandLogo
-              className="authx-brand"
-              title="Ledgr"
-              subtitle="Finance with clarity"
-              tone="light"
-            />
-            <span className="authx-visual-pill">
-              {isLogin ? 'Private access' : 'New workspace'}
-            </span>
+        <section className="authx-auth-column">
+          <div className="authx-brand-row">
+            <BrandLogo className="authx-brand" title="Ledgr" subtitle="Private finance workspace" tone="dark" />
           </div>
 
-          <div className="authx-visual-copy">
-            <span className="authx-kicker">Private finance workspace</span>
-            <h1>
-              {isLogin
-                ? 'Sign in to the workspace built for calm financial control.'
-                : 'Create a Ledgr account with a premium first impression.'}
-            </h1>
-            <p>
-              Designed for modern finance teams and private operators who want clarity, trust, and
-              clean control from the first screen.
-            </p>
-          </div>
-
-          <div className="authx-app-preview">
-            <div className="authx-preview-topbar">
-              <div className="authx-preview-dots" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="authx-preview-search">Search Ledgr</div>
-            </div>
-
-            <div className="authx-preview-body">
-              <div className="authx-preview-main">
-                <div className="authx-preview-hero">
-                  <span className="authx-preview-hero-kicker">Capital overview</span>
-                  <strong>One place for cards, balances, and your next financial move.</strong>
-                  <div className="authx-preview-hero-bars" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                </div>
-
-                <div className="authx-preview-chart" aria-hidden="true">
-                  <span className="authx-preview-line authx-preview-line-one" />
-                  <span className="authx-preview-line authx-preview-line-two" />
-                </div>
-
-                <div className="authx-preview-stats" aria-hidden="true">
-                  <div className="authx-preview-stat">
-                    <span>Cash flow</span>
-                    <strong>Monitored</strong>
-                  </div>
-                  <div className="authx-preview-stat">
-                    <span>Wallets</span>
-                    <strong>Private</strong>
-                  </div>
-                  <div className="authx-preview-stat">
-                    <span>Workspace</span>
-                    <strong>Secure</strong>
-                  </div>
-                </div>
-              </div>
-
-              <aside className="authx-preview-rail">
-                <div className="authx-preview-card">
-                  <div className="authx-preview-card-top">
-                    <div className="authx-preview-card-dots" aria-hidden="true">
-                      <span />
-                      <span />
-                    </div>
-                    <small>Primary card</small>
-                  </div>
-                  <div className="authx-preview-chip" aria-hidden="true" />
-                  <strong>{isLogin ? 'Protected access' : 'Account setup'}</strong>
-                  <span>{isLogin ? 'Private and ready' : 'Secure and ready'}</span>
-                </div>
-              </aside>
-            </div>
-          </div>
-
-          <div className="authx-visual-footer">
-            <div className="authx-feature-pill">
-              <AuthIcon type="shield" />
-              <span>Private by default</span>
-            </div>
-            <div className="authx-feature-pill">
-              <AuthIcon type="spark" />
-              <span>Premium fintech design</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="authx-panel">
-          <div className="authx-card">
-            <div className="authx-card-top">
-              <nav className="authx-switch" aria-label="Authentication mode">
-                <Link className={`authx-switch-link${isLogin ? ' active' : ''}`} to="/login">
-                  Log in
-                </Link>
-                <Link className={`authx-switch-link${isLogin ? '' : ' active'}`} to="/signup">
-                  Sign up
-                </Link>
-              </nav>
-
-              <span className="authx-status">Workspace access</span>
+          <div className="authx-auth-card">
+            <div className="authx-mode-toggle">
+              <Link className={isLogin ? 'active' : ''} to="/login">
+                Log in
+              </Link>
+              <Link className={!isLogin ? 'active' : ''} to="/signup">
+                Sign up
+              </Link>
             </div>
 
             <div className="authx-card-copy">
-              <span className="authx-card-kicker">{isLogin ? 'Welcome back' : 'Create account'}</span>
-              <h2>{isLogin ? 'Sign in to Ledgr' : 'Create your Ledgr account'}</h2>
+              <span className="authx-panel-kicker">{isLogin ? 'Secure access' : 'Create access'}</span>
+              <h1>{isLogin ? 'Access your Ledgr workspace' : 'Create your Ledgr account'}</h1>
               <p>
                 {isLogin
-                  ? 'Use the credentials linked to your private finance workspace.'
-                  : 'Set up one secure account and start with a clean private workspace.'}
+                  ? 'Use your account details to continue into your private workspace.'
+                  : 'Create a secure account first. You will use the same details to log in later.'}
               </p>
             </div>
 
@@ -345,7 +232,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="Enter your email"
+                    placeholder="name@example.com"
                     autoComplete="email"
                   />
                 </span>
@@ -363,15 +250,16 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     type={showPassword ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder={isLogin ? 'Enter your password' : 'Create a password'}
+                    placeholder="Enter your password"
                     autoComplete={isLogin ? 'current-password' : 'new-password'}
                   />
                   <button
                     className="authx-password-toggle"
                     type="button"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                     onClick={() => setShowPassword((current) => !current)}
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    <AuthIcon type="eye" />
                   </button>
                 </span>
               </label>
@@ -389,7 +277,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                       type={showPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      placeholder="Repeat your password"
+                      placeholder="Confirm your password"
                       autoComplete="new-password"
                     />
                   </span>
@@ -397,14 +285,26 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               ) : null}
 
               <div className="authx-form-meta">
-                <label className="authx-remember" htmlFor="rememberEmail">
+                <label className="authx-check" htmlFor="rememberEmail">
                   <input
                     id="rememberEmail"
                     type="checkbox"
                     checked={rememberEmail}
                     onChange={(event) => setRememberEmail(event.target.checked)}
                   />
-                  <span>Remember me on this device</span>
+                  <span className="authx-check-box">
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                      <path
+                        d="m5.2 10.2 3.1 3.1 6.4-6.7"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  </span>
+                  <span>{isLogin ? 'Remember me' : 'Remember my email'}</span>
                 </label>
 
                 {isLogin ? (
@@ -420,33 +320,148 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     Forgot password?
                   </button>
                 ) : (
-                  <span className="authx-note">Use at least 8 characters.</span>
+                  <span className="authx-meta-note">Use at least 8 characters.</span>
                 )}
               </div>
 
               <button className="authx-primary" type="submit">
-                {isLogin ? 'Log in' : 'Create account'}
+                {isLogin ? 'Access workspace' : 'Create account'}
               </button>
             </form>
 
-            <div className="authx-card-foot">
-              <p className="authx-switch-copy">
-                {isLogin ? "Don't have an account yet? " : 'Already have an account? '}
-                <Link className="authx-inline-link" to={isLogin ? '/signup' : '/login'}>
-                  {isLogin ? 'Sign up' : 'Log in'}
-                </Link>
-              </p>
+            <p className="authx-switch-copy">
+              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              <Link className="authx-inline-link" to={isLogin ? '/signup' : '/login'}>
+                {isLogin ? 'Sign up' : 'Log in'}
+              </Link>
+            </p>
+          </div>
+        </section>
 
-              <div className="authx-mini-notes">
-                <span className="authx-mini-note">
-                  <AuthIcon type="shield" />
-                  Secure session
-                </span>
-                <span className="authx-mini-note">
-                  <AuthIcon type="spark" />
-                  Premium experience
-                </span>
+        <section className="authx-preview-column" aria-hidden="true">
+          <div className="authx-preview-header">
+            <span className="authx-kicker">Product preview</span>
+            <div className="authx-preview-pills">
+              <span>Private</span>
+              <span>Secure</span>
+              <span>Calm</span>
+            </div>
+          </div>
+
+          <div className="authx-preview-surface">
+            <div className="authx-surface-topbar">
+              <div className="authx-surface-dots">
+                <span />
+                <span />
+                <span />
               </div>
+              <div className="authx-surface-search" />
+              <BrandLogo className="authx-surface-brand" compact markOnly subtitle="" title="" tone="dark" />
+            </div>
+
+            <div className="authx-art-grid">
+              <div className="authx-art-main">
+                <article className="authx-art-hero">
+                  <span className="authx-surface-label">Ledgr preview</span>
+                  <strong>Money, made calm.</strong>
+                  <p>Cards. Budget. Goals.</p>
+
+                  <div className="authx-art-pill-row">
+                    <span>Cards</span>
+                    <span>Budget</span>
+                    <span>Goals</span>
+                  </div>
+
+                  <div className="authx-art-rings">
+                    <span className="authx-art-ring authx-art-ring-one" />
+                    <span className="authx-art-ring authx-art-ring-two" />
+                    <span className="authx-art-glass" />
+                  </div>
+                </article>
+
+                <div className="authx-art-lower">
+                  <article className="authx-orbit-panel">
+                    <span className="authx-orbit-tag authx-orbit-tag-top">Private</span>
+                    <span className="authx-orbit-tag authx-orbit-tag-left">Budget</span>
+                    <span className="authx-orbit-tag authx-orbit-tag-right">Goals</span>
+                    <span className="authx-orbit-glow" />
+                    <span className="authx-orbit-ring authx-orbit-ring-one" />
+                    <span className="authx-orbit-ring authx-orbit-ring-two" />
+                    <span className="authx-orbit-ring authx-orbit-ring-three" />
+
+                    <div className="authx-orbit-core">
+                      <BrandLogo className="authx-orbit-brand" compact markOnly subtitle="" title="" tone="dark" />
+                    </div>
+                  </article>
+
+                  <article className="authx-signal-panel">
+                    <div className="authx-signal-bars" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+
+                    <div className="authx-signal-chip-row">
+                      <span>Secure</span>
+                      <span>Ready</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <aside className="authx-art-rail">
+                <article className="authx-wallet-stack-panel">
+                  <div className="authx-wallet-layer authx-wallet-layer-back">
+                    <span className="authx-wallet-layer-chip" aria-hidden="true" />
+                    <strong>Backup</strong>
+                    <small>**** 2458</small>
+                  </div>
+
+                  <div className="authx-wallet-layer authx-wallet-layer-front">
+                    <div className="authx-wallet-layer-top">
+                      <BrandLogo className="authx-wallet-mark" compact markOnly subtitle="" title="" tone="dark" />
+                      <span className="authx-wallet-layer-dots" aria-hidden="true">
+                        <span />
+                        <span />
+                      </span>
+                    </div>
+
+                    <span className="authx-wallet-layer-chip" aria-hidden="true" />
+                    <strong>Primary card</strong>
+                    <small>**** 5432</small>
+                  </div>
+                </article>
+
+                <article className="authx-status-panel">
+                  <div className="authx-status-pill-row">
+                    <span>Private</span>
+                    <span>Local</span>
+                    <span>Ready</span>
+                  </div>
+
+                  <div className="authx-status-track" aria-hidden="true">
+                    <span className="authx-status-track-fill authx-status-track-fill-blue" />
+                    <span className="authx-status-track-fill authx-status-track-fill-teal" />
+                    <span className="authx-status-track-fill authx-status-track-fill-gold" />
+                  </div>
+
+                  <div className="authx-status-list">
+                    <div className="authx-status-row">
+                      <span>Cards</span>
+                      <strong>On</strong>
+                    </div>
+                    <div className="authx-status-row">
+                      <span>Budget</span>
+                      <strong>Set</strong>
+                    </div>
+                    <div className="authx-status-row">
+                      <span>Alerts</span>
+                      <strong>Ready</strong>
+                    </div>
+                  </div>
+                </article>
+              </aside>
             </div>
           </div>
         </section>

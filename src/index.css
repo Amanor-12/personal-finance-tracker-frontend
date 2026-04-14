@@ -1,39 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
 * {
   box-sizing: border-box;
 }
 
 :root {
-  font-family: "Plus Jakarta Sans", Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Manrope', 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #111827;
-  --finance-ink: #111827;
-  --finance-muted: #667085;
-  --finance-line: rgba(15, 23, 42, 0.08);
-  --finance-surface: rgba(255, 255, 255, 0.76);
-  --finance-surface-strong: #ffffff;
-  --finance-soft: #f8fafc;
-  --finance-brand-deep: #3730a3;
-  --finance-brand-mid: #6366f1;
-  --finance-brand-bright: #14b8a6;
-  --finance-gold: #f59e0b;
-  --finance-coral: #f97316;
-  --finance-shadow: 0 28px 70px rgba(15, 23, 42, 0.08);
-  background:
-    radial-gradient(circle at top left, rgba(99, 102, 241, 0.14), transparent 24%),
-    radial-gradient(circle at top right, rgba(20, 184, 166, 0.12), transparent 18%),
-    radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 18%),
-    linear-gradient(180deg, #fbfcff 0%, #eff4fb 100%);
+  color: #111b42;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --ref-bg: #f3f5f5;
+  --ref-edge: #cad2d8;
+  --ref-mist: #bdc0c1;
+  --ref-navy: #111b42;
+  --ref-indigo: #190ea4;
+  --ref-violet: #2527d7;
+  --ref-blue: #2d4beb;
+  --ref-gold: #8f782d;
+  background:
+    radial-gradient(circle at top left, rgba(45, 75, 235, 0.12), transparent 18%),
+    radial-gradient(circle at right 20%, rgba(37, 39, 215, 0.08), transparent 18%),
+    radial-gradient(circle at bottom left, rgba(37, 192, 176, 0.08), transparent 20%),
+    linear-gradient(180deg, #f8f9fb 0%, #eef3f8 100%);
+}
+
+html,
+body,
+#root {
+  min-height: 100vh;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  color: var(--finance-ink);
+  color: var(--ref-navy);
   background: transparent;
 }
 
@@ -48,24 +52,21 @@ select {
 }
 
 button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.85rem 1.2rem;
-  font-weight: 700;
+  border: 0;
   cursor: pointer;
   transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    background-color 0.18s ease,
-    opacity 0.18s ease;
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease,
+    opacity 0.16s ease;
 }
 
 button:hover {
   transform: translateY(-1px);
 }
 
-img {
-  max-width: 100%;
+img,
+svg {
   display: block;
 }
 
@@ -80,11 +81,15 @@ img {
   gap: 10px;
 }
 
+.brand-logo-mark-only {
+  gap: 0;
+}
+
 .brand-logo-mark {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
-  filter: drop-shadow(0 18px 28px rgba(55, 48, 163, 0.16));
+  filter: drop-shadow(0 10px 16px rgba(17, 27, 66, 0.1));
 }
 
 .brand-logo-copy {
@@ -97,22 +102,22 @@ img {
 }
 
 .brand-logo-dark .brand-logo-copy strong {
-  color: var(--finance-ink);
-  font-size: 1.16rem;
+  color: var(--ref-navy);
+  font-size: 1.08rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .brand-logo-dark .brand-logo-copy span {
   margin-top: 4px;
-  color: var(--finance-muted);
-  font-size: 0.9rem;
+  color: #8a93a6;
+  font-size: 0.86rem;
   line-height: 1.35;
 }
 
 .brand-logo-light .brand-logo-copy strong {
   color: #ffffff;
-  font-size: 1.16rem;
+  font-size: 1.08rem;
   line-height: 1;
   letter-spacing: -0.02em;
 }
@@ -120,15 +125,15 @@ img {
 .brand-logo-light .brand-logo-copy span {
   margin-top: 4px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   line-height: 1.35;
 }
 
 .brand-logo-compact .brand-logo-mark {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
 }
 
 .brand-logo-compact .brand-logo-copy strong {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
