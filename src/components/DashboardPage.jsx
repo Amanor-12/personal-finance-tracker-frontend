@@ -1,208 +1,265 @@
-import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import BrandLogo from './BrandLogo';
+import { useMemo, useState } from 'react';
+import FinanceLayout from './FinanceLayout';
 import { cardStore } from '../utils/cardStore';
+import { financeStore } from '../utils/financeStore';
 
-const menuItems = [
-  { label: 'Home', active: true, icon: 'home' },
-  { label: 'Projects', icon: 'projects' },
-  { label: 'Schedule', icon: 'schedule' },
-  { label: 'Performance', icon: 'performance' },
-  { label: 'Task List', icon: 'task' },
-  { label: 'Team', icon: 'team' },
-  { label: 'Message', icon: 'message' },
+const quickActions = [
+  { label: 'Pay', icon: 'send', tone: 'violet', action: 'payment' },
+  { label: 'Receive', icon: 'receive', tone: 'mint', action: null },
+  { label: 'Invoice', icon: 'invoice', tone: 'amber', action: 'payment' },
+  { label: 'Add Card', icon: 'plus', tone: 'sky', action: 'card' },
 ];
 
-const otherItems = [{ label: 'Help & Support', icon: 'support' }];
-
-const walletActions = [
-  { key: 'send', label: 'Send', icon: 'send', tone: 'lavender' },
-  { key: 'receive', label: 'Receive', icon: 'receive', tone: 'mint' },
-  { key: 'invoice', label: 'Invoices', icon: 'invoice', tone: 'amber' },
-  { key: 'more', label: 'More', icon: 'more', tone: 'sky' },
+const expenseLegendConfig = [
+  { label: 'Shopping', tone: 'violet' },
+  { label: 'Essentials', tone: 'blue' },
+  { label: 'Bills', tone: 'teal' },
+  { label: 'Travel', tone: 'orange' },
 ];
 
-const themeLabels = {
-  indigo: 'Indigo',
-  emerald: 'Emerald',
-  sunset: 'Sunset',
-};
-
-const expenseLegend = [
-  { label: 'Shopping', value: '$0.00', colorClass: 'legend-violet' },
-  { label: 'Essentials', value: '$0.00', colorClass: 'legend-blue' },
-  { label: 'Bills', value: '$0.00', colorClass: 'legend-green' },
-  { label: 'Travel', value: '$0.00', colorClass: 'legend-orange' },
+const chartTabs = ['Overview', 'Cards', 'Payments'];
+const chartMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const cardThemeOptions = [
+  { label: 'Indigo', value: 'indigo' },
+  { label: 'Emerald', value: 'emerald' },
+  { label: 'Sunset', value: 'sunset' },
 ];
 
-const createInitialCardForm = (fullName = '') => ({
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 2,
+});
+
+const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+});
+
+const formatCurrency = (value) => currencyFormatter.format(value || 0);
+const formatShortDate = (value) => shortDateFormatter.format(new Date(value));
+
+const createCardForm = (fullName = '') => ({
   nickname: '',
   holderName: fullName,
-  brand: 'Visa',
+  brand: 'Mastercard',
   last4: '',
   expiry: '',
   theme: 'indigo',
 });
 
-const getInitials = (fullName = '') =>
-  fullName
-    .split(' ')
+const createPaymentForm = (cardId = '') => ({
+  title: '',
+  amount: '',
+  category: 'Shopping',
+  paymentSource: cardId,
+  note: '',
+  date: new Date().toISOString().slice(0, 10),
+});
+
+const getCardTitle = (card) => card?.nickname?.trim() || `${card?.brand || 'Ledgr'} Card`;
+const matchesCardQuery = (card, query) =>
+  !query ||
+  [getCardTitle(card), card?.holderName, card?.brand, card?.last4]
     .filter(Boolean)
-    .slice(0, 2)
-    .map((value) => value[0]?.toUpperCase())
-    .join('') || 'FF';
-
-function SidebarIcon({ type }) {
-  const icons = {
-    home: (
-      <path
-        d="M3.5 8.2 8 4.5l4.5 3.7v4.3a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z M6.3 13V9.8h3.4V13"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.4"
-      />
-    ),
-    projects: (
-      <>
-        <rect x="2.5" y="3.5" width="11" height="9" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M5 6.2h6M5 9h4.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
-      </>
-    ),
-    schedule: (
-      <>
-        <rect x="2.8" y="3.8" width="10.4" height="9.6" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M5.2 2.8v2M10.8 2.8v2M4.7 7.2h6.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
-      </>
-    ),
-    performance: (
-      <>
-        <rect x="3" y="3.5" width="10" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M5.2 10.4 7 8.5l1.6 1.6 2.6-3" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
-      </>
-    ),
-    task: (
-      <>
-        <path d="M4 5.2h1.4l.9 1.1L8 4.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
-        <path d="M9.7 5.2h2.8M9.7 8.1h2.8M4 10h1.4l.9 1.1L8 9.2M9.7 10h2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
-      </>
-    ),
-    team: (
-      <>
-        <circle cx="6" cy="6.1" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <circle cx="10.8" cy="6.8" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M3.6 12.6c.4-1.8 1.8-2.8 4-2.8 2.1 0 3.5 1 3.9 2.8M10.1 12.3c.2-.8.8-1.4 1.8-1.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
-      </>
-    ),
-    message: (
-      <>
-        <path d="M3.2 4.5a2 2 0 0 1 2-2h5.6a2 2 0 0 1 2 2v4.8a2 2 0 0 1-2 2H7.1l-2.6 2v-2H5.2a2 2 0 0 1-2-2Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
-      </>
-    ),
-    support: (
-      <>
-        <circle cx="8" cy="8" r="5.3" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M6.6 6.4a1.7 1.7 0 1 1 2.5 1.5c-.8.4-1.1.8-1.1 1.5M8 11.9h.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
-      </>
-    ),
-  };
-
-  return (
-    <svg aria-hidden="true" className="sidebar-icon-svg" viewBox="0 0 16 16">
-      {icons[type]}
-    </svg>
-  );
-}
-
-function TopbarIcon({ type }) {
-  const icons = {
-    notification: (
-      <>
-        <path
-          d="M8 2.8a3.2 3.2 0 0 0-3.2 3.2v1.3c0 .9-.3 1.7-.8 2.5L3 11.4h10l-1-1.6a4.7 4.7 0 0 1-.8-2.5V6A3.2 3.2 0 0 0 8 2.8Z"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.4"
-        />
-        <path d="M6.4 12.5c.3 1 1 1.5 1.6 1.5.7 0 1.4-.5 1.7-1.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
-      </>
-    ),
-    message: (
-      <path
-        d="M3.2 4.5a2 2 0 0 1 2-2h5.6a2 2 0 0 1 2 2v4.8a2 2 0 0 1-2 2H7.1l-2.6 2v-2H5.2a2 2 0 0 1-2-2Z"
-        fill="none"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.4"
-      />
-    ),
-    chevron: <path d="m5.2 6.3 2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />,
-    dots: (
-      <>
-        <circle cx="8" cy="4.4" r="1.1" fill="currentColor" />
-        <circle cx="8" cy="8" r="1.1" fill="currentColor" />
-        <circle cx="8" cy="11.6" r="1.1" fill="currentColor" />
-      </>
-    ),
-  };
-
-  return (
-    <svg aria-hidden="true" className="topbar-icon-svg" viewBox="0 0 16 16">
-      {icons[type]}
-    </svg>
-  );
-}
+    .some((value) => value.toLowerCase().includes(query));
 
 function WalletActionIcon({ type }) {
   const icons = {
-    send: <path d="M3.2 8 12.8 3.5 9.7 12.8 8.1 8.8 3.2 8Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />,
+    send: <path d="m4 10.4 8-5-2 7.6-2.2-2.4L4 10.4Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.5" />,
     receive: (
       <>
-        <path d="M8 3.2v9.2M8 12.4 4.8 9.2M8 12.4l3.2-3.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
-        <path d="M3.8 13.2h8.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+        <path d="M8 4v7.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+        <path d="m5.6 9.6 2.4 2.5 2.4-2.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
       </>
     ),
     invoice: (
       <>
-        <rect x="3.4" y="2.8" width="9.2" height="10.4" rx="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M5.4 5.4h5.2M5.4 8h5.2M5.4 10.6h3.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+        <rect x="4.1" y="3.8" width="7.8" height="9.4" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M6 6.6h4M6 8.8h4M6 11h2.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
       </>
     ),
-    more: (
+    plus: (
       <>
-        <circle cx="4.4" cy="8" r="1.1" fill="currentColor" />
-        <circle cx="8" cy="8" r="1.1" fill="currentColor" />
-        <circle cx="11.6" cy="8" r="1.1" fill="currentColor" />
+        <path d="M8 4.2v7.6M4.2 8h7.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
       </>
     ),
   };
 
   return (
-    <svg aria-hidden="true" className="wallet-action-svg" viewBox="0 0 16 16">
+    <svg aria-hidden="true" className="ref-action-svg" viewBox="0 0 16 16">
       {icons[type]}
     </svg>
   );
 }
 
-function DashboardPage({ currentUser, onLogout }) {
-  const [cards, setCards] = useState([]);
-  const [isAddingCard, setIsAddingCard] = useState(false);
-  const [cardForm, setCardForm] = useState(() => createInitialCardForm(currentUser?.fullName));
-  const [cardMessage, setCardMessage] = useState('');
+function CardSearchIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="m10.4 10.4 2.8 2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+    </svg>
+  );
+}
 
-  useEffect(() => {
-    if (!currentUser?.id) {
-      return;
+function WalletStackCard({ card, depth = 0, placeholder = false, isActive = false, onSelect = null }) {
+  const theme = placeholder ? 'indigo' : card?.theme || 'indigo';
+  const title = placeholder ? 'Ledgr' : card?.brand || 'Card';
+  const label = placeholder ? 'Preview card' : card?.holderName || 'Card holder';
+  const number = placeholder ? '**** ----' : `**** ${card.last4}`;
+  const expiry = placeholder ? '--/--' : card?.expiry || '--/--';
+  const tail = placeholder ? 'preview' : getCardTitle(card);
+  const Element = onSelect ? 'button' : 'article';
+
+  return (
+    <Element
+      type={onSelect ? 'button' : undefined}
+      className={`ref-wallet-card ref-stack-card theme-${theme}${placeholder ? ' is-placeholder' : ''}${onSelect ? ' is-clickable' : ''}${isActive ? ' is-active' : ''}`}
+      style={{
+        '--stack-x': `${depth * 14}px`,
+        '--stack-y': `${depth * 18}px`,
+        '--stack-scale': `${1 - depth * 0.04}`,
+        '--stack-opacity': `${1 - depth * 0.14}`,
+        zIndex: 12 - depth,
+      }}
+      onClick={onSelect}
+      aria-pressed={onSelect ? isActive : undefined}
+    >
+      <div className="ref-wallet-card-top">
+        <div className="ref-wallet-card-brand">
+          <div className="ref-master-mark" aria-hidden="true">
+            <span />
+            <span />
+          </div>
+          <strong>{title}</strong>
+        </div>
+      </div>
+
+      <span className="ref-wallet-chip" aria-hidden="true" />
+
+      <div className="ref-wallet-card-copy">
+        <span>{label}</span>
+        <strong>{number}</strong>
+      </div>
+
+      <div className="ref-wallet-card-bottom">
+        <span>{expiry}</span>
+        <div className="ref-wallet-tail">
+          <span className="ref-wallet-tail-mark" aria-hidden="true">
+            <span />
+            <span />
+          </span>
+          <small>{tail}</small>
+        </div>
+      </div>
+    </Element>
+  );
+}
+
+function DashboardPage({ currentUser, onLogout }) {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isCardComposerOpen, setIsCardComposerOpen] = useState(false);
+  const [isPaymentComposerOpen, setIsPaymentComposerOpen] = useState(false);
+  const [activeCardId, setActiveCardId] = useState('');
+  const [cardSearch, setCardSearch] = useState('');
+  const [cardForm, setCardForm] = useState(() => createCardForm(currentUser?.fullName));
+  const [paymentForm, setPaymentForm] = useState(() => createPaymentForm(''));
+  const [cardMessage, setCardMessage] = useState('');
+  const [paymentMessage, setPaymentMessage] = useState('');
+
+  const firstName = currentUser?.fullName?.split(' ')[0] || 'Bryan';
+
+  const cards = useMemo(
+    () => (currentUser?.id ? cardStore.getCardsForUser(currentUser.id) : []),
+    [currentUser?.id, refreshKey]
+  );
+
+  const snapshot = useMemo(
+    () =>
+      currentUser?.id
+        ? financeStore.getDashboardSnapshot(currentUser.id)
+        : {
+            totalExpenses: 0,
+            recentTransactions: [],
+            categorySpend: [],
+          },
+    [currentUser?.id, refreshKey]
+  );
+
+  const expenseItems = useMemo(() => {
+    const totals = new Map(snapshot.categorySpend.map((item) => [item.category, item.total]));
+
+    return expenseLegendConfig.map((item) => ({
+      ...item,
+      amount: formatCurrency(totals.get(item.label) || 0),
+    }));
+  }, [snapshot.categorySpend]);
+
+  const recentPayments = snapshot.recentTransactions.slice(0, 4);
+  const cardSearchQuery = cardSearch.trim().toLowerCase();
+  const filteredCards = useMemo(() => {
+    if (!cardSearchQuery) {
+      return cards;
     }
 
-    setCards(cardStore.getCardsForUser(currentUser.id));
-    setCardForm(createInitialCardForm(currentUser.fullName));
+    return cards.filter((card) => matchesCardQuery(card, cardSearchQuery));
+  }, [cardSearchQuery, cards]);
+
+  const activeCard = filteredCards.find((card) => card.id === activeCardId) || filteredCards[0] || null;
+  const visibleCards = useMemo(() => {
+    if (!filteredCards.length) {
+      return [];
+    }
+
+    const orderedCards = activeCard
+      ? [activeCard, ...filteredCards.filter((card) => card.id !== activeCard.id)]
+      : filteredCards;
+
+    return orderedCards.slice(0, 3);
+  }, [activeCard, filteredCards]);
+  const stackedCards = visibleCards.length ? visibleCards.slice().reverse() : [];
+  const cardPickerCards = filteredCards.slice(0, 6);
+  const totalCards = cards.length;
+
+  const heroPills = [
+    totalCards ? `${totalCards} cards` : 'No cards',
+    recentPayments.length ? `${recentPayments.length} payments` : '0 payments',
+  ];
+
+  const workspaceRows = [
+    { label: 'Cards', value: String(totalCards).padStart(2, '0'), tone: 'teal' },
+    { label: 'Payments', value: String(snapshot.recentTransactions.length).padStart(2, '0'), tone: 'violet' },
+    { label: 'Sync', value: 'Local', tone: 'orange' },
+  ];
+
+  const flowState = recentPayments.length
+    ? {
+        title: `${recentPayments.length} payment${recentPayments.length > 1 ? 's' : ''} saved`,
+        copy: 'Saved locally for now.',
+      }
+    : {
+        title: 'No payments yet',
+        copy: 'Add one payment to start.',
+      };
+
+  const openCardComposer = () => {
+    setCardForm(createCardForm(currentUser?.fullName));
     setCardMessage('');
-    setIsAddingCard(false);
-  }, [currentUser?.fullName, currentUser?.id]);
+    setIsCardComposerOpen(true);
+  };
+
+  const openPaymentComposer = () => {
+    setPaymentForm(createPaymentForm(activeCard?.id || cards[0]?.id || ''));
+    setPaymentMessage('');
+    setIsPaymentComposerOpen(true);
+  };
+
+  const closeComposers = () => {
+    setIsCardComposerOpen(false);
+    setIsPaymentComposerOpen(false);
+    setCardMessage('');
+    setPaymentMessage('');
+  };
 
   const handleCardChange = (event) => {
     const { name, value } = event.target;
@@ -213,11 +270,20 @@ function DashboardPage({ currentUser, onLogout }) {
     setCardMessage('');
   };
 
-  const handleAddCard = (event) => {
+  const handlePaymentChange = (event) => {
+    const { name, value } = event.target;
+    setPaymentForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+    setPaymentMessage('');
+  };
+
+  const handleCardSubmit = (event) => {
     event.preventDefault();
 
     if (!cardForm.nickname.trim()) {
-      setCardMessage('Card nickname is required.');
+      setCardMessage('Give the card a short name.');
       return;
     }
 
@@ -238,466 +304,548 @@ function DashboardPage({ currentUser, onLogout }) {
 
     const nextCard = cardStore.addCard(currentUser.id, {
       ...cardForm,
-      nickname: cardForm.nickname,
-      holderName: cardForm.holderName || currentUser.fullName,
+      holderName: cardForm.holderName.trim(),
+      nickname: cardForm.nickname.trim(),
     });
 
-    setCards((currentCards) => [nextCard, ...currentCards]);
-    setCardForm(createInitialCardForm(currentUser.fullName));
-    setCardMessage('');
-    setIsAddingCard(false);
+    setActiveCardId(nextCard.id);
+    setCardSearch('');
+    setRefreshKey((value) => value + 1);
+    closeComposers();
   };
 
-  const handleDeleteCard = (cardId) => {
-    const nextCards = cardStore.deleteCard(currentUser.id, cardId);
-    setCards(nextCards);
-  };
+  const handlePaymentSubmit = (event) => {
+    event.preventDefault();
 
-  const handleWalletAction = (key) => {
-    if (key === 'send') {
-      setIsAddingCard(true);
+    if (!paymentForm.title.trim()) {
+      setPaymentMessage('Who is this payment for?');
+      return;
     }
 
-    if (key === 'more') {
-      onLogout();
+    if (!Number(paymentForm.amount) || Number(paymentForm.amount) <= 0) {
+      setPaymentMessage('Enter a valid amount.');
+      return;
+    }
+
+    const sourceCard = cards.find((card) => card.id === paymentForm.paymentSource);
+
+    financeStore.addTransaction(currentUser.id, {
+      type: 'expense',
+      title: paymentForm.title.trim(),
+      category: paymentForm.category,
+      amount: Number(paymentForm.amount),
+      date: paymentForm.date,
+      note: paymentForm.note,
+      paymentSource: sourceCard ? `${getCardTitle(sourceCard)} - ${sourceCard.last4}` : 'Local wallet',
+    });
+
+    setRefreshKey((value) => value + 1);
+    closeComposers();
+  };
+
+  const handleQuickAction = (action) => {
+    if (action === 'card') {
+      openCardComposer();
+    }
+
+    if (action === 'payment') {
+      openPaymentComposer();
     }
   };
 
-  const initials = getInitials(currentUser?.fullName);
-  const firstName = currentUser?.fullName?.split(' ')[0] || 'there';
-  const primaryCard = cards[0];
+  const handleDeleteActiveCard = () => {
+    if (!currentUser?.id || !activeCard) {
+      return;
+    }
 
-  return (
-    <main className="dashboard-shell">
-      <aside className="dashboard-sidebar">
-        <div className="brand-block">
-          <BrandLogo className="sidebar-brand-logo" compact title="Ledgr" subtitle="" />
-        </div>
+    const shouldDelete = window.confirm(`Delete ${getCardTitle(activeCard)}?`);
 
-        <div className="workspace-switcher">
-          <span className="workspace-label">Workspace</span>
-          <div className="workspace-profile">
-            <div className="workspace-avatar">{initials}</div>
-            <div className="workspace-copy">
-              <strong>{currentUser?.fullName}</strong>
-              <span>Private workspace</span>
-            </div>
-            <div className="workspace-chevron">
-              <TopbarIcon type="chevron" />
-            </div>
+    if (!shouldDelete) {
+      return;
+    }
+
+    const remainingCards = cardStore.deleteCard(currentUser.id, activeCard.id);
+    const matchingCards = remainingCards.filter((card) => matchesCardQuery(card, cardSearchQuery));
+
+    setActiveCardId(matchingCards[0]?.id || remainingCards[0]?.id || '');
+    setRefreshKey((value) => value + 1);
+  };
+
+  const rail = (
+    <>
+      <article className="ref-panel ref-wallet-panel">
+        <div className="ref-panel-head">
+          <div>
+            <h3>Your Card</h3>
+          </div>
+
+          <div className="ref-panel-actions">
+            <button className="ref-mini-action" type="button" onClick={openCardComposer}>
+              + Add Card
+            </button>
+            <button className="ref-dots-button" type="button" aria-label="Card options">
+              ...
+            </button>
           </div>
         </div>
 
-        <div className="sidebar-section">
-          <span className="sidebar-label">Menu</span>
-          <nav className="sidebar-list">
-            {menuItems.map((item) =>
-              item.active ? (
-                <NavLink key={item.label} className="sidebar-item active" to="/dashboard">
-                  <span className="sidebar-item-main">
-                    <span className="sidebar-icon-shell">
-                      <SidebarIcon type={item.icon} />
-                    </span>
-                    <span>{item.label}</span>
-                  </span>
-                </NavLink>
-              ) : (
-                <div key={item.label} className="sidebar-item">
-                  <span className="sidebar-item-main">
-                    <span className="sidebar-icon-shell">
-                      <SidebarIcon type={item.icon} />
-                    </span>
-                    <span>{item.label}</span>
-                  </span>
-                </div>
-              )
-            )}
-          </nav>
+        <label className="ref-card-search" aria-label="Search cards">
+          <CardSearchIcon />
+          <input
+            type="search"
+            value={cardSearch}
+            onChange={(event) => setCardSearch(event.target.value)}
+            placeholder="Search cards"
+          />
+        </label>
+
+        <div className="ref-card-stack">
+          {stackedCards.length
+            ? stackedCards.map((card, index) => {
+                const depth = stackedCards.length - index - 1;
+
+                return (
+                  <WalletStackCard
+                    key={card.id}
+                    card={card}
+                    depth={depth}
+                    isActive={activeCard?.id === card.id}
+                    onSelect={() => setActiveCardId(card.id)}
+                  />
+                );
+              })
+            : <WalletStackCard placeholder depth={0} />}
         </div>
 
-        <div className="sidebar-section sidebar-others">
-          <span className="sidebar-label">Others</span>
-          <div className="sidebar-list">
-            {otherItems.map((item) => (
-              <div key={item.label} className="sidebar-item sidebar-item-support">
-                <span className="sidebar-item-main">
-                  <span className="sidebar-icon-shell">
-                    <SidebarIcon type={item.icon} />
-                  </span>
-                  <span>{item.label}</span>
-                </span>
-              </div>
+        {cardPickerCards.length ? (
+          <div className="ref-card-picker" aria-label="Saved cards">
+            {cardPickerCards.map((card) => (
+              <button
+                key={card.id}
+                className={`ref-card-picker-item${activeCard?.id === card.id ? ' is-active' : ''}`}
+                type="button"
+                onClick={() => setActiveCardId(card.id)}
+              >
+                <span>{getCardTitle(card)}</span>
+                <small>**** {card.last4}</small>
+              </button>
             ))}
           </div>
+        ) : null}
+
+        <div className="ref-wallet-stack-meta">
+          <p className="ref-wallet-stack-caption">
+            {cardSearchQuery && !filteredCards.length
+              ? 'No card found.'
+              : totalCards
+                ? `${totalCards} saved locally`
+                : 'Add your first card.'}
+          </p>
+
+          {activeCard ? (
+            <button className="ref-inline-delete" type="button" onClick={handleDeleteActiveCard}>
+              Delete
+            </button>
+          ) : null}
         </div>
 
-        <div className="sidebar-footer-link">
-          <span className="sidebar-item-main">
-            <span className="sidebar-icon-shell">
-              <SidebarIcon type="support" />
-            </span>
-            <span>Support</span>
-          </span>
+        <div className="ref-wallet-actions">
+          {quickActions.map((action) => (
+            <button
+              key={action.label}
+              className="ref-wallet-action"
+              type="button"
+              onClick={() => handleQuickAction(action.action)}
+            >
+              <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
+                <WalletActionIcon type={action.icon} />
+              </span>
+              <span>{action.label}</span>
+            </button>
+          ))}
         </div>
-      </aside>
+      </article>
 
-      <section className="dashboard-stage">
-        <header className="dashboard-topbar">
-          <label className="search-shell">
-            <input aria-label="Search anything" placeholder="Search" readOnly value="" />
-          </label>
+      <article className="ref-panel ref-expenses-panel">
+        <div className="ref-panel-head">
+          <div>
+            <h3>Expenses</h3>
+            <p>Monthly category view</p>
+          </div>
+          <button className="ref-dots-button" type="button" aria-label="Expense options">
+            ...
+          </button>
+        </div>
 
-          <div className="topbar-actions">
-            <button className="topbar-icon-button" type="button" aria-label="Notifications">
-              <TopbarIcon type="notification" />
-            </button>
-            <button className="topbar-icon-button" type="button" aria-label="Messages">
-              <TopbarIcon type="message" />
-            </button>
-            <div className="topbar-user-block">
-              <div className="topbar-user">
-                <div className="topbar-avatar">{initials}</div>
-                <div className="topbar-user-copy">
-                  <strong>{currentUser?.fullName}</strong>
-                  <span>Private workspace</span>
-                </div>
+        <div className="ref-expense-visual">
+          <svg aria-hidden="true" className="ref-expense-chart" viewBox="0 0 260 260">
+            <circle className="ref-expense-track" cx="120" cy="128" r="90" />
+            <circle className="ref-expense-track" cx="120" cy="128" r="70" />
+            <circle className="ref-expense-track" cx="120" cy="128" r="50" />
+            <circle className="ref-expense-track" cx="120" cy="128" r="30" />
+
+            <circle className="ref-expense-arc ref-expense-arc-violet" cx="120" cy="128" r="90" />
+            <circle className="ref-expense-arc ref-expense-arc-blue" cx="120" cy="128" r="70" />
+            <circle className="ref-expense-arc ref-expense-arc-teal" cx="120" cy="128" r="50" />
+            <circle className="ref-expense-arc ref-expense-arc-orange" cx="120" cy="128" r="30" />
+          </svg>
+
+          <div className="ref-expense-summary">
+            <strong>{formatCurrency(snapshot.totalExpenses)}</strong>
+            <span>{recentPayments.length ? 'Local' : '0%'}</span>
+            <small>{recentPayments.length ? 'Saved from local payments' : 'No spend yet'}</small>
+          </div>
+        </div>
+
+        <div className="ref-expense-legend">
+          {expenseItems.map((item) => (
+            <div key={item.label} className="ref-expense-row">
+              <div className="ref-expense-label">
+                <span className={`ref-expense-dot ref-expense-dot-${item.tone}`} />
+                <span>{item.label}</span>
               </div>
-              <button className="topbar-user-caret" type="button" aria-label="Open account menu">
-                <TopbarIcon type="chevron" />
-              </button>
+              <strong>{item.amount}</strong>
             </div>
-            <button className="topbar-logout-button" type="button" onClick={onLogout}>
-              Log out
+          ))}
+        </div>
+      </article>
+    </>
+  );
+
+  return (
+    <>
+      <FinanceLayout
+        currentUser={currentUser}
+        onLogout={onLogout}
+        pageTitle={`Welcome back, ${firstName}`}
+        pageSubtitle="Local preview."
+        primaryActionLabel="+ New Payment"
+        onPrimaryAction={openPaymentComposer}
+        rail={rail}
+      >
+        <article className="ref-hero-card">
+          <div className="ref-hero-copy">
+            <span className="ref-section-chip">Workspace</span>
+            <h2>Your wallet, ready.</h2>
+            <p>Add cards now. Payments stay local.</p>
+
+            <div className="ref-hero-pill-row">
+              {heroPills.map((item) => (
+                <span key={item} className="ref-hero-pill">
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <button className="ref-secondary-button" type="button" onClick={openCardComposer}>
+              + Add Card
             </button>
           </div>
-        </header>
 
-        <div className="dashboard-grid">
-          <section className="dashboard-main">
-            <div className="dashboard-heading">
-              <div className="dashboard-heading-copy">
-                <h1>Welcome back, {firstName}</h1>
-                <p>Your private card workspace is ready.</p>
-              </div>
-              <button className="primary-card-action" type="button" onClick={() => setIsAddingCard(true)}>
-                + Add card
-              </button>
-            </div>
+          <div className="ref-hero-visual" aria-hidden="true">
+            <span className="ref-hero-orbit ref-hero-orbit-one" />
+            <span className="ref-hero-orbit ref-hero-orbit-two" />
+            <span className="ref-hero-glow" />
+            <span className="ref-hero-glass" />
+          </div>
+        </article>
 
-            <article className="hero-banner">
-              <div className="hero-banner-copy">
-                <span className="banner-kicker">Wallet space</span>
-                <h2>{cards.length ? 'Your cards are ready.' : 'Set up your wallet.'}</h2>
-                <p>
-                  {cards.length
-                    ? 'Everything here belongs to this account only.'
-                    : 'Add one card to start personalizing Ledgr.'}
-                </p>
-                <button className="banner-cta" type="button" onClick={() => setIsAddingCard(true)}>
-                  {cards.length ? 'Add another card' : 'Add first card'}
-                </button>
-              </div>
-
-              <div className="hero-banner-art" aria-hidden="true">
-                <div className="banner-ring ring-back" />
-                <div className="banner-ring ring-front" />
-                <div className="banner-shine" />
-              </div>
-            </article>
-
-            {isAddingCard ? (
-              <article className="content-panel add-card-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Add a Card</h3>
-                  </div>
-                </div>
-
-                <form className="card-form" onSubmit={handleAddCard}>
-                  {cardMessage ? <p className="form-error">{cardMessage}</p> : null}
-
-                  <div className="card-form-grid">
-                    <label htmlFor="nickname">
-                      Card nickname
-                      <input
-                        id="nickname"
-                        name="nickname"
-                        type="text"
-                        value={cardForm.nickname}
-                        onChange={handleCardChange}
-                        placeholder="Main Visa"
-                      />
-                    </label>
-
-                    <label htmlFor="holderName">
-                      Card holder
-                      <input
-                        id="holderName"
-                        name="holderName"
-                        type="text"
-                        value={cardForm.holderName}
-                        onChange={handleCardChange}
-                        placeholder="Card holder name"
-                      />
-                    </label>
-
-                    <label htmlFor="brand">
-                      Brand
-                      <select id="brand" name="brand" value={cardForm.brand} onChange={handleCardChange}>
-                        <option>Visa</option>
-                        <option>Mastercard</option>
-                        <option>Amex</option>
-                        <option>Debit</option>
-                      </select>
-                    </label>
-
-                    <label htmlFor="theme">
-                      Card theme
-                      <select id="theme" name="theme" value={cardForm.theme} onChange={handleCardChange}>
-                        <option value="indigo">Indigo</option>
-                        <option value="emerald">Emerald</option>
-                        <option value="sunset">Sunset</option>
-                      </select>
-                    </label>
-
-                    <label htmlFor="last4">
-                      Last 4 digits
-                      <input
-                        id="last4"
-                        name="last4"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength="4"
-                        value={cardForm.last4}
-                        onChange={handleCardChange}
-                        placeholder="4242"
-                      />
-                    </label>
-
-                    <label htmlFor="expiry">
-                      Expiry
-                      <input
-                        id="expiry"
-                        name="expiry"
-                        type="text"
-                        maxLength="5"
-                        value={cardForm.expiry}
-                        onChange={handleCardChange}
-                        placeholder="04/28"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="card-form-actions">
-                    <button className="secondary-button" type="button" onClick={() => setIsAddingCard(false)}>
-                      Cancel
-                    </button>
-                    <button className="primary-card-action" type="submit">
-                      Save card
-                    </button>
-                  </div>
-                </form>
-              </article>
-            ) : null}
-
-            <article className="content-panel graph-panel">
-              <div className="panel-header">
-                <div>
-                  <h3>Money Flow</h3>
-                </div>
-                <div className="tab-strip">
-                  <span className="tab-pill active">All cards</span>
-                  {cards.slice(0, 3).map((card) => (
-                    <span key={card.id} className="tab-pill">
-                      {card.nickname}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="graph-surface">
-                <div className="graph-grid" aria-hidden="true" />
-                <div className="graph-placeholder">
-                  <strong>No activity yet</strong>
-                  <p>Connect the backend when you are ready.</p>
-                </div>
-              </div>
-            </article>
-
-            <div className="dashboard-bottom-grid">
-              <article className="content-panel saving-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Saved Cards</h3>
-                  </div>
-                </div>
-
-                {cards.length ? (
-                  <div className="saved-card-list">
-                    {cards.map((card) => (
-                      <article key={card.id} className="saved-card-row">
-                        <div className={`saved-card-badge theme-${card.theme}`}>
-                          {card.brand.slice(0, 1)}
-                        </div>
-                        <div className="saved-card-copy">
-                          <strong>{card.nickname}</strong>
-                          <span>
-                            {card.brand} ending in {card.last4}
-                          </span>
-                        </div>
-                        <span className="saved-card-expiry">{card.expiry}</span>
-                        <button className="row-link" type="button" onClick={() => handleDeleteCard(card.id)}>
-                          Remove
-                        </button>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="empty-panel-state">
-                    <strong>No cards added yet</strong>
-                    <p>Your saved cards will appear here.</p>
-                  </div>
-                )}
-              </article>
-
-              <article className="content-panel statistics-panel">
-                <div className="panel-header">
-                  <div>
-                    <h3>Overview</h3>
-                  </div>
-                </div>
-
-                <div className="stats-visual-wrap">
-                  <div className="stats-donut" aria-hidden="true">
-                    <div className="stats-donut-inner">
-                      <strong>{cards.length}</strong>
-                      <span>Cards</span>
-                    </div>
-                  </div>
-
-                  <div className="stats-list">
-                    <div>
-                      <span>User</span>
-                      <strong>{firstName}</strong>
-                    </div>
-                    <div>
-                      <span>Access</span>
-                      <strong>Protected</strong>
-                    </div>
-                    <div>
-                      <span>Theme</span>
-                      <strong>{primaryCard ? themeLabels[primaryCard.theme] : 'Waiting'}</strong>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <aside className="dashboard-rail">
-            <article className="content-panel wallet-panel">
-              <div className="panel-header">
-                <div>
-                  <h3>Your Card</h3>
-                </div>
-                <button className="icon-dots" type="button" aria-label="Card options">
-                  <TopbarIcon type="dots" />
-                </button>
-              </div>
-
-              <div className={`wallet-card theme-${primaryCard?.theme || 'indigo'}${primaryCard ? '' : ' preview'}`}>
-                <div className="wallet-card-sheen" aria-hidden="true" />
-
-                <div className="wallet-card-brand-line">
-                  <div className="wallet-card-brand-markers">
-                    <span className="wallet-brand-dot wallet-brand-dot-red" />
-                    <span className="wallet-brand-dot wallet-brand-dot-gold" />
-                  </div>
-                  <strong>{primaryCard ? `${primaryCard.brand} Credit` : 'Secure Wallet'}</strong>
-                </div>
-
-                <div className="wallet-card-chip" aria-hidden="true" />
-
-                <div className="wallet-card-balance">
-                  <span>{primaryCard ? 'Saved Card' : 'Card Status'}</span>
-                  <strong>{primaryCard ? `**** ${primaryCard.last4}` : 'Add your card'}</strong>
-                </div>
-
-                <div className="wallet-card-meta">
-                  <span>{primaryCard ? primaryCard.expiry : '--/--'}</span>
-                  <div className="wallet-card-tail">
-                    <span className="wallet-brand-dot wallet-brand-dot-red" />
-                    <span className="wallet-brand-dot wallet-brand-dot-gold" />
-                    <small>{primaryCard ? primaryCard.holderName : 'No holder yet'}</small>
-                  </div>
-                </div>
-              </div>
-
-              <div className="wallet-action-grid">
-                {walletActions.map((action) => (
+        <article className="ref-panel ref-flow-panel">
+          <div className="ref-flow-header">
+            <div className="ref-flow-copy">
+              <h3>Money Flow</h3>
+              <div className="ref-flow-tabs" role="tablist" aria-label="Money flow views">
+                {chartTabs.map((tab, index) => (
                   <button
-                    key={action.key}
-                    className="wallet-action-tile"
+                    key={tab}
+                    className={`ref-flow-tab${index === 0 ? ' is-active' : ''}`}
                     type="button"
-                    onClick={() => handleWalletAction(action.key)}
+                    role="tab"
+                    aria-selected={index === 0}
                   >
-                    <div className={`wallet-action-icon ${action.tone}`}>
-                      <WalletActionIcon type={action.icon} />
-                    </div>
-                    <span>{action.label}</span>
+                    {tab}
                   </button>
                 ))}
               </div>
-            </article>
+            </div>
 
-            <article className="content-panel expenses-panel">
-              <div className="panel-header">
-                <div>
-                  <h3>Expenses</h3>
+            <div className="ref-flow-legend" aria-label="Workspace legend">
+              <span className="ref-flow-legend-item income">{totalCards} cards</span>
+              <span className="ref-flow-legend-item expense">{snapshot.recentTransactions.length} payments</span>
+            </div>
+          </div>
+
+          <div className="ref-chart-shell">
+            <div className="ref-chart-grid" aria-hidden="true" />
+
+            <div className="ref-chart-yaxis" aria-hidden="true">
+              <span>1,400</span>
+              <span>1,200</span>
+              <span>1,000</span>
+              <span>800</span>
+              <span>600</span>
+              <span>400</span>
+              <span>200</span>
+              <span>0</span>
+            </div>
+
+            <div className="ref-chart-empty">
+              <strong>{flowState.title}</strong>
+              <p>{flowState.copy}</p>
+            </div>
+
+            <div className="ref-chart-xaxis" aria-hidden="true">
+              {chartMonths.map((month) => (
+                <span key={month}>{month}</span>
+              ))}
+            </div>
+          </div>
+        </article>
+
+        <div className="ref-bottom-grid">
+          <article className="ref-panel ref-payments-panel">
+            <div className="ref-panel-head">
+              <div>
+                <h3>Recent Payments</h3>
+              </div>
+              <button className="ref-inline-filter" type="button" onClick={openPaymentComposer}>
+                + New
+              </button>
+            </div>
+
+            {recentPayments.length ? (
+              <div className="ref-payment-list">
+                {recentPayments.map((payment) => (
+                  <article key={payment.id} className="ref-payment-row">
+                    <div className="ref-payment-copy">
+                      <span className="ref-payment-dot" aria-hidden="true" />
+                      <div>
+                        <strong>{payment.title}</strong>
+                        <small>
+                          {payment.paymentSource || 'Local wallet'} - {formatShortDate(payment.date)}
+                        </small>
+                      </div>
+                    </div>
+                    <strong className="ref-payment-amount">{formatCurrency(payment.amount)}</strong>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="ref-empty-card">
+                <strong>No payments yet</strong>
+                <p>Payments you save will show here.</p>
+              </div>
+            )}
+          </article>
+
+          <article className="ref-panel ref-workspace-panel">
+            <div className="ref-panel-head">
+              <div>
+                <h3>Workspace</h3>
+              </div>
+              <button className="ref-view-link" type="button">
+                Local
+              </button>
+            </div>
+
+            <div className="ref-statistics-body">
+              <div className="ref-stat-ring">
+                <div className="ref-stat-ring-center">
+                  <strong>{snapshot.recentTransactions.length}</strong>
+                  <span>Payments</span>
                 </div>
-                <button className="icon-dots" type="button" aria-label="Expense options">
-                  <TopbarIcon type="dots" />
-                </button>
               </div>
 
-              <div className="expense-rings-wrap">
-                <svg className="expense-chart" viewBox="0 0 220 220" aria-hidden="true">
-                  <g transform="rotate(140 110 110)">
-                    <circle className="expense-track" cx="110" cy="110" r="76" />
-                    <circle className="expense-track" cx="110" cy="110" r="58" />
-                    <circle className="expense-track" cx="110" cy="110" r="40" />
-                    <circle className="expense-track" cx="110" cy="110" r="22" />
-
-                    <circle className="expense-arc expense-arc-violet" cx="110" cy="110" r="76" />
-                    <circle className="expense-arc expense-arc-blue" cx="110" cy="110" r="58" />
-                    <circle className="expense-arc expense-arc-green" cx="110" cy="110" r="40" />
-                    <circle className="expense-arc expense-arc-orange" cx="110" cy="110" r="22" />
-                  </g>
-                </svg>
-
-                <div className="expense-summary">
-                  <strong>$0.00</strong>
-                  <span>0%</span>
-                  <small>No spend yet</small>
-                </div>
-              </div>
-
-              <div className="expense-legend">
-                {expenseLegend.map((item) => (
-                  <div key={item.label} className="expense-legend-row">
-                    <div className="expense-legend-label">
-                      <span className={`legend-dot ${item.colorClass}`} />
+              <div className="ref-stat-list">
+                {workspaceRows.map((item) => (
+                  <div key={item.label} className="ref-stat-row">
+                    <div className="ref-stat-label">
+                      <span className={`ref-expense-dot ref-expense-dot-${item.tone}`} />
                       <span>{item.label}</span>
                     </div>
                     <strong>{item.value}</strong>
                   </div>
                 ))}
               </div>
-            </article>
-          </aside>
+            </div>
+          </article>
         </div>
-      </section>
-    </main>
+      </FinanceLayout>
+
+      {isCardComposerOpen ? (
+        <div className="ref-modal-backdrop" role="presentation" onClick={closeComposers}>
+          <section
+            className="ref-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-card-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="ref-modal-head">
+              <div>
+                <span className="ref-modal-kicker">Cards</span>
+                <h3 id="add-card-title">Add a new card</h3>
+              </div>
+              <button className="ref-modal-close" type="button" onClick={closeComposers} aria-label="Close add card">
+                x
+              </button>
+            </div>
+
+            <form className="ref-modal-form" onSubmit={handleCardSubmit}>
+              {cardMessage ? <p className="ref-form-message">{cardMessage}</p> : null}
+
+              <div className="ref-field-grid">
+                <label className="ref-field">
+                  <span>Card name</span>
+                  <input name="nickname" type="text" value={cardForm.nickname} onChange={handleCardChange} placeholder="Daily Card" />
+                </label>
+
+                <label className="ref-field">
+                  <span>Card holder</span>
+                  <input name="holderName" type="text" value={cardForm.holderName} onChange={handleCardChange} placeholder="Card holder name" />
+                </label>
+
+                <label className="ref-field">
+                  <span>Brand</span>
+                  <select name="brand" value={cardForm.brand} onChange={handleCardChange}>
+                    <option>Mastercard</option>
+                    <option>Visa</option>
+                    <option>Amex</option>
+                    <option>Debit</option>
+                  </select>
+                </label>
+
+                <label className="ref-field">
+                  <span>Theme</span>
+                  <select name="theme" value={cardForm.theme} onChange={handleCardChange}>
+                    {cardThemeOptions.map((theme) => (
+                      <option key={theme.value} value={theme.value}>
+                        {theme.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="ref-field">
+                  <span>Last 4</span>
+                  <input
+                    name="last4"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength="4"
+                    value={cardForm.last4}
+                    onChange={handleCardChange}
+                    placeholder="5432"
+                  />
+                </label>
+
+                <label className="ref-field">
+                  <span>Expiry</span>
+                  <input name="expiry" type="text" maxLength="5" value={cardForm.expiry} onChange={handleCardChange} placeholder="01/27" />
+                </label>
+              </div>
+
+              <div className="ref-modal-actions">
+                <button className="ref-modal-secondary" type="button" onClick={closeComposers}>
+                  Cancel
+                </button>
+                <button className="ref-modal-primary" type="submit">
+                  Save Card
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ) : null}
+
+      {isPaymentComposerOpen ? (
+        <div className="ref-modal-backdrop" role="presentation" onClick={closeComposers}>
+          <section
+            className="ref-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="new-payment-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="ref-modal-head">
+              <div>
+                <span className="ref-modal-kicker">Payments</span>
+                <h3 id="new-payment-title">Create a local payment</h3>
+              </div>
+              <button className="ref-modal-close" type="button" onClick={closeComposers} aria-label="Close payment form">
+                x
+              </button>
+            </div>
+
+            <form className="ref-modal-form" onSubmit={handlePaymentSubmit}>
+              {paymentMessage ? <p className="ref-form-message">{paymentMessage}</p> : null}
+
+              <div className="ref-field-grid">
+                <label className="ref-field">
+                  <span>Payee</span>
+                  <input name="title" type="text" value={paymentForm.title} onChange={handlePaymentChange} placeholder="Apple Music" />
+                </label>
+
+                <label className="ref-field">
+                  <span>Amount</span>
+                  <input
+                    name="amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={paymentForm.amount}
+                    onChange={handlePaymentChange}
+                    placeholder="64.00"
+                  />
+                </label>
+
+                <label className="ref-field">
+                  <span>Category</span>
+                  <select name="category" value={paymentForm.category} onChange={handlePaymentChange}>
+                    {expenseLegendConfig.map((item) => (
+                      <option key={item.label} value={item.label}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="ref-field">
+                  <span>Source</span>
+                  <select name="paymentSource" value={paymentForm.paymentSource} onChange={handlePaymentChange}>
+                    <option value="">Local wallet</option>
+                    {cards.map((card) => (
+                      <option key={card.id} value={card.id}>
+                        {getCardTitle(card)} - {card.last4}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="ref-field">
+                  <span>Date</span>
+                  <input name="date" type="date" value={paymentForm.date} onChange={handlePaymentChange} />
+                </label>
+
+                <label className="ref-field ref-field-wide">
+                  <span>Note</span>
+                  <input name="note" type="text" value={paymentForm.note} onChange={handlePaymentChange} placeholder="Optional note" />
+                </label>
+              </div>
+
+              <div className="ref-modal-actions">
+                <button className="ref-modal-secondary" type="button" onClick={closeComposers}>
+                  Cancel
+                </button>
+                <button className="ref-modal-primary" type="submit">
+                  Save Payment
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ) : null}
+    </>
   );
 }
 

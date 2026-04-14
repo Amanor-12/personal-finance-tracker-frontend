@@ -1,0 +1,261 @@
+import { NavLink } from 'react-router-dom';
+import BrandLogo from './BrandLogo';
+import { settingsStore } from '../utils/settingsStore';
+
+const navItems = [
+  { label: 'Overview', to: '/dashboard', icon: 'overview' },
+  { label: 'Transactions', icon: 'transactions' },
+  { label: 'Budget', icon: 'budget' },
+  { label: 'Goals', icon: 'goals' },
+];
+
+const otherItems = [
+  { label: 'Settings', to: '/settings', icon: 'settings' },
+  { label: 'Help & Support', icon: 'help' },
+];
+
+function SidebarIcon({ type }) {
+  const icons = {
+    overview: (
+      <>
+        <path d="M3.5 8.1 8 4.7l4.5 3.4v4.1a.6.6 0 0 1-.6.6H4.1a.6.6 0 0 1-.6-.6Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+        <path d="M6.4 12.8V9.7h3.2v3.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+      </>
+    ),
+    accounts: (
+      <>
+        <rect x="2.8" y="4.2" width="10.4" height="7.6" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M3.7 6.8h8.6M5.4 9.4h2.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    transactions: (
+      <>
+        <path d="M4.2 5.2h7.6M4.2 8h7.6M4.2 10.8h5.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <circle cx="3.1" cy="5.2" r=".7" fill="currentColor" />
+        <circle cx="3.1" cy="8" r=".7" fill="currentColor" />
+        <circle cx="3.1" cy="10.8" r=".7" fill="currentColor" />
+      </>
+    ),
+    budget: (
+      <>
+        <path d="M3.6 11.4h8.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="M4.6 9.6 6.3 7.8 7.9 9l3-3.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+      </>
+    ),
+    bills: (
+      <>
+        <rect x="3.2" y="3.8" width="9.6" height="8.8" rx="1.9" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M5.2 6.4h5.6M5.2 8.6h5.6M5.2 10.8h3.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    goals: (
+      <>
+        <path d="m8 3.4 1.4 2.8 3.1.5-2.2 2.2.5 3.1L8 10.5 5.2 12l.5-3.1-2.2-2.2 3.1-.5Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.35" />
+      </>
+    ),
+    reports: (
+      <>
+        <path d="M4 11.4V9.1M7 11.4V5.8M10 11.4V7.4M13 11.4V4.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="M3.2 12.2h10" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    settings: (
+      <>
+        <circle cx="8" cy="8" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M8 3.6v1M8 11.4v1M12.4 8h-1M4.6 8h-1M11.1 4.9l-.7.7M5.6 10.4l-.7.7M11.1 11.1l-.7-.7M5.6 5.6l-.7-.7" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.35" />
+      </>
+    ),
+    help: (
+      <>
+        <circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M6.6 6.4a1.7 1.7 0 1 1 2.5 1.5c-.8.4-1.1.8-1.1 1.5M8 11.7h.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="7.1" cy="7.1" r="3.3" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="m9.5 9.5 2.5 2.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    bell: (
+      <>
+        <path d="M8 3.1A2.9 2.9 0 0 0 5.1 6v1.2c0 .8-.2 1.5-.6 2.2l-.7 1.2h8.4l-.7-1.2a4 4 0 0 1-.6-2.2V6A2.9 2.9 0 0 0 8 3.1Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+        <path d="M6.6 11.7c.3.8.8 1.2 1.4 1.2s1.1-.4 1.4-1.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    chevron: <path d="m5.4 6.4 2.6 2.6 2.6-2.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.55" />,
+  };
+
+  return (
+    <svg aria-hidden="true" className="ref-icon-svg" viewBox="0 0 16 16">
+      {icons[type]}
+    </svg>
+  );
+}
+
+const getInitials = (fullName = '') =>
+  fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((value) => value[0]?.toUpperCase())
+    .join('') || 'LD';
+
+function FinanceLayout({
+  currentUser,
+  onLogout,
+  pageTitle,
+  pageSubtitle,
+  primaryActionLabel,
+  onPrimaryAction,
+  children,
+  rail,
+}) {
+  const initials = getInitials(currentUser?.fullName);
+  const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
+  const workspaceName = settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName).workspaceName;
+
+  return (
+    <main className="ref-shell">
+      <aside className="ref-sidebar">
+        <div className="ref-sidebar-top">
+          <div className="ref-brand-lockup">
+            <BrandLogo className="ref-brand" compact subtitle="" title="Ledgr" tone="dark" />
+            <span className="ref-brand-arrow" aria-hidden="true">
+              {'<<'}
+            </span>
+          </div>
+
+          <section className="ref-sidebar-block">
+            <span className="ref-sidebar-label">Workspace</span>
+            <div className="ref-workspace-card">
+              <div className="ref-workspace-avatar">{initials}</div>
+              <div className="ref-workspace-copy">
+                <strong>{workspaceName || `${firstName} Space`}</strong>
+                <span>Private workspace</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="ref-sidebar-block">
+            <span className="ref-sidebar-label">Finance</span>
+            <nav className="ref-nav">
+              {navItems.map((item) =>
+                item.to ? (
+                  <NavLink
+                    key={item.label}
+                    className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}`}
+                    to={item.to}
+                  >
+                    <span className="ref-nav-icon">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </NavLink>
+                ) : (
+                  <div key={item.label} className="ref-nav-item is-disabled">
+                    <span className="ref-nav-icon">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </div>
+                )
+              )}
+            </nav>
+          </section>
+
+          <section className="ref-sidebar-block">
+            <span className="ref-sidebar-label">Others</span>
+            <div className="ref-nav">
+              {otherItems.map((item) =>
+                item.to ? (
+                  <NavLink
+                    key={item.label}
+                    className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}`}
+                    to={item.to}
+                  >
+                    <span className="ref-nav-icon">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </NavLink>
+                ) : (
+                  <div key={item.label} className="ref-nav-item is-disabled">
+                    <span className="ref-nav-icon">
+                      <SidebarIcon type={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </div>
+                )
+              )}
+            </div>
+          </section>
+        </div>
+
+        <div className="ref-sidebar-bottom">
+          <div className="ref-support-link">
+            <span className="ref-nav-icon">
+              <SidebarIcon type="help" />
+            </span>
+            <span>Support</span>
+          </div>
+        </div>
+      </aside>
+
+      <section className="ref-stage">
+        <header className="ref-topbar">
+          <label className="ref-search">
+            <span className="ref-search-icon">
+              <SidebarIcon type="search" />
+            </span>
+            <input aria-label="Search anything" placeholder="Search Anything..." readOnly value="" />
+          </label>
+
+          <div className="ref-topbar-actions">
+            <button className="ref-icon-button" type="button" aria-label="Notifications">
+              <SidebarIcon type="bell" />
+            </button>
+            <button className="ref-icon-button" type="button" aria-label="Messages">
+              <SidebarIcon type="message" />
+            </button>
+
+            <div className="ref-user-chip">
+              <div className="ref-user-avatar">{initials}</div>
+              <div className="ref-user-copy">
+                <strong>{currentUser?.fullName}</strong>
+                <span>Private workspace</span>
+              </div>
+              <span className="ref-user-caret">
+                <SidebarIcon type="chevron" />
+              </span>
+            </div>
+
+            <button className="ref-logout-button" type="button" onClick={onLogout}>
+              Log out
+            </button>
+          </div>
+        </header>
+
+        <div className="ref-heading-row">
+          <div className="ref-heading-copy">
+            <h1>{pageTitle}</h1>
+            <p>{pageSubtitle}</p>
+          </div>
+
+          {primaryActionLabel ? (
+            <button className="ref-primary-button" type="button" onClick={onPrimaryAction}>
+              {primaryActionLabel}
+            </button>
+          ) : null}
+        </div>
+
+        <div className="ref-content-grid">
+          <section className="ref-main">{children}</section>
+          {rail ? <aside className="ref-rail">{rail}</aside> : null}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export default FinanceLayout;
