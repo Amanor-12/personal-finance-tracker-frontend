@@ -873,9 +873,390 @@
 
 .authx-surface-brand .brand-logo-mark,
 .authx-orbit-brand .brand-logo-mark,
-.authx-wallet-mark .brand-logo-mark {
+.authx-wallet-mark .brand-logo-mark,
+.authx-mini-brand .brand-logo-mark,
+.authx-mini-wallet-brand .brand-logo-mark {
   width: 38px;
   height: 38px;
+}
+
+.authx-dashboard-preview {
+  margin-top: 18px;
+  min-height: 548px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.authx-mini-sidebar,
+.authx-mini-hero,
+.authx-mini-chart,
+.authx-mini-wallet-card,
+.authx-mini-expense-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18px 42px rgba(91, 122, 182, 0.08);
+}
+
+.authx-mini-sidebar {
+  padding: 16px 12px;
+  display: grid;
+  align-content: space-between;
+  background:
+    radial-gradient(circle at top, rgba(34, 78, 223, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 249, 255, 0.96));
+}
+
+.authx-mini-sidebar-top {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+.authx-mini-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.authx-mini-nav-item {
+  width: 34px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(188, 197, 212, 0.72);
+}
+
+.authx-mini-nav-item.is-active {
+  height: 42px;
+  background: linear-gradient(180deg, #224edf 0%, #1eb7b3 100%);
+}
+
+.authx-mini-user {
+  width: 40px;
+  height: 96px;
+  justify-self: center;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(34, 78, 223, 0.18), rgba(30, 183, 179, 0.12));
+}
+
+.authx-mini-stage {
+  display: grid;
+  gap: 16px;
+}
+
+.authx-mini-toolbar {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.authx-mini-searchbar {
+  flex: 1;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(203, 211, 224, 0.46);
+}
+
+.authx-mini-toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.authx-mini-toolbar-actions span {
+  width: 26px;
+  height: 26px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(217, 224, 233, 0.9);
+}
+
+.authx-mini-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 16px;
+}
+
+.authx-mini-main,
+.authx-mini-rail {
+  display: grid;
+  gap: 16px;
+}
+
+.authx-mini-hero {
+  min-height: 188px;
+  padding: 24px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 24%),
+    linear-gradient(135deg, #19305f 0%, #224edf 58%, #1eb7b3 100%);
+}
+
+.authx-mini-chip {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.authx-mini-hero strong {
+  display: block;
+  margin-top: 20px;
+  max-width: 250px;
+  font-size: 2rem;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.authx-mini-ring-wrap {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 164px;
+  height: 164px;
+  animation: authxFloat 10s ease-in-out infinite;
+}
+
+.authx-mini-ring {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  transform: rotate(-20deg);
+}
+
+.authx-mini-ring-one {
+  inset: 0;
+  border-width: 10px;
+  border-color: rgba(255, 255, 255, 0.94) rgba(255, 255, 255, 0.14) rgba(255, 255, 255, 0.14) rgba(255, 255, 255, 0.74);
+}
+
+.authx-mini-ring-two {
+  inset: 22px;
+  border-width: 10px;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.authx-mini-glass {
+  position: absolute;
+  right: 6px;
+  bottom: 0;
+  width: 84px;
+  height: 108px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05));
+  transform: rotate(18deg);
+}
+
+.authx-mini-chart {
+  min-height: 224px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(30, 183, 179, 0.1), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 250, 255, 0.96));
+}
+
+.authx-mini-chart-grid {
+  position: absolute;
+  inset: 18px;
+  border-radius: 24px;
+  background-image:
+    linear-gradient(to right, rgba(208, 216, 228, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(208, 216, 228, 0.5) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.authx-mini-chart-card {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 22px;
+  height: 78px;
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 34px rgba(102, 122, 168, 0.12);
+}
+
+.authx-mini-chart-card span {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(209, 216, 228, 0.88);
+}
+
+.authx-mini-chart-card span:first-child {
+  width: 58%;
+}
+
+.authx-mini-chart-card span:last-child {
+  width: 32%;
+}
+
+.authx-mini-wallet-card {
+  min-height: 224px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 249, 255, 0.96));
+}
+
+.authx-mini-wallet-back,
+.authx-mini-wallet-front {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  min-height: 132px;
+  border-radius: 24px;
+  box-shadow: 0 22px 46px rgba(34, 78, 223, 0.18);
+}
+
+.authx-mini-wallet-back {
+  bottom: 28px;
+  background: linear-gradient(135deg, rgba(68, 78, 239, 0.62), rgba(121, 119, 242, 0.72));
+  transform: scale(0.92);
+}
+
+.authx-mini-wallet-front {
+  top: 22px;
+  padding: 16px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1a315f 0%, #224edf 60%, #1eb7b3 100%);
+  animation: authxFloat 9s ease-in-out infinite;
+}
+
+.authx-mini-wallet-top,
+.authx-mini-wallet-dots {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.authx-mini-wallet-dots {
+  gap: 6px;
+}
+
+.authx-mini-wallet-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.authx-mini-wallet-dots span:first-child {
+  background: #f97316;
+}
+
+.authx-mini-wallet-dots span:last-child {
+  background: #facc15;
+}
+
+.authx-mini-wallet-chip {
+  width: 38px;
+  height: 28px;
+  display: block;
+  margin-top: 18px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f7dc9d 0%, #d19633 100%);
+}
+
+.authx-mini-wallet-front strong {
+  display: block;
+  margin-top: 18px;
+  font-size: 1.1rem;
+}
+
+.authx-mini-wallet-front small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.authx-mini-expense-card {
+  min-height: 224px;
+  background:
+    radial-gradient(circle at top left, rgba(34, 78, 223, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 255, 0.96));
+}
+
+.authx-mini-expense-rings {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 176px;
+  height: 176px;
+  transform: translate(-50%, -50%);
+}
+
+.authx-mini-expense-track,
+.authx-mini-expense-ring {
+  position: absolute;
+  border-radius: 50%;
+  transform: rotate(-22deg);
+}
+
+.authx-mini-expense-track {
+  border: 8px solid rgba(231, 236, 244, 0.92);
+}
+
+.authx-mini-expense-track-one,
+.authx-mini-expense-ring-one {
+  inset: 0;
+}
+
+.authx-mini-expense-track-two,
+.authx-mini-expense-ring-two {
+  inset: 20px;
+}
+
+.authx-mini-expense-track-three,
+.authx-mini-expense-ring-three {
+  inset: 40px;
+}
+
+.authx-mini-expense-track-four,
+.authx-mini-expense-ring-four {
+  inset: 60px;
+}
+
+.authx-mini-expense-ring {
+  border-style: solid;
+  border-width: 8px;
+  border-color: transparent;
+}
+
+.authx-mini-expense-ring-one {
+  border-top-color: #4237bd;
+  border-right-color: #4237bd;
+  border-left-color: #4237bd;
+}
+
+.authx-mini-expense-ring-two {
+  border-top-color: #5f63f2;
+  border-right-color: #5f63f2;
+  border-left-color: #5f63f2;
+}
+
+.authx-mini-expense-ring-three {
+  border-top-color: #27b9ab;
+  border-right-color: #27b9ab;
+  border-left-color: #27b9ab;
+}
+
+.authx-mini-expense-ring-four {
+  border-top-color: #f59e0b;
+  border-right-color: #f59e0b;
+  border-left-color: #f59e0b;
 }
 
 .authx-art-grid {
@@ -1361,6 +1742,39 @@
   .authx-auth-column,
   .authx-preview-column {
     padding: 28px 24px;
+  }
+
+  .authx-dashboard-preview,
+  .authx-mini-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .authx-mini-sidebar {
+    min-height: 72px;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .authx-mini-sidebar-top {
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .authx-mini-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .authx-mini-nav-item.is-active {
+    width: 42px;
+    height: 8px;
+  }
+
+  .authx-mini-user {
+    width: 64px;
+    height: 32px;
   }
 
   .authx-surface-grid,

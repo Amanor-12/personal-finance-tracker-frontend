@@ -344,7 +344,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
             <div className="authx-preview-pills">
               <span>Private</span>
               <span>Secure</span>
-              <span>Calm</span>
+              <span>Live</span>
             </div>
           </div>
 
@@ -359,109 +359,82 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               <BrandLogo className="authx-surface-brand" compact markOnly subtitle="" title="" tone="dark" />
             </div>
 
-            <div className="authx-art-grid">
-              <div className="authx-art-main">
-                <article className="authx-art-hero">
-                  <span className="authx-surface-label">Ledgr preview</span>
-                  <strong>Money, made calm.</strong>
-                  <p>Cards. Budget. Goals.</p>
+            <div className="authx-dashboard-preview">
+              <aside className="authx-mini-sidebar">
+                <div className="authx-mini-sidebar-top">
+                  <BrandLogo className="authx-mini-brand" compact markOnly subtitle="" title="" tone="dark" />
+                  <div className="authx-mini-nav">
+                    <span className="authx-mini-nav-item is-active" />
+                    <span className="authx-mini-nav-item" />
+                    <span className="authx-mini-nav-item" />
+                  </div>
+                </div>
 
-                  <div className="authx-art-pill-row">
-                    <span>Cards</span>
-                    <span>Budget</span>
-                    <span>Goals</span>
+                <div className="authx-mini-user" />
+              </aside>
+
+              <div className="authx-mini-stage">
+                <div className="authx-mini-toolbar">
+                  <div className="authx-mini-searchbar" />
+                  <div className="authx-mini-toolbar-actions">
+                    <span />
+                    <span />
+                  </div>
+                </div>
+
+                <div className="authx-mini-grid">
+                  <div className="authx-mini-main">
+                    <article className="authx-mini-hero">
+                      <span className="authx-mini-chip">Ledgr</span>
+                      <strong>Private finance.</strong>
+                      <div className="authx-mini-ring-wrap">
+                        <span className="authx-mini-ring authx-mini-ring-one" />
+                        <span className="authx-mini-ring authx-mini-ring-two" />
+                        <span className="authx-mini-glass" />
+                      </div>
+                    </article>
+
+                    <article className="authx-mini-chart">
+                      <div className="authx-mini-chart-grid" />
+                      <div className="authx-mini-chart-card">
+                        <span />
+                        <span />
+                      </div>
+                    </article>
                   </div>
 
-                  <div className="authx-art-rings">
-                    <span className="authx-art-ring authx-art-ring-one" />
-                    <span className="authx-art-ring authx-art-ring-two" />
-                    <span className="authx-art-glass" />
-                  </div>
-                </article>
+                  <aside className="authx-mini-rail">
+                    <article className="authx-mini-wallet-card">
+                      <div className="authx-mini-wallet-back" />
+                      <div className="authx-mini-wallet-front">
+                        <div className="authx-mini-wallet-top">
+                          <BrandLogo className="authx-mini-wallet-brand" compact markOnly subtitle="" title="" tone="dark" />
+                          <span className="authx-mini-wallet-dots">
+                            <span />
+                            <span />
+                          </span>
+                        </div>
+                        <span className="authx-mini-wallet-chip" />
+                        <strong>Card</strong>
+                        <small>**** 5432</small>
+                      </div>
+                    </article>
 
-                <div className="authx-art-lower">
-                  <article className="authx-orbit-panel">
-                    <span className="authx-orbit-tag authx-orbit-tag-top">Private</span>
-                    <span className="authx-orbit-tag authx-orbit-tag-left">Budget</span>
-                    <span className="authx-orbit-tag authx-orbit-tag-right">Goals</span>
-                    <span className="authx-orbit-glow" />
-                    <span className="authx-orbit-ring authx-orbit-ring-one" />
-                    <span className="authx-orbit-ring authx-orbit-ring-two" />
-                    <span className="authx-orbit-ring authx-orbit-ring-three" />
-
-                    <div className="authx-orbit-core">
-                      <BrandLogo className="authx-orbit-brand" compact markOnly subtitle="" title="" tone="dark" />
-                    </div>
-                  </article>
-
-                  <article className="authx-signal-panel">
-                    <div className="authx-signal-bars" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-
-                    <div className="authx-signal-chip-row">
-                      <span>Secure</span>
-                      <span>Ready</span>
-                    </div>
-                  </article>
+                    <article className="authx-mini-expense-card">
+                      <div className="authx-mini-expense-rings">
+                        <span className="authx-mini-expense-track authx-mini-expense-track-one" />
+                        <span className="authx-mini-expense-track authx-mini-expense-track-two" />
+                        <span className="authx-mini-expense-track authx-mini-expense-track-three" />
+                        <span className="authx-mini-expense-track authx-mini-expense-track-four" />
+                        <span className="authx-mini-expense-ring authx-mini-expense-ring-one" />
+                        <span className="authx-mini-expense-ring authx-mini-expense-ring-two" />
+                        <span className="authx-mini-expense-ring authx-mini-expense-ring-three" />
+                        <span className="authx-mini-expense-ring authx-mini-expense-ring-four" />
+                      </div>
+                    </article>
+                  </aside>
                 </div>
               </div>
-
-              <aside className="authx-art-rail">
-                <article className="authx-wallet-stack-panel">
-                  <div className="authx-wallet-layer authx-wallet-layer-back">
-                    <span className="authx-wallet-layer-chip" aria-hidden="true" />
-                    <strong>Backup</strong>
-                    <small>**** 2458</small>
-                  </div>
-
-                  <div className="authx-wallet-layer authx-wallet-layer-front">
-                    <div className="authx-wallet-layer-top">
-                      <BrandLogo className="authx-wallet-mark" compact markOnly subtitle="" title="" tone="dark" />
-                      <span className="authx-wallet-layer-dots" aria-hidden="true">
-                        <span />
-                        <span />
-                      </span>
-                    </div>
-
-                    <span className="authx-wallet-layer-chip" aria-hidden="true" />
-                    <strong>Primary card</strong>
-                    <small>**** 5432</small>
-                  </div>
-                </article>
-
-                <article className="authx-status-panel">
-                  <div className="authx-status-pill-row">
-                    <span>Private</span>
-                    <span>Local</span>
-                    <span>Ready</span>
-                  </div>
-
-                  <div className="authx-status-track" aria-hidden="true">
-                    <span className="authx-status-track-fill authx-status-track-fill-blue" />
-                    <span className="authx-status-track-fill authx-status-track-fill-teal" />
-                    <span className="authx-status-track-fill authx-status-track-fill-gold" />
-                  </div>
-
-                  <div className="authx-status-list">
-                    <div className="authx-status-row">
-                      <span>Cards</span>
-                      <strong>On</strong>
-                    </div>
-                    <div className="authx-status-row">
-                      <span>Budget</span>
-                      <strong>Set</strong>
-                    </div>
-                    <div className="authx-status-row">
-                      <span>Alerts</span>
-                      <strong>Ready</strong>
-                    </div>
-                  </div>
-                </article>
-              </aside>
             </div>
           </div>
         </section>
