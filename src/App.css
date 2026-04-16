@@ -1,3 +1,18 @@
+.app-loading-state {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at top right, rgba(102, 212, 228, 0.16), transparent 28%),
+    radial-gradient(circle at left center, rgba(104, 76, 245, 0.12), transparent 34%),
+    #f4f7ff;
+  color: #1d2545;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
 .ref-shell {
   min-height: 100vh;
   width: min(1380px, calc(100% - 40px));

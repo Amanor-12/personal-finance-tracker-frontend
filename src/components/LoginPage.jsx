@@ -81,15 +81,6 @@ function AuthIcon({ type }) {
         <circle cx="10" cy="10" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
       </>
     ),
-    shield: (
-      <path
-        d="M10 2.8 4.8 4.6v4.6c0 3.1 2.1 5.7 5.2 7 3.1-1.3 5.2-3.9 5.2-7V4.6Z"
-        fill="none"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    ),
   };
 
   return (
@@ -110,6 +101,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const [rememberEmail, setRememberEmail] = useState(Boolean(rememberedEmail));
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -120,7 +112,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
     setMessage('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!isLogin && !formData.fullName.trim()) {
@@ -144,6 +136,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
     }
 
     try {
+      setIsSubmitting(true);
+
       if (rememberEmail) {
         window.localStorage.setItem(REMEMBERED_EMAIL_KEY, formData.email.trim());
       } else {
@@ -151,12 +145,12 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
       }
 
       if (isLogin) {
-        onLogin({
+        await onLogin({
           email: formData.email.trim(),
           password: formData.password,
         });
       } else {
-        onSignUp({
+        await onSignUp({
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
           password: formData.password,
@@ -166,6 +160,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
       navigate('/dashboard');
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -192,8 +188,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               <h1>{isLogin ? 'Access your Ledgr workspace' : 'Create your Ledgr account'}</h1>
               <p>
                 {isLogin
-                  ? 'Use your account details to continue into your private workspace.'
-                  : 'Create a secure account first. You will use the same details to log in later.'}
+                  ? 'Sign in with your account to reach your private finance dashboard.'
+                  : 'Create your account here, then the backend API will keep your workspace synced.'}
               </p>
             </div>
 
@@ -313,7 +309,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     type="button"
                     onClick={() =>
                       setMessage(
-                        'Password recovery will be available soon. Use your current credentials for now.'
+                        'Password recovery is not wired yet. Use your current credentials for now.'
                       )
                     }
                   >
@@ -324,8 +320,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                 )}
               </div>
 
-              <button className="authx-primary" type="submit">
-                {isLogin ? 'Access workspace' : 'Create account'}
+              <button className="authx-primary" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Please wait...' : isLogin ? 'Access workspace' : 'Create account'}
               </button>
             </form>
 
@@ -361,79 +357,49 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
             <div className="authx-dashboard-preview">
               <aside className="authx-mini-sidebar">
-                <div className="authx-mini-sidebar-top">
-                  <BrandLogo className="authx-mini-brand" compact markOnly subtitle="" title="" tone="dark" />
-                  <div className="authx-mini-nav">
-                    <span className="authx-mini-nav-item is-active" />
-                    <span className="authx-mini-nav-item" />
-                    <span className="authx-mini-nav-item" />
-                  </div>
+                <div className="authx-mini-sidebar-brand">
+                  <BrandLogo className="authx-mini-brand" compact subtitle="" title="Ledgr" tone="dark" />
                 </div>
-
-                <div className="authx-mini-user" />
+                <div className="authx-mini-nav">
+                  <span className="is-active">Overview</span>
+                  <span>Transactions</span>
+                  <span>Budget</span>
+                  <span>Goals</span>
+                </div>
               </aside>
 
               <div className="authx-mini-stage">
-                <div className="authx-mini-toolbar">
-                  <div className="authx-mini-searchbar" />
-                  <div className="authx-mini-toolbar-actions">
-                    <span />
-                    <span />
+                <section className="authx-mini-hero">
+                  <span className="authx-mini-chip">Connected</span>
+                  <h2>Finance, in sync.</h2>
+                  <p>Your frontend signs in through the API and loads live dashboard data.</p>
+                </section>
+
+                <section className="authx-mini-wallet-card">
+                  <div className="authx-mini-wallet-top">
+                    <span className="authx-mini-wallet-mark" />
+                    <span>Primary card</span>
                   </div>
-                </div>
+                  <strong>•••• 5432</strong>
+                  <small>Backend connected</small>
+                </section>
 
-                <div className="authx-mini-grid">
-                  <div className="authx-mini-main">
-                    <article className="authx-mini-hero">
-                      <span className="authx-mini-chip">Ledgr</span>
-                      <strong>Private finance.</strong>
-                      <div className="authx-mini-ring-wrap">
-                        <span className="authx-mini-ring authx-mini-ring-one" />
-                        <span className="authx-mini-ring authx-mini-ring-two" />
-                        <span className="authx-mini-glass" />
-                      </div>
-                    </article>
+                <section className="authx-mini-chart">
+                  <div className="authx-mini-bar authx-mini-bar-one" />
+                  <div className="authx-mini-bar authx-mini-bar-two" />
+                  <div className="authx-mini-bar authx-mini-bar-three" />
+                  <div className="authx-mini-bar authx-mini-bar-four" />
+                </section>
 
-                    <article className="authx-mini-chart">
-                      <div className="authx-mini-chart-grid" />
-                      <div className="authx-mini-chart-card">
-                        <span />
-                        <span />
-                      </div>
-                    </article>
+                <section className="authx-mini-expense-card">
+                  <div className="authx-mini-ring authx-mini-ring-one" />
+                  <div className="authx-mini-ring authx-mini-ring-two" />
+                  <div className="authx-mini-ring authx-mini-ring-three" />
+                  <div className="authx-mini-expense-copy">
+                    <strong>Live totals</strong>
+                    <span>Transactions, budgets, and profile data come from your API.</span>
                   </div>
-
-                  <aside className="authx-mini-rail">
-                    <article className="authx-mini-wallet-card">
-                      <div className="authx-mini-wallet-back" />
-                      <div className="authx-mini-wallet-front">
-                        <div className="authx-mini-wallet-top">
-                          <BrandLogo className="authx-mini-wallet-brand" compact markOnly subtitle="" title="" tone="dark" />
-                          <span className="authx-mini-wallet-dots">
-                            <span />
-                            <span />
-                          </span>
-                        </div>
-                        <span className="authx-mini-wallet-chip" />
-                        <strong>Card</strong>
-                        <small>**** 5432</small>
-                      </div>
-                    </article>
-
-                    <article className="authx-mini-expense-card">
-                      <div className="authx-mini-expense-rings">
-                        <span className="authx-mini-expense-track authx-mini-expense-track-one" />
-                        <span className="authx-mini-expense-track authx-mini-expense-track-two" />
-                        <span className="authx-mini-expense-track authx-mini-expense-track-three" />
-                        <span className="authx-mini-expense-track authx-mini-expense-track-four" />
-                        <span className="authx-mini-expense-ring authx-mini-expense-ring-one" />
-                        <span className="authx-mini-expense-ring authx-mini-expense-ring-two" />
-                        <span className="authx-mini-expense-ring authx-mini-expense-ring-three" />
-                        <span className="authx-mini-expense-ring authx-mini-expense-ring-four" />
-                      </div>
-                    </article>
-                  </aside>
-                </div>
+                </section>
               </div>
             </div>
           </div>

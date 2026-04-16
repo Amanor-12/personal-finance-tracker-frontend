@@ -1,9 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { authStore } from '../utils/authStore';
 
-function ProtectedRoute({ children }) {
-  const currentUser = authStore.getSession();
-
+function ProtectedRoute({ children, currentUser }) {
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }

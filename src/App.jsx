@@ -19,6 +19,7 @@ const pageTitles = {
 
 function App() {
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
+  const [isAuthLoading, setIsAuthLoading] = useState(() => authStore.hasToken());
   const location = useLocation();
 
   useEffect(() => {
@@ -31,26 +32,65 @@ function App() {
     document.title = `Ledgr | ${pageTitle}`;
   }, [currentUser, location.pathname]);
 
-  const handleLogin = (credentials) => {
-    const user = authStore.login(credentials);
+  useEffect(() => {
+    let isCancelled = false;
+
+    const hydrateSession = async () => {
+      if (!authStore.hasToken()) {
+        setIsAuthLoading(false);
+        return;
+      }
+
+      try {
+        const user = await authStore.fetchCurrentUser();
+
+        if (!isCancelled) {
+          setCurrentUser(user);
+        }
+      } catch {
+        if (!isCancelled) {
+          setCurrentUser(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsAuthLoading(false);
+        }
+      }
+    };
+
+    hydrateSession();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const handleLogin = async (credentials) => {
+    const user = await authStore.login(credentials);
     setCurrentUser(user);
+    return user;
   };
 
-  const handleSignUp = (payload) => {
-    const user = authStore.signup(payload);
+  const handleSignUp = async (payload) => {
+    const user = await authStore.signup(payload);
     setCurrentUser(user);
+    return user;
   };
 
-  const handleLogout = () => {
-    authStore.logout();
+  const handleLogout = async () => {
+    await authStore.logout();
     setCurrentUser(null);
   };
 
-  const handleUpdateProfile = (payload) => {
-    const updatedUser = authStore.updateProfile(currentUser.id, payload);
+  const handleUpdateProfile = async (payload) => {
+    const updatedUser = await authStore.updateProfile(currentUser.id, payload);
     setCurrentUser(updatedUser);
     return updatedUser;
   };
+
+  if (isAuthLoading) {
+    return <main className="app-loading-state">Loading your workspace...</main>;
+  }
 
   return (
     <Routes>
@@ -81,7 +121,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <DashboardPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
@@ -90,7 +130,7 @@ function App() {
       <Route
         path="/settings"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <SettingsPage
               currentUser={currentUser}
               onLogout={handleLogout}
@@ -103,7 +143,7 @@ function App() {
       <Route
         path="/transactions"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Transactions" />
           </ProtectedRoute>
         }
@@ -112,7 +152,7 @@ function App() {
       <Route
         path="/budget"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Budget" />
           </ProtectedRoute>
         }
@@ -121,7 +161,7 @@ function App() {
       <Route
         path="/goals"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Goals" />
           </ProtectedRoute>
         }
@@ -130,7 +170,7 @@ function App() {
       <Route
         path="/help"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute currentUser={currentUser}>
             <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Help & Support" />
           </ProtectedRoute>
         }
