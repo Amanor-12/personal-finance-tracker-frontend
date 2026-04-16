@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
@@ -48,18 +48,8 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     [currentUser?.fullName, currentUser?.id]
   );
 
-  const cardsCount = useMemo(
-    () => (currentUser?.id ? cardStore.getCardsForUser(currentUser.id).length : 0),
-    [currentUser?.id]
-  );
-
-  const paymentsCount = useMemo(
-    () =>
-      currentUser?.id
-        ? financeStore.getDashboardSnapshot(currentUser.id).recentTransactions.length
-        : 0,
-    [currentUser?.id]
-  );
+  const [cardsCount, setCardsCount] = useState(0);
+  const [paymentsCount, setPaymentsCount] = useState(0);
 
   const [profileForm, setProfileForm] = useState(() => createProfileForm(currentUser, storedSettings));
   const [preferenceForm, setPreferenceForm] = useState(() => createPreferenceForm(storedSettings));
@@ -67,6 +57,46 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   const [profileMessage, setProfileMessage] = useState('');
   const [preferenceMessage, setPreferenceMessage] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadMetrics = async () => {
+      if (!currentUser?.id) {
+        setCardsCount(0);
+        setPaymentsCount(0);
+        return;
+      }
+
+      try {
+        const [cards, snapshot] = await Promise.all([
+          cardStore.getCardsForUser(currentUser.id),
+          financeStore.getDashboardSnapshot(currentUser.id),
+        ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        setCardsCount(cards.length);
+        setPaymentsCount(snapshot.recentTransactions.length);
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+
+        if (error.status === 401) {
+          await onLogout();
+        }
+      }
+    };
+
+    loadMetrics();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser?.id, onLogout]);
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
@@ -94,11 +124,11 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     setAlertMessage('');
   };
 
-  const handleProfileSubmit = (event) => {
+  const handleProfileSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const updatedUser = onUpdateProfile({
+      const updatedUser = await onUpdateProfile({
         fullName: profileForm.fullName,
         email: profileForm.email,
       });
@@ -112,7 +142,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       );
 
       setProfileForm(createProfileForm(updatedUser, nextSettings));
-      setProfileMessage('Saved locally.');
+      setProfileMessage('Profile saved.');
     } catch (error) {
       setProfileMessage(error.message);
     }
@@ -138,9 +168,9 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     <>
       <article className="ref-panel settings-rail-card">
         <div className="settings-rail-head">
-          <span className="ref-section-chip settings-chip">Local mode</span>
+          <span className="ref-section-chip settings-chip">Connected</span>
           <h3>Workspace status</h3>
-          <p>Your settings save in this browser for now.</p>
+          <p>Your profile now syncs with the backend API.</p>
         </div>
 
         <div className="settings-metric-list">
@@ -154,7 +184,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
           </div>
           <div className="settings-metric">
             <span>Mode</span>
-            <strong>Local</strong>
+            <strong>API</strong>
           </div>
         </div>
       </article>
@@ -162,13 +192,13 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       <article className="ref-panel settings-rail-card">
         <div className="settings-rail-head">
           <h3>Privacy</h3>
-          <p>Nothing here needs the backend yet.</p>
+          <p>Preferences stay local, profile data is synced.</p>
         </div>
 
         <div className="settings-tag-list">
           <span className="settings-tag">Private</span>
           <span className="settings-tag">Editable</span>
-          <span className="settings-tag">Local-first</span>
+          <span className="settings-tag">Synced</span>
         </div>
       </article>
     </>
@@ -179,13 +209,13 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Settings"
-      pageSubtitle="Local controls for your workspace."
+      pageSubtitle="Profile sync and workspace preferences."
       rail={rail}
     >
       <article className="ref-panel settings-hero-card">
         <span className="ref-section-chip settings-chip">Settings</span>
         <h2>Keep Ledgr yours.</h2>
-        <p>Update your profile, workspace, and local preferences.</p>
+        <p>Update your profile, workspace, and app preferences.</p>
       </article>
 
       <div className="settings-grid">

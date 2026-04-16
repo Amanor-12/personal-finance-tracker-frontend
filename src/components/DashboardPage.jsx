@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
@@ -10,13 +10,6 @@ const quickActions = [
   { label: 'Add Card', icon: 'plus', tone: 'sky', action: 'card' },
 ];
 
-const expenseLegendConfig = [
-  { label: 'Shopping', tone: 'violet' },
-  { label: 'Essentials', tone: 'blue' },
-  { label: 'Bills', tone: 'teal' },
-  { label: 'Travel', tone: 'orange' },
-];
-
 const chartTabs = ['Overview', 'Cards', 'Payments'];
 const chartMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cardThemeOptions = [
@@ -24,6 +17,19 @@ const cardThemeOptions = [
   { label: 'Emerald', value: 'emerald' },
   { label: 'Sunset', value: 'sunset' },
 ];
+const expenseLegendTones = ['violet', 'blue', 'teal', 'orange'];
+const expenseFallbackLabels = ['Housing', 'Groceries', 'Transport', 'Savings'];
+const defaultSnapshot = {
+  totalIncome: 0,
+  totalExpenses: 0,
+  netCashFlow: 0,
+  currentMonthKey: '',
+  currentMonthLabel: '',
+  categorySpend: [],
+  recentTransactions: [],
+  budgetProgress: [],
+  monthlyTrend: [],
+};
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -48,10 +54,10 @@ const createCardForm = (fullName = '') => ({
   theme: 'indigo',
 });
 
-const createPaymentForm = (cardId = '') => ({
+const createPaymentForm = ({ cardId = '', categoryId = '' } = {}) => ({
   title: '',
   amount: '',
-  category: 'Shopping',
+  categoryId,
   paymentSource: cardId,
   note: '',
   date: new Date().toISOString().slice(0, 10),
@@ -158,42 +164,99 @@ function WalletStackCard({ card, depth = 0, placeholder = false, isActive = fals
 
 function DashboardPage({ currentUser, onLogout }) {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCardComposerOpen, setIsCardComposerOpen] = useState(false);
   const [isPaymentComposerOpen, setIsPaymentComposerOpen] = useState(false);
   const [activeCardId, setActiveCardId] = useState('');
   const [cardSearch, setCardSearch] = useState('');
+  const [cards, setCards] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [snapshot, setSnapshot] = useState(defaultSnapshot);
+  const [dataMessage, setDataMessage] = useState('');
   const [cardForm, setCardForm] = useState(() => createCardForm(currentUser?.fullName));
-  const [paymentForm, setPaymentForm] = useState(() => createPaymentForm(''));
+  const [paymentForm, setPaymentForm] = useState(() => createPaymentForm());
   const [cardMessage, setCardMessage] = useState('');
   const [paymentMessage, setPaymentMessage] = useState('');
 
-  const firstName = currentUser?.fullName?.split(' ')[0] || 'Bryan';
+  const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
 
-  const cards = useMemo(
-    () => (currentUser?.id ? cardStore.getCardsForUser(currentUser.id) : []),
-    [currentUser?.id, refreshKey]
-  );
+  useEffect(() => {
+    let isCancelled = false;
 
-  const snapshot = useMemo(
-    () =>
-      currentUser?.id
-        ? financeStore.getDashboardSnapshot(currentUser.id)
-        : {
-            totalExpenses: 0,
-            recentTransactions: [],
-            categorySpend: [],
-          },
-    [currentUser?.id, refreshKey]
-  );
+    const loadWorkspaceData = async () => {
+      if (!currentUser?.id) {
+        setCards([]);
+        setExpenseCategories([]);
+        setSnapshot(defaultSnapshot);
+        setActiveCardId('');
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setDataMessage('');
+
+      try {
+        const [nextCards, nextSnapshot, nextCategories] = await Promise.all([
+          cardStore.getCardsForUser(currentUser.id),
+          financeStore.getDashboardSnapshot(currentUser.id),
+          financeStore.getCategoriesForUser(currentUser.id),
+        ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        const nextExpenseCategories = nextCategories.filter((category) => category.type === 'expense');
+
+        setCards(nextCards);
+        setSnapshot(nextSnapshot);
+        setExpenseCategories(nextExpenseCategories);
+        setActiveCardId((currentActiveCardId) =>
+          nextCards.some((card) => card.id === currentActiveCardId) ? currentActiveCardId : nextCards[0]?.id || ''
+        );
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+
+        if (error.status === 401) {
+          await onLogout();
+          return;
+        }
+
+        setCards([]);
+        setExpenseCategories([]);
+        setSnapshot(defaultSnapshot);
+        setDataMessage(error.message || 'Could not load your workspace.');
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadWorkspaceData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser?.id, onLogout, refreshKey]);
 
   const expenseItems = useMemo(() => {
     const totals = new Map(snapshot.categorySpend.map((item) => [item.category, item.total]));
+    const labels = snapshot.categorySpend.length
+      ? snapshot.categorySpend.map((item) => item.category)
+      : expenseCategories.length
+        ? expenseCategories.map((category) => category.name)
+        : expenseFallbackLabels;
 
-    return expenseLegendConfig.map((item) => ({
-      ...item,
-      amount: formatCurrency(totals.get(item.label) || 0),
+    return labels.slice(0, 4).map((label, index) => ({
+      label,
+      tone: expenseLegendTones[index],
+      amount: formatCurrency(totals.get(label) || 0),
     }));
-  }, [snapshot.categorySpend]);
+  }, [expenseCategories, snapshot.categorySpend]);
 
   const recentPayments = snapshot.recentTransactions.slice(0, 4);
   const cardSearchQuery = cardSearch.trim().toLowerCase();
@@ -229,17 +292,17 @@ function DashboardPage({ currentUser, onLogout }) {
   const workspaceRows = [
     { label: 'Cards', value: String(totalCards).padStart(2, '0'), tone: 'teal' },
     { label: 'Payments', value: String(snapshot.recentTransactions.length).padStart(2, '0'), tone: 'violet' },
-    { label: 'Sync', value: 'Local', tone: 'orange' },
+    { label: 'Sync', value: 'API', tone: 'orange' },
   ];
 
   const flowState = recentPayments.length
     ? {
         title: `${recentPayments.length} payment${recentPayments.length > 1 ? 's' : ''} saved`,
-        copy: 'Saved locally for now.',
+        copy: 'Stored in your finance workspace.',
       }
     : {
         title: 'No payments yet',
-        copy: 'Add one payment to start.',
+        copy: 'Add one payment to start tracking.',
       };
 
   const openCardComposer = () => {
@@ -249,7 +312,12 @@ function DashboardPage({ currentUser, onLogout }) {
   };
 
   const openPaymentComposer = () => {
-    setPaymentForm(createPaymentForm(activeCard?.id || cards[0]?.id || ''));
+    setPaymentForm(
+      createPaymentForm({
+        cardId: activeCard?.id || cards[0]?.id || '',
+        categoryId: expenseCategories[0]?.id || '',
+      })
+    );
     setPaymentMessage('');
     setIsPaymentComposerOpen(true);
   };
@@ -279,7 +347,7 @@ function DashboardPage({ currentUser, onLogout }) {
     setPaymentMessage('');
   };
 
-  const handleCardSubmit = (event) => {
+  const handleCardSubmit = async (event) => {
     event.preventDefault();
 
     if (!cardForm.nickname.trim()) {
@@ -302,19 +370,23 @@ function DashboardPage({ currentUser, onLogout }) {
       return;
     }
 
-    const nextCard = cardStore.addCard(currentUser.id, {
-      ...cardForm,
-      holderName: cardForm.holderName.trim(),
-      nickname: cardForm.nickname.trim(),
-    });
+    try {
+      const nextCard = await cardStore.addCard(currentUser.id, {
+        ...cardForm,
+        holderName: cardForm.holderName.trim(),
+        nickname: cardForm.nickname.trim(),
+      });
 
-    setActiveCardId(nextCard.id);
-    setCardSearch('');
-    setRefreshKey((value) => value + 1);
-    closeComposers();
+      setActiveCardId(nextCard.id);
+      setCardSearch('');
+      setRefreshKey((value) => value + 1);
+      closeComposers();
+    } catch (error) {
+      setCardMessage(error.message || 'Could not save that card.');
+    }
   };
 
-  const handlePaymentSubmit = (event) => {
+  const handlePaymentSubmit = async (event) => {
     event.preventDefault();
 
     if (!paymentForm.title.trim()) {
@@ -327,20 +399,27 @@ function DashboardPage({ currentUser, onLogout }) {
       return;
     }
 
-    const sourceCard = cards.find((card) => card.id === paymentForm.paymentSource);
+    if (!paymentForm.categoryId) {
+      setPaymentMessage('Choose a category first.');
+      return;
+    }
 
-    financeStore.addTransaction(currentUser.id, {
-      type: 'expense',
-      title: paymentForm.title.trim(),
-      category: paymentForm.category,
-      amount: Number(paymentForm.amount),
-      date: paymentForm.date,
-      note: paymentForm.note,
-      paymentSource: sourceCard ? `${getCardTitle(sourceCard)} - ${sourceCard.last4}` : 'Local wallet',
-    });
+    try {
+      await financeStore.addTransaction(currentUser.id, {
+        type: 'expense',
+        description: paymentForm.note.trim()
+          ? `${paymentForm.title.trim()} - ${paymentForm.note.trim()}`
+          : paymentForm.title.trim(),
+        categoryId: paymentForm.categoryId,
+        amount: Number(paymentForm.amount),
+        transactionDate: paymentForm.date,
+      });
 
-    setRefreshKey((value) => value + 1);
-    closeComposers();
+      setRefreshKey((value) => value + 1);
+      closeComposers();
+    } catch (error) {
+      setPaymentMessage(error.message || 'Could not save that payment.');
+    }
   };
 
   const handleQuickAction = (action) => {
@@ -353,7 +432,7 @@ function DashboardPage({ currentUser, onLogout }) {
     }
   };
 
-  const handleDeleteActiveCard = () => {
+  const handleDeleteActiveCard = async () => {
     if (!currentUser?.id || !activeCard) {
       return;
     }
@@ -364,11 +443,15 @@ function DashboardPage({ currentUser, onLogout }) {
       return;
     }
 
-    const remainingCards = cardStore.deleteCard(currentUser.id, activeCard.id);
-    const matchingCards = remainingCards.filter((card) => matchesCardQuery(card, cardSearchQuery));
+    try {
+      const remainingCards = await cardStore.deleteCard(currentUser.id, activeCard.id);
+      const matchingCards = remainingCards.filter((card) => matchesCardQuery(card, cardSearchQuery));
 
-    setActiveCardId(matchingCards[0]?.id || remainingCards[0]?.id || '');
-    setRefreshKey((value) => value + 1);
+      setActiveCardId(matchingCards[0]?.id || remainingCards[0]?.id || '');
+      setRefreshKey((value) => value + 1);
+    } catch (error) {
+      setDataMessage(error.message || 'Could not delete that card.');
+    }
   };
 
   const rail = (
@@ -438,7 +521,7 @@ function DashboardPage({ currentUser, onLogout }) {
             {cardSearchQuery && !filteredCards.length
               ? 'No card found.'
               : totalCards
-                ? `${totalCards} saved locally`
+                ? `${totalCards} saved to your workspace`
                 : 'Add your first card.'}
           </p>
 
@@ -492,8 +575,8 @@ function DashboardPage({ currentUser, onLogout }) {
 
           <div className="ref-expense-summary">
             <strong>{formatCurrency(snapshot.totalExpenses)}</strong>
-            <span>{recentPayments.length ? 'Local' : '0%'}</span>
-            <small>{recentPayments.length ? 'Saved from local payments' : 'No spend yet'}</small>
+            <span>{snapshot.currentMonthLabel || 'This month'}</span>
+            <small>{recentPayments.length ? 'Tracked from your backend data' : 'No spend yet'}</small>
           </div>
         </div>
 
@@ -518,7 +601,7 @@ function DashboardPage({ currentUser, onLogout }) {
         currentUser={currentUser}
         onLogout={onLogout}
         pageTitle={`Welcome back, ${firstName}`}
-        pageSubtitle="Local preview."
+        pageSubtitle="Your connected finance workspace."
         primaryActionLabel="+ New Payment"
         onPrimaryAction={openPaymentComposer}
         rail={rail}
@@ -527,7 +610,7 @@ function DashboardPage({ currentUser, onLogout }) {
           <div className="ref-hero-copy">
             <span className="ref-section-chip">Workspace</span>
             <h2>Your wallet, ready.</h2>
-            <p>Add cards now. Payments stay local.</p>
+            <p>Add cards and track payments from your API.</p>
 
             <div className="ref-hero-pill-row">
               {heroPills.map((item) => (
@@ -590,8 +673,8 @@ function DashboardPage({ currentUser, onLogout }) {
             </div>
 
             <div className="ref-chart-empty">
-              <strong>{flowState.title}</strong>
-              <p>{flowState.copy}</p>
+              <strong>{isLoading ? 'Loading workspace...' : flowState.title}</strong>
+              <p>{dataMessage || (isLoading ? 'Syncing cards, categories, and payments.' : flowState.copy)}</p>
             </div>
 
             <div className="ref-chart-xaxis" aria-hidden="true">
@@ -622,7 +705,7 @@ function DashboardPage({ currentUser, onLogout }) {
                       <div>
                         <strong>{payment.title}</strong>
                         <small>
-                          {payment.paymentSource || 'Local wallet'} - {formatShortDate(payment.date)}
+                          {payment.paymentSource || 'Expense'} - {formatShortDate(payment.date)}
                         </small>
                       </div>
                     </div>
@@ -633,7 +716,7 @@ function DashboardPage({ currentUser, onLogout }) {
             ) : (
               <div className="ref-empty-card">
                 <strong>No payments yet</strong>
-                <p>Payments you save will show here.</p>
+                <p>Payments you create through the API will show here.</p>
               </div>
             )}
           </article>
@@ -644,7 +727,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <h3>Workspace</h3>
               </div>
               <button className="ref-view-link" type="button">
-                Local
+                API
               </button>
             </div>
 
@@ -770,7 +853,7 @@ function DashboardPage({ currentUser, onLogout }) {
             <div className="ref-modal-head">
               <div>
                 <span className="ref-modal-kicker">Payments</span>
-                <h3 id="new-payment-title">Create a local payment</h3>
+                <h3 id="new-payment-title">Create a payment</h3>
               </div>
               <button className="ref-modal-close" type="button" onClick={closeComposers} aria-label="Close payment form">
                 x
@@ -801,10 +884,11 @@ function DashboardPage({ currentUser, onLogout }) {
 
                 <label className="ref-field">
                   <span>Category</span>
-                  <select name="category" value={paymentForm.category} onChange={handlePaymentChange}>
-                    {expenseLegendConfig.map((item) => (
-                      <option key={item.label} value={item.label}>
-                        {item.label}
+                  <select name="categoryId" value={paymentForm.categoryId} onChange={handlePaymentChange}>
+                    <option value="">Choose category</option>
+                    {expenseCategories.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
                       </option>
                     ))}
                   </select>
@@ -813,7 +897,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 <label className="ref-field">
                   <span>Source</span>
                   <select name="paymentSource" value={paymentForm.paymentSource} onChange={handlePaymentChange}>
-                    <option value="">Local wallet</option>
+                    <option value="">Wallet</option>
                     {cards.map((card) => (
                       <option key={card.id} value={card.id}>
                         {getCardTitle(card)} - {card.last4}
