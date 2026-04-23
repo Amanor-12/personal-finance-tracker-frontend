@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
 
 const quickActions = [
   { label: 'Pay', icon: 'send', tone: 'violet', action: 'payment' },
-  { label: 'Receive', icon: 'receive', tone: 'mint', action: null },
+  { label: 'Receive', icon: 'receive', tone: 'mint', to: '/accounts' },
   { label: 'Invoice', icon: 'invoice', tone: 'amber', action: 'payment' },
   { label: 'Add Card', icon: 'plus', tone: 'sky', action: 'card' },
 ];
 
-const chartTabs = ['Overview', 'Cards', 'Payments'];
+const chartTabs = [
+  { label: 'Overview', to: '/dashboard' },
+  { label: 'Wallets', to: '/accounts' },
+  { label: 'Transactions', to: '/transactions' },
+];
 const chartMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cardThemeOptions = [
   { label: 'Indigo', value: 'indigo' },
@@ -533,19 +538,28 @@ function DashboardPage({ currentUser, onLogout }) {
         </div>
 
         <div className="ref-wallet-actions">
-          {quickActions.map((action) => (
-            <button
-              key={action.label}
-              className="ref-wallet-action"
-              type="button"
-              onClick={() => handleQuickAction(action.action)}
-            >
-              <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
-                <WalletActionIcon type={action.icon} />
-              </span>
-              <span>{action.label}</span>
-            </button>
-          ))}
+          {quickActions.map((action) =>
+            action.to ? (
+              <Link key={action.label} className="ref-wallet-action" to={action.to}>
+                <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
+                  <WalletActionIcon type={action.icon} />
+                </span>
+                <span>{action.label}</span>
+              </Link>
+            ) : (
+              <button
+                key={action.label}
+                className="ref-wallet-action"
+                type="button"
+                onClick={() => handleQuickAction(action.action)}
+              >
+                <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
+                  <WalletActionIcon type={action.icon} />
+                </span>
+                <span>{action.label}</span>
+              </button>
+            )
+          )}
         </div>
       </article>
 
@@ -620,9 +634,14 @@ function DashboardPage({ currentUser, onLogout }) {
               ))}
             </div>
 
-            <button className="ref-secondary-button" type="button" onClick={openCardComposer}>
-              + Add Card
-            </button>
+            <div className="ref-hero-actions">
+              <button className="ref-secondary-button" type="button" onClick={openCardComposer}>
+                + Add Card
+              </button>
+              <Link className="ref-secondary-link" to="/accounts">
+                Open wallets
+              </Link>
+            </div>
           </div>
 
           <div className="ref-hero-visual" aria-hidden="true">
@@ -637,19 +656,17 @@ function DashboardPage({ currentUser, onLogout }) {
           <div className="ref-flow-header">
             <div className="ref-flow-copy">
               <h3>Money Flow</h3>
-              <div className="ref-flow-tabs" role="tablist" aria-label="Money flow views">
+              <nav className="ref-flow-tabs" aria-label="Money flow routes">
                 {chartTabs.map((tab, index) => (
-                  <button
-                    key={tab}
+                  <Link
+                    key={tab.label}
                     className={`ref-flow-tab${index === 0 ? ' is-active' : ''}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={index === 0}
+                    to={tab.to}
                   >
-                    {tab}
-                  </button>
+                    {tab.label}
+                  </Link>
                 ))}
-              </div>
+              </nav>
             </div>
 
             <div className="ref-flow-legend" aria-label="Workspace legend">
@@ -691,9 +708,12 @@ function DashboardPage({ currentUser, onLogout }) {
               <div>
                 <h3>Recent Payments</h3>
               </div>
-              <button className="ref-inline-filter" type="button" onClick={openPaymentComposer}>
-                + New
-              </button>
+              <div className="ref-panel-head-actions">
+                <Link className="ref-view-link" to="/transactions">Ledger</Link>
+                <button className="ref-inline-filter" type="button" onClick={openPaymentComposer}>
+                  + New
+                </button>
+              </div>
             </div>
 
             {recentPayments.length ? (
@@ -726,9 +746,7 @@ function DashboardPage({ currentUser, onLogout }) {
               <div>
                 <h3>Workspace</h3>
               </div>
-              <button className="ref-view-link" type="button">
-                API
-              </button>
+              <Link className="ref-view-link" to="/reports">Insights</Link>
             </div>
 
             <div className="ref-statistics-body">
