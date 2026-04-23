@@ -28,6 +28,55 @@ const summarizeAccountTypes = (accounts) =>
       return summary;
     }, {});
 
+function AccountPreviewCard({ account, depth = 0, placeholder = false }) {
+  const accountType = placeholder ? 'Preview account' : getAccountTypeLabel(account.accountType);
+  const title = placeholder ? 'Ledgr' : account.name;
+  const balance = placeholder ? 'Add your first account' : formatAccountCurrency(account.currentBalance, account.currency);
+  const identifier = placeholder ? '**** ----' : account.maskedIdentifier || account.institutionName || 'Manual account';
+  const footer = placeholder ? 'preview' : account.isPrimary ? 'primary' : account.status;
+
+  return (
+    <article
+      className={`accounts-wallet-preview-card ref-wallet-card ref-stack-card theme-indigo${placeholder ? ' is-placeholder' : ''}`}
+      style={{
+        '--stack-x': `${depth * 16}px`,
+        '--stack-y': `${depth * 20}px`,
+        '--stack-scale': `${1 - depth * 0.045}`,
+        '--stack-opacity': `${1 - depth * 0.12}`,
+        zIndex: 12 - depth,
+      }}
+    >
+      <div className="ref-wallet-card-top">
+        <div className="ref-wallet-card-brand">
+          <div className="ref-master-mark" aria-hidden="true">
+            <span />
+            <span />
+          </div>
+          <strong>{title}</strong>
+        </div>
+      </div>
+
+      <span className="ref-wallet-chip" aria-hidden="true" />
+
+      <div className="ref-wallet-card-copy">
+        <span>{accountType}</span>
+        <strong>{balance}</strong>
+      </div>
+
+      <div className="ref-wallet-card-bottom">
+        <span>{identifier}</span>
+        <div className="ref-wallet-tail">
+          <span className="ref-wallet-tail-mark" aria-hidden="true">
+            <span />
+            <span />
+          </span>
+          <small>{footer}</small>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function AccountsPage({ currentUser, onLogout }) {
   const [accounts, setAccounts] = useState([]);
   const [query, setQuery] = useState('');
@@ -97,6 +146,8 @@ function AccountsPage({ currentUser, onLogout }) {
 
   const summary = useMemo(() => summarizeAccounts(accounts), [accounts]);
   const typeBreakdown = useMemo(() => summarizeAccountTypes(accounts), [accounts]);
+  const activeAccounts = useMemo(() => accounts.filter((account) => account.status === 'active'), [accounts]);
+  const previewAccounts = useMemo(() => activeAccounts.slice(0, 3).reverse(), [activeAccounts]);
 
   const openAddDialog = () => {
     setEditingAccount(null);
@@ -146,6 +197,15 @@ function AccountsPage({ currentUser, onLogout }) {
     }
   };
 
+  const setPrimaryAccount = async (account) => {
+    try {
+      await accountStore.setPrimaryAccount(currentUser.id, account.id);
+      setRefreshKey((value) => value + 1);
+    } catch (error) {
+      setLoadError(error.message || 'Primary account could not be updated.');
+    }
+  };
+
   const rail = (
     <aside className="activity-rail">
       <article className="ref-panel activity-rail-card activity-rail-card-dark">
@@ -175,23 +235,38 @@ function AccountsPage({ currentUser, onLogout }) {
         onPrimaryAction={openAddDialog}
         rail={rail}
       >
-        <section className="accounts-command-board" aria-label="Account workspace">
+        <section className="accounts-command-board accounts-wallet-board" aria-label="Account workspace">
           <div className="accounts-command-copy">
             <span className="ref-section-chip">Vault workspace</span>
-            <h2>Every money location, organized.</h2>
-            <p>Create manual accounts for checking, savings, cards, cash, investments, and anything else you track.</p>
-            <button className="ref-secondary-button" type="button" onClick={openAddDialog}>Add account</button>
+            <h2>One trusted map of your accounts.</h2>
+            <p>Add the real places your money lives, then use them across transactions, budgets, goals, and reports.</p>
+            <div className="accounts-wallet-actions">
+              <button className="ref-secondary-button" type="button" onClick={openAddDialog}>Add account</button>
+              <span>{summary.activeCount ? `${summary.activeCount} active` : 'No accounts yet'}</span>
+            </div>
           </div>
 
-          <article className="accounts-command-primary">
-            <span>Primary money location</span>
-            <h3>{summary.primary?.name || 'Not selected yet'}</h3>
-            <p>
-              {summary.primary
-                ? `${formatAccountCurrency(summary.primary.currentBalance, summary.primary.currency)} in ${getAccountTypeLabel(summary.primary.accountType)}.`
-                : 'Add an account, then choose which one should act as your default workspace account.'}
-            </p>
-          </article>
+          <div className="accounts-wallet-preview" aria-label="Wallet preview">
+            <div className="accounts-wallet-preview-stack">
+              {previewAccounts.length ? (
+                previewAccounts.map((account, index) => {
+                  const depth = previewAccounts.length - index - 1;
+
+                  return <AccountPreviewCard key={account.id} account={account} depth={depth} />;
+                })
+              ) : (
+                <AccountPreviewCard placeholder />
+              )}
+            </div>
+            <div className="accounts-wallet-preview-note">
+              <strong>{summary.primary?.name || 'Choose a primary account'}</strong>
+              <span>
+                {summary.primary
+                  ? `${getAccountTypeLabel(summary.primary.accountType)} used as your default money location.`
+                  : 'Your first account becomes the foundation for transactions and reports.'}
+              </span>
+            </div>
+          </div>
 
           <div className="accounts-command-stats" aria-label="Account summary">
             <article><span>Total balance</span><strong>{formatAccountCurrency(summary.totalBalance)}</strong></article>
@@ -260,6 +335,9 @@ function AccountsPage({ currentUser, onLogout }) {
                   <b>{formatAccountCurrency(account.currentBalance, account.currency)}</b>
                   <div className="accounts-vault-card-actions">
                     <button type="button" onClick={() => openEditDialog(account)}>Edit</button>
+                    {account.status === 'active' && !account.isPrimary ? (
+                      <button type="button" onClick={() => setPrimaryAccount(account)}>Make primary</button>
+                    ) : null}
                     {account.status === 'active' ? (
                       <button className="is-danger" type="button" onClick={() => archiveAccount(account)}>Archive</button>
                     ) : null}
