@@ -1,3 +1,13 @@
 node_modules/
 dist/
+vite-*.log
+icons8_*.html
+pixabay_*.html
+src/assets/generated_login_scene*.png
+src/assets/hf_login_scene*.png
+src/assets/icons8_candidate*.webp
+src/assets/login_scene_final.png
+src/assets/pixabay_*.jpg
+src/assets/pixabay_*.png
+src/assets/thumb*.webp
 
