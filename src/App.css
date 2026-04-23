@@ -12652,3 +12652,422 @@ textarea:focus-visible,
     grid-template-columns: 1fr;
   }
 }
+
+/* Overview-grade hero system for finance pages */
+.transactions-ops-console,
+.accounts-wallet-board,
+.budget-cockpit,
+.goals-portfolio-console,
+.recurring-queue-console,
+.reports-analysis-console {
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  border: 1px solid rgba(95, 109, 226, 0.12);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(142, 179, 255, 0.34), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(103, 77, 245, 0.3), transparent 28%),
+    linear-gradient(135deg, #6d88ff 0%, #4d6bf4 24%, #4b47ea 54%, #6a33d7 100%);
+  box-shadow: 0 28px 54px rgba(82, 72, 240, 0.18);
+}
+
+.transactions-ops-console > *,
+.accounts-wallet-board > *,
+.budget-cockpit > *,
+.goals-portfolio-console > *,
+.recurring-queue-console > *,
+.reports-analysis-console > * {
+  position: relative;
+  z-index: 2;
+}
+
+.transactions-ops-console::before,
+.accounts-wallet-board::before,
+.budget-cockpit::before,
+.goals-portfolio-console::before,
+.recurring-queue-console::before,
+.reports-analysis-console::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.transactions-ops-console::after,
+.accounts-wallet-board::after,
+.budget-cockpit::after,
+.goals-portfolio-console::after,
+.recurring-queue-console::after,
+.reports-analysis-console::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.transactions-ops-console .ref-section-chip,
+.accounts-wallet-board .ref-section-chip,
+.budget-cockpit .ref-section-chip,
+.goals-portfolio-console .ref-section-chip,
+.recurring-queue-console .ref-section-chip,
+.reports-analysis-console .ref-section-chip {
+  color: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.transactions-ops-console h2,
+.accounts-wallet-board h2,
+.budget-cockpit h2,
+.goals-portfolio-console h2,
+.recurring-queue-console h2,
+.reports-analysis-console h2 {
+  color: #ffffff;
+}
+
+.transactions-ops-console p,
+.accounts-wallet-board .accounts-command-copy p,
+.budget-cockpit p,
+.goals-portfolio-console .goals-portfolio-panel p,
+.recurring-queue-console p,
+.reports-analysis-console p {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.transactions-ops-metrics div,
+.transactions-ops-controls,
+.accounts-wallet-preview,
+.accounts-wallet-preview-note,
+.accounts-command-stats article,
+.accounts-command-map,
+.accounts-command-controls,
+.budget-cockpit-meter,
+.budget-cockpit-ledger article,
+.budget-cockpit-search,
+.goals-portfolio-values article,
+.goals-portfolio-search,
+.recurring-next-card,
+.recurring-queue-stats article,
+.recurring-queue-search,
+.reports-analysis-state,
+.reports-analysis-kpis article {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(22px);
+}
+
+.transactions-ops-console span,
+.accounts-wallet-board span,
+.budget-cockpit span,
+.goals-portfolio-console span,
+.recurring-queue-console span,
+.reports-analysis-console span,
+.transactions-ops-console small,
+.accounts-wallet-board small,
+.budget-cockpit small,
+.goals-portfolio-console small,
+.recurring-queue-console small,
+.reports-analysis-console small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.transactions-ops-console strong,
+.accounts-wallet-board strong,
+.budget-cockpit strong,
+.goals-portfolio-console strong,
+.recurring-queue-console strong,
+.reports-analysis-console strong,
+.accounts-wallet-board b,
+.budget-cockpit b,
+.goals-portfolio-console b,
+.recurring-queue-console b,
+.reports-analysis-console b {
+  color: #ffffff;
+}
+
+.transactions-ops-console input,
+.transactions-ops-console select,
+.accounts-wallet-board input,
+.accounts-wallet-board select,
+.budget-cockpit input,
+.budget-cockpit select,
+.goals-portfolio-console input,
+.recurring-queue-console input,
+.reports-analysis-console input {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.transactions-ops-console input::placeholder,
+.accounts-wallet-board input::placeholder,
+.budget-cockpit input::placeholder,
+.goals-portfolio-console input::placeholder,
+.recurring-queue-console input::placeholder,
+.reports-analysis-console input::placeholder {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.transactions-ops-console input:focus,
+.transactions-ops-console select:focus,
+.accounts-wallet-board input:focus,
+.accounts-wallet-board select:focus,
+.budget-cockpit input:focus,
+.budget-cockpit select:focus,
+.goals-portfolio-console input:focus,
+.recurring-queue-console input:focus,
+.reports-analysis-console input:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+.transactions-ops-console .ref-secondary-button,
+.accounts-wallet-board .ref-secondary-button,
+.budget-cockpit .ref-secondary-button,
+.goals-portfolio-console .ref-secondary-button,
+.recurring-queue-console .ref-secondary-button {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+
+.transactions-ops-console .ref-secondary-button:hover,
+.accounts-wallet-board .ref-secondary-button:hover,
+.budget-cockpit .ref-secondary-button:hover,
+.goals-portfolio-console .ref-secondary-button:hover,
+.recurring-queue-console .ref-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.transactions-ops-console .transactions-ops-actions button,
+.accounts-wallet-board .accounts-wallet-actions > span,
+.budget-cockpit .budget-cockpit-meter div,
+.goals-portfolio-console .goals-progress-track,
+.recurring-queue-console .recurring-queue-stats article,
+.reports-analysis-console .reports-analysis-kpis article {
+  box-shadow: none;
+}
+
+.transactions-ops-console .transactions-ops-actions button {
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.transactions-ops-console .transactions-ops-actions button:first-child {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.transactions-ops-console::before {
+  top: 22px;
+  right: 26px;
+  width: 188px;
+  height: 188px;
+  border-radius: 999px;
+  border: 14px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(255, 255, 255, 0.86);
+  border-left-color: rgba(255, 255, 255, 0.62);
+  transform: rotate(-18deg);
+}
+
+.transactions-ops-console::after {
+  inset: auto 24px 26px auto;
+  width: 220px;
+  height: 126px;
+  border-radius: 28px;
+  background:
+    linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: calc(100% / 6) calc(100% / 4);
+  opacity: 0.36;
+}
+
+.accounts-wallet-board {
+  background:
+    radial-gradient(circle at 10% 2%, rgba(142, 179, 255, 0.32), transparent 28%),
+    radial-gradient(circle at 88% 16%, rgba(72, 214, 215, 0.2), transparent 24%),
+    linear-gradient(135deg, #6d88ff 0%, #4e6af5 26%, #4a44eb 56%, #6828d8 100%);
+}
+
+.accounts-wallet-board::before {
+  right: -22px;
+  top: -28px;
+  width: 232px;
+  height: 232px;
+  border-radius: 999px;
+  border: 18px solid rgba(255, 255, 255, 0.12);
+  border-left-color: rgba(255, 255, 255, 0.4);
+  transform: rotate(-22deg);
+}
+
+.accounts-wallet-board::after {
+  right: 54px;
+  top: 54px;
+  width: 120px;
+  height: 156px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
+  transform: rotate(18deg);
+  opacity: 0.8;
+}
+
+.accounts-wallet-board .accounts-command-map-head strong,
+.accounts-wallet-board .accounts-command-type-list b {
+  color: #ffffff;
+}
+
+.accounts-wallet-board .accounts-command-type-list span {
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.budget-cockpit {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(142, 179, 255, 0.28), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(40, 183, 207, 0.18), transparent 22%),
+    linear-gradient(135deg, #6885ff 0%, #4f68f6 24%, #4a46ed 54%, #6131da 100%);
+}
+
+.budget-cockpit::before {
+  right: 40px;
+  top: 42px;
+  width: 196px;
+  height: 116px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.02));
+  transform: skewX(-18deg);
+}
+
+.budget-cockpit::after {
+  left: 34px;
+  bottom: 26px;
+  width: 224px;
+  height: 72px;
+  border-radius: 20px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 32%, transparent 32%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 58%, transparent 58%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 82%, transparent 82%);
+  background-size: 100% 12px, 100% 12px, 100% 12px;
+  background-repeat: no-repeat;
+  background-position: 0 0, 0 28px, 0 56px;
+  opacity: 0.44;
+}
+
+.budget-cockpit .budget-cockpit-meter div,
+.budget-cockpit .budget-board-track,
+.budget-cockpit .goals-progress-track {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.goals-portfolio-console {
+  background:
+    radial-gradient(circle at 16% 6%, rgba(142, 179, 255, 0.3), transparent 30%),
+    radial-gradient(circle at 74% 24%, rgba(111, 108, 249, 0.26), transparent 24%),
+    linear-gradient(135deg, #6d88ff 0%, #506cf7 24%, #4d48f0 58%, #6530d8 100%);
+}
+
+.goals-portfolio-console::before {
+  left: 40%;
+  top: 50%;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  border: 24px solid rgba(255, 255, 255, 0.08);
+  transform: translate(-50%, -50%);
+}
+
+.goals-portfolio-console::after {
+  right: 34px;
+  top: 42px;
+  width: 168px;
+  height: 168px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+}
+
+.goals-portfolio-console .goals-progress-orb {
+  background:
+    radial-gradient(circle closest-side, rgba(255, 255, 255, 0.96) 58%, transparent 59% 100%),
+    conic-gradient(#2bc1b0 0 var(--goal-progress), #5a5ef6 var(--goal-progress) calc(var(--goal-progress) + 16%), rgba(255, 255, 255, 0.18) 0 100%);
+  box-shadow: 0 24px 42px rgba(24, 36, 93, 0.18);
+}
+
+.recurring-queue-console {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(142, 179, 255, 0.28), transparent 28%),
+    radial-gradient(circle at 84% 18%, rgba(40, 183, 207, 0.2), transparent 24%),
+    linear-gradient(135deg, #6b87ff 0%, #506bf6 22%, #4a45ec 58%, #6032d9 100%);
+}
+
+.recurring-queue-console::before {
+  left: 34px;
+  top: 92px;
+  right: 34px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.06));
+}
+
+.recurring-queue-console::after {
+  left: 48px;
+  top: 80px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 180px 0 0 rgba(255, 255, 255, 0.48), 360px 0 0 rgba(255, 255, 255, 0.26);
+}
+
+.reports-analysis-console {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(142, 179, 255, 0.28), transparent 28%),
+    radial-gradient(circle at 86% 18%, rgba(40, 183, 207, 0.18), transparent 24%),
+    linear-gradient(135deg, #6c88ff 0%, #4f6af5 24%, #4a45ea 56%, #6932d7 100%);
+}
+
+.reports-analysis-console::before {
+  right: 34px;
+  bottom: 28px;
+  width: 180px;
+  height: 108px;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+}
+
+.reports-analysis-console::after {
+  right: 62px;
+  bottom: 44px;
+  width: 132px;
+  height: 76px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, transparent 0 54%, rgba(255, 255, 255, 0.28) 54% 58%, transparent 58%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 14%, transparent 14% 28%, rgba(255, 255, 255, 0.28) 28% 42%, transparent 42% 56%, rgba(255, 255, 255, 0.42) 56% 70%, transparent 70% 84%, rgba(255, 255, 255, 0.2) 84% 100%);
+}
+
+.reports-analysis-console .reports-analysis-state strong {
+  color: #ffffff;
+}
+
+@media (max-width: 1180px) {
+  .transactions-ops-console::after,
+  .budget-cockpit::after,
+  .reports-analysis-console::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .transactions-ops-console,
+  .accounts-wallet-board,
+  .budget-cockpit,
+  .goals-portfolio-console,
+  .recurring-queue-console,
+  .reports-analysis-console {
+    padding: 22px;
+  }
+}
