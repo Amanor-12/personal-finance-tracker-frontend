@@ -75,4 +75,10 @@ export const authStore = {
 
     return sessionStore.updateUser(payload.user);
   },
+  async updatePassword({ currentPassword, newPassword }) {
+    return apiClient.put('/api/auth/password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+  },
 };

@@ -41,6 +41,7 @@ const createDefaultSettings = (fullName = '') => {
     paymentReminders: true,
     weeklySummary: false,
     loginAlerts: true,
+    onboardingCompleted: false,
   };
 };
 

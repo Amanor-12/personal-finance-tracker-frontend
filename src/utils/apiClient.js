@@ -76,6 +76,13 @@ export const apiClient = {
       body,
     });
   },
+  patch(path, body, options) {
+    return request(path, {
+      ...options,
+      method: 'PATCH',
+      body,
+    });
+  },
   put(path, body, options) {
     return request(path, {
       ...options,

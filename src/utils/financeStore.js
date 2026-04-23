@@ -18,12 +18,17 @@ const normalizeCategory = (category) => ({
 
 const normalizeTransaction = (transaction) => ({
   id: transaction.id,
+  accountId: transaction.accountId || transaction.account_id || null,
+  accountName: transaction.accountName || transaction.account_name || '',
   categoryId: transaction.categoryId || transaction.category_id,
   categoryName: transaction.categoryName || transaction.category_name || '',
   categoryType: transaction.categoryType || transaction.category_type || transaction.type,
   type: transaction.type === 'income' ? 'income' : 'expense',
   amount: Number(transaction.amount) || 0,
   description: transaction.description || '',
+  notes: transaction.notes || '',
+  status: transaction.status || 'recorded',
+  isRecurring: Boolean(transaction.isRecurring || transaction.is_recurring),
   transactionDate: transaction.transactionDate || transaction.transaction_date,
   createdAt: transaction.createdAt || transaction.created_at || null,
   updatedAt: transaction.updatedAt || transaction.updated_at || null,
@@ -43,6 +48,46 @@ const normalizeBudget = (budget) => ({
   status: budget.status || '',
   createdAt: budget.createdAt || budget.created_at || null,
   updatedAt: budget.updatedAt || budget.updated_at || null,
+});
+
+const normalizeGoal = (goal) => ({
+  id: goal.id,
+  title: goal.title || '',
+  goalType: goal.goalType || goal.goal_type || 'save',
+  targetAmount: Number(goal.targetAmount || goal.target_amount) || 0,
+  currentAmount: Number(goal.currentAmount || goal.current_amount) || 0,
+  remainingAmount: Number(goal.remainingAmount || goal.remaining_amount) || 0,
+  progress: Number(goal.progress) || 0,
+  status: goal.status || '',
+  targetDate: goal.targetDate || goal.target_date || null,
+  daysRemaining:
+    goal.daysRemaining === null || goal.daysRemaining === undefined
+      ? goal.days_remaining ?? null
+      : goal.daysRemaining,
+  createdAt: goal.createdAt || goal.created_at || null,
+  updatedAt: goal.updatedAt || goal.updated_at || null,
+});
+
+const normalizeRecurringPayment = (payment) => ({
+  id: payment.id,
+  accountId: payment.accountId || payment.account_id || null,
+  accountName: payment.accountName || payment.account_name || '',
+  amount: Number(payment.amount) || 0,
+  annualAmount: Number(payment.annualAmount || payment.annual_amount) || 0,
+  billingFrequency: payment.billingFrequency || payment.billing_frequency || 'monthly',
+  categoryId: payment.categoryId || payment.category_id,
+  categoryName: payment.categoryName || payment.category_name || '',
+  createdAt: payment.createdAt || payment.created_at || null,
+  daysUntilNextPayment:
+    payment.daysUntilNextPayment === null || payment.daysUntilNextPayment === undefined
+      ? payment.days_until_next_payment ?? null
+      : payment.daysUntilNextPayment,
+  monthlyAmount: Number(payment.monthlyAmount || payment.monthly_amount) || 0,
+  name: payment.name || '',
+  nextPaymentDate: payment.nextPaymentDate || payment.next_payment_date,
+  notes: payment.notes || '',
+  status: payment.status || 'active',
+  updatedAt: payment.updatedAt || payment.updated_at || null,
 });
 
 const normalizeDashboardSnapshot = (snapshot) => ({
@@ -77,10 +122,27 @@ const normalizeDashboardSnapshot = (snapshot) => ({
 export const financeStore = {
   async addTransaction(userId, payload) {
     const response = await apiClient.post('/api/transactions', {
+      account_id: payload.accountId ? Number(payload.accountId) : null,
       category_id: Number(payload.categoryId),
       type: payload.type,
       amount: Number(payload.amount),
       description: payload.description?.trim() || '',
+      notes: payload.notes?.trim() || '',
+      is_recurring: Boolean(payload.isRecurring),
+      transaction_date: payload.transactionDate,
+    });
+
+    return normalizeTransaction(response.transaction);
+  },
+  async updateTransaction(userId, transactionId, payload) {
+    const response = await apiClient.put(`/api/transactions/${transactionId}`, {
+      account_id: payload.accountId ? Number(payload.accountId) : null,
+      category_id: Number(payload.categoryId),
+      type: payload.type,
+      amount: Number(payload.amount),
+      description: payload.description?.trim() || '',
+      notes: payload.notes?.trim() || '',
+      is_recurring: Boolean(payload.isRecurring),
       transaction_date: payload.transactionDate,
     });
 
@@ -106,9 +168,21 @@ export const financeStore = {
     const response = await apiClient.get('/api/dashboard/summary');
     return normalizeDashboardSnapshot(response);
   },
+  async getGoalsForUser() {
+    const response = await apiClient.get('/api/goals');
+    return response.goals.map((goal) => normalizeGoal(goal));
+  },
+  async getRecurringPaymentsForUser() {
+    const response = await apiClient.get('/api/recurring-payments');
+    return response.recurringPayments.map((payment) => normalizeRecurringPayment(payment));
+  },
   async getTransactionsForUser() {
     const response = await apiClient.get('/api/transactions');
     return response.transactions.map((transaction) => normalizeTransaction(transaction));
+  },
+  async deleteGoal(userId, goalId) {
+    await apiClient.delete(`/api/goals/${goalId}`);
+    return this.getGoalsForUser(userId);
   },
   async saveBudget(userId, payload) {
     const requestBody = {
@@ -122,6 +196,41 @@ export const financeStore = {
       : await apiClient.post('/api/budgets', requestBody);
 
     return normalizeBudget(response.budget);
+  },
+  async saveGoal(userId, payload) {
+    const requestBody = {
+      title: payload.title?.trim() || '',
+      goal_type: payload.goalType,
+      target_amount: Number(payload.targetAmount),
+      current_amount: Number(payload.currentAmount || 0),
+      target_date: payload.targetDate || null,
+    };
+    const response = payload.id
+      ? await apiClient.put(`/api/goals/${payload.id}`, requestBody)
+      : await apiClient.post('/api/goals', requestBody);
+
+    return normalizeGoal(response.goal);
+  },
+  async deleteRecurringPayment(userId, recurringPaymentId) {
+    await apiClient.delete(`/api/recurring-payments/${recurringPaymentId}`);
+    return this.getRecurringPaymentsForUser(userId);
+  },
+  async saveRecurringPayment(userId, payload) {
+    const requestBody = {
+      account_id: payload.accountId ? Number(payload.accountId) : null,
+      amount: Number(payload.amount),
+      billing_frequency: payload.billingFrequency,
+      category_id: Number(payload.categoryId),
+      name: payload.name?.trim() || '',
+      next_payment_date: payload.nextPaymentDate,
+      notes: payload.notes?.trim() || '',
+      status: payload.status,
+    };
+    const response = payload.id
+      ? await apiClient.put(`/api/recurring-payments/${payload.id}`, requestBody)
+      : await apiClient.post('/api/recurring-payments', requestBody);
+
+    return normalizeRecurringPayment(response.recurringPayment);
   },
   formatBudgetMonthKey(month, year) {
     return `${year}-${padValue(month)}`;
