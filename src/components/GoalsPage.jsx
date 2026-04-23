@@ -4,7 +4,7 @@ import DeleteGoalDialog from './goals/DeleteGoalDialog';
 import GoalFormDialog from './goals/GoalFormDialog';
 import GoalsIcon from './goals/GoalsIcon';
 import { formatGoalCurrency, formatGoalDate, getGoalProgressPercent, getGoalTypeLabel } from './goals/goalUtils';
-import { PremiumButton, PremiumEmpty, PremiumHero, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeGoals = (goals) =>
@@ -156,15 +156,28 @@ function GoalsPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <PremiumHero
-          eyebrow="Milestone portfolio"
-          title="Track what you are building toward."
-          body="Create targets, update progress manually, and keep long-term money decisions visible without turning them into noise."
-          variant="goal"
-          meta={[`${visibleGoals.length} visible`, `${progress}% funded`, `${summary.completed} complete`]}
-          actions={<PremiumButton onClick={openCreate}>Create goal</PremiumButton>}
-          visual={<div className="premium-rings" />}
-        />
+        <section className="goals-portfolio-hero">
+          <div className="goals-portfolio-copy">
+            <span className="premium-eyebrow">Goal portfolio</span>
+            <h2>Make every target visible without making it loud.</h2>
+            <p>Track savings and payoff targets with simple progress, deadlines, and manual contributions.</p>
+            <div className="goals-portfolio-meta">
+              <span>{visibleGoals.length} visible</span>
+              <span>{progress}% funded</span>
+              <span>{summary.completed} complete</span>
+            </div>
+            <PremiumButton onClick={openCreate}>Create goal</PremiumButton>
+          </div>
+
+          <div className="goals-target-preview" aria-hidden="true">
+            <div className="goals-target-card is-front">
+              <span>Target</span>
+              <strong>Progress</strong>
+              <div><span style={{ width: `${progress ? Math.min(100, progress) : 34}%` }} /></div>
+            </div>
+            <div className="goals-target-card is-back" />
+          </div>
+        </section>
 
         <PremiumMetrics>
           <PremiumMetric label="Target total" value={formatGoalCurrency(summary.target)} helper="Visible goals" tone="violet" />

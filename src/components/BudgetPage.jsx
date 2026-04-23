@@ -4,7 +4,7 @@ import BudgetFormDialog from './budgets/BudgetFormDialog';
 import BudgetsIcon from './budgets/BudgetsIcon';
 import DeleteBudgetDialog from './budgets/DeleteBudgetDialog';
 import { formatBudgetCurrency, formatBudgetPeriod, getCurrentBudgetPeriod } from './budgets/budgetUtils';
-import { PremiumButton, PremiumEmpty, PremiumHero, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeBudgets = (budgets) =>
@@ -169,15 +169,31 @@ function BudgetPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <PremiumHero
-          eyebrow="Planning board"
-          title="Give every important category a limit."
-          body="Start with the areas that need control. Ledgr compares each budget with spending as transaction history grows."
-          variant="plan"
-          meta={[formatBudgetPeriod(period.month, period.year), `${visibleBudgets.length} visible`, `${summary.overspent} over limit`]}
-          actions={<PremiumButton onClick={openCreate}>Create budget</PremiumButton>}
-          visual={<div className="premium-bars"><span /><span /><span /><span /></div>}
-        />
+        <section className="budget-control-hero">
+          <div className="budget-control-copy">
+            <span className="premium-eyebrow">Budget control</span>
+            <h2>Turn monthly limits into clear decisions.</h2>
+            <p>Budget only the categories that matter, then track pressure as real transactions arrive.</p>
+            <div className="budget-control-meta">
+              <span>{formatBudgetPeriod(period.month, period.year)}</span>
+              <span>{visibleBudgets.length} visible</span>
+              <span>{summary.overspent} over limit</span>
+            </div>
+            <PremiumButton onClick={openCreate}>Create budget</PremiumButton>
+          </div>
+
+          <div className="budget-calendar-preview" aria-hidden="true">
+            <div className="budget-calendar-head">
+              <strong>Month plan</strong>
+              <span>Pressure map</span>
+            </div>
+            <div className="budget-calendar-grid">
+              {Array.from({ length: 18 }).map((_, index) => (
+                <span key={index} className={index % 5 === 0 ? 'is-active' : ''} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         <PremiumMetrics>
           <PremiumMetric label="Budgeted" value={formatBudgetCurrency(summary.totalBudgeted)} helper="Visible limits" tone="amber" />

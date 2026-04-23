@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumButton, PremiumEmpty, PremiumHero, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
+import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
 import DeleteTransactionDialog from './transactions/DeleteTransactionDialog';
 import TransactionDetailDrawer from './transactions/TransactionDetailDrawer';
 import TransactionFormDialog from './transactions/TransactionFormDialog';
@@ -226,15 +226,36 @@ function TransactionsPage({ currentUser, onLogout }) {
         onPrimaryAction={openAddDialog}
         rail={rail}
       >
-        <PremiumHero
-          eyebrow="Ledger workspace"
-          title="A clear operating record for your money."
-          body="Review income and spending, search quickly, and open detail views without losing the shape of the ledger."
-          variant="ledger"
-          meta={[`${transactions.length} total`, `${visibleTransactions.length} visible`, `${categories.length} categories`]}
-          actions={<PremiumButton onClick={openAddDialog}>Add transaction</PremiumButton>}
-          visual={<div className="premium-orbit" />}
-        />
+        <section className="transactions-command-hero">
+          <div className="transactions-command-copy">
+            <span className="premium-eyebrow">Ledger ops</span>
+            <h2>Find, verify, and control every money movement.</h2>
+            <p>Search, filter, inspect, edit, and delete records from one serious transaction workspace.</p>
+            <div className="transactions-command-meta">
+              <span>{transactions.length} total</span>
+              <span>{visibleTransactions.length} visible</span>
+              <span>{categories.length} categories</span>
+            </div>
+            <PremiumButton onClick={openAddDialog}>Add transaction</PremiumButton>
+          </div>
+
+          <div className="transactions-ledger-preview" aria-hidden="true">
+            <div className="transactions-ledger-preview-top">
+              <span />
+              <strong>Ledger view</strong>
+              <em>Filtered</em>
+            </div>
+            <div className="transactions-ledger-preview-grid">
+              <span>Merchant</span>
+              <span>Category</span>
+              <span>Status</span>
+              <span>Amount</span>
+            </div>
+            <div className="transactions-ledger-preview-line is-wide" />
+            <div className="transactions-ledger-preview-line" />
+            <div className="transactions-ledger-preview-line is-short" />
+          </div>
+        </section>
 
         <PremiumMetrics>
           <PremiumMetric label="Inflow" value={formatMoney(summary.income)} helper="Visible income" tone="indigo" />

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumButton, PremiumEmpty, PremiumHero, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import DeleteRecurringDialog from './recurring/DeleteRecurringDialog';
 import RecurringFormDialog from './recurring/RecurringFormDialog';
 import RecurringIcon from './recurring/RecurringIcon';
@@ -174,15 +174,31 @@ function RecurringPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <PremiumHero
-          eyebrow="Renewal timeline"
-          title="See every repeat payment before it returns."
-          body="Track rent, insurance, subscriptions, memberships, and bills in a timeline that shows monthly and annual impact."
-          variant="renewal"
-          meta={[`${summary.active} active`, `${formatRecurringCurrency(summary.monthly)} monthly`, nextPayment ? formatDaysUntil(nextPayment.daysUntilNextPayment) : 'No upcoming']}
-          actions={<PremiumButton onClick={openCreate}>Add recurring</PremiumButton>}
-          visual={<div className="premium-timeline"><span /><span /><span /></div>}
-        />
+        <section className="recurring-renewal-hero">
+          <div className="recurring-renewal-copy">
+            <span className="premium-eyebrow">Renewal desk</span>
+            <h2>Know what repeats before it charges again.</h2>
+            <p>Track bills, subscriptions, rent, insurance, and memberships by next payment date and recurring impact.</p>
+            <div className="recurring-renewal-meta">
+              <span>{summary.active} active</span>
+              <span>{formatRecurringCurrency(summary.monthly)} monthly</span>
+              <span>{nextPayment ? formatDaysUntil(nextPayment.daysUntilNextPayment) : 'No upcoming'}</span>
+            </div>
+            <PremiumButton onClick={openCreate}>Add recurring</PremiumButton>
+          </div>
+
+          <div className="recurring-renewal-preview" aria-hidden="true">
+            <div className="recurring-renewal-card">
+              <span>Next</span>
+              <strong>{nextPayment ? 'Scheduled' : 'Nothing scheduled'}</strong>
+            </div>
+            <div className="recurring-renewal-path">
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        </section>
 
         <PremiumMetrics>
           <PremiumMetric label="Monthly" value={formatRecurringCurrency(summary.monthly)} helper="Active recurring impact" tone="teal" />

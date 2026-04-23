@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumEmpty, PremiumHero, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
 import ReportsIcon from './reports/ReportsIcon';
 import { buildCategoryBreakdown, buildMerchantBreakdown, buildMonthlyTrend, getLargestTrendValue, summarizeReportTransactions } from './reports/reportUtils';
 import { accountStore } from '../utils/accountStore';
@@ -103,14 +103,32 @@ function ReportsPage({ currentUser, onLogout }) {
       pageSubtitle="An analytics workspace that stays quiet until real activity exists."
       rail={rail}
     >
-      <PremiumHero
-        eyebrow="Analytics lab"
-        title="Clear answers from your financial activity."
-        body="See income, expenses, net cash flow, category concentration, merchant patterns, and planning context from one calm workspace."
-        variant="analytics"
-        meta={[`${transactions.length} transactions`, `${accounts.length} accounts`, `${budgets.length} budgets`]}
-        visual={<div className="premium-bars"><span /><span /><span /><span /></div>}
-      />
+      <section className="reports-lab-hero">
+        <div className="reports-lab-copy">
+          <span className="premium-eyebrow">Insight lab</span>
+          <h2>Turn real transaction history into useful answers.</h2>
+          <p>Reports stay empty until the workspace has signal, then show trends, categories, merchants, and cash flow.</p>
+          <div className="reports-lab-meta">
+            <span>{transactions.length} transactions</span>
+            <span>{accounts.length} accounts</span>
+            <span>{budgets.length} budgets</span>
+          </div>
+        </div>
+
+        <div className="reports-lab-preview" aria-hidden="true">
+          <div className="reports-lab-axis" />
+          <div className="reports-lab-bars">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className="reports-lab-card">
+            <span>Signal</span>
+            <strong>{transactions.length ? 'Available' : 'Waiting'}</strong>
+          </div>
+        </div>
+      </section>
 
       <PremiumMetrics>
         <PremiumMetric label="Income" value={formatMoney(summary.income)} helper="All recorded income" tone="indigo" />

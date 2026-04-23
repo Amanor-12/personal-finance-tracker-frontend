@@ -8,29 +8,6 @@ export const currencyFormatter = new Intl.NumberFormat('en-US', {
 
 export const formatMoney = (value) => currencyFormatter.format(Number(value) || 0);
 
-export function PremiumHero({ actions = null, body, eyebrow, meta = [], title, variant = 'blue', visual = null }) {
-  return (
-    <section className={`premium-hero premium-hero-${variant}`}>
-      <div className="premium-hero-copy">
-        <span className="premium-eyebrow">{eyebrow}</span>
-        <h2>{title}</h2>
-        <p>{body}</p>
-        {meta.length ? (
-          <div className="premium-hero-meta">
-            {meta.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        ) : null}
-        {actions ? <div className="premium-action-row">{actions}</div> : null}
-      </div>
-      <div className="premium-hero-visual" aria-hidden="true">
-        {visual}
-      </div>
-    </section>
-  );
-}
-
 export function PremiumMetric({ label, tone = 'neutral', value, helper }) {
   return (
     <article className={`premium-metric premium-metric-${tone}`}>
