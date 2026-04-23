@@ -324,12 +324,57 @@ function DashboardPage({ currentUser, onLogout }) {
     workspaceSignals.accounts ? `${workspaceSignals.accounts} accounts` : '0 accounts',
   ];
 
-  const workspaceRows = [
-    { label: 'Accounts', value: String(workspaceSignals.accounts).padStart(2, '0'), tone: 'teal' },
-    { label: 'Budgets', value: String(workspaceSignals.budgets).padStart(2, '0'), tone: 'blue' },
-    { label: 'Goals', value: String(workspaceSignals.goals).padStart(2, '0'), tone: 'violet' },
-    { label: 'Renewals', value: String(workspaceSignals.recurring).padStart(2, '0'), tone: 'orange' },
+  const workspaceModules = [
+    {
+      label: 'Accounts',
+      value: workspaceSignals.accounts,
+      tone: 'teal',
+      route: '/accounts',
+      emptyCopy: 'Add the real places your money lives.',
+      readyCopy: 'Money locations are ready to use across Ledgr.',
+    },
+    {
+      label: 'Budgets',
+      value: workspaceSignals.budgets,
+      tone: 'blue',
+      route: '/budget',
+      emptyCopy: 'Set spending guardrails before activity grows.',
+      readyCopy: 'Monthly limits are guiding the workspace.',
+    },
+    {
+      label: 'Goals',
+      value: workspaceSignals.goals,
+      tone: 'violet',
+      route: '/goals',
+      emptyCopy: 'Create the next savings or payoff target.',
+      readyCopy: 'Savings targets are visible in the workspace.',
+    },
+    {
+      label: 'Renewals',
+      value: workspaceSignals.recurring,
+      tone: 'orange',
+      route: '/recurring',
+      emptyCopy: 'Track recurring bills before they surprise you.',
+      readyCopy: 'Upcoming renewals are already in view.',
+    },
   ];
+  const connectedModules = workspaceModules.filter((module) => module.value > 0).length;
+  const nextWorkspaceModule = workspaceModules.find((module) => module.value === 0) || workspaceModules[0];
+  const workspaceSummary = connectedModules === workspaceModules.length
+    ? {
+        kicker: 'Workspace connected',
+        title: 'Overview is linked to every core finance area.',
+        copy: 'Use this page as the decision layer, then jump into any module when you need details.',
+        actionLabel: 'Open insights',
+        actionRoute: '/reports',
+      }
+    : {
+        kicker: `${connectedModules}/${workspaceModules.length} areas ready`,
+        title: `Next priority: ${nextWorkspaceModule.label.toLowerCase()}.`,
+        copy: nextWorkspaceModule.emptyCopy,
+        actionLabel: `Open ${nextWorkspaceModule.label.toLowerCase()}`,
+        actionRoute: nextWorkspaceModule.route,
+      };
 
   const flowState = recentPayments.length
     ? {
@@ -780,25 +825,33 @@ function DashboardPage({ currentUser, onLogout }) {
               <Link className="ref-view-link" to="/reports">Insights</Link>
             </div>
 
-            <div className="ref-statistics-body">
-              <div className="ref-stat-ring">
-                <div className="ref-stat-ring-center">
-                  <strong>{snapshot.recentTransactions.length}</strong>
-                  <span>Payments</span>
-                </div>
+            <div className="ref-workspace-summary">
+              <div>
+                <span className="ref-workspace-kicker">{workspaceSummary.kicker}</span>
+                <strong>{workspaceSummary.title}</strong>
+                <p>{workspaceSummary.copy}</p>
               </div>
+              <Link className="ref-workspace-cta" to={workspaceSummary.actionRoute}>
+                {workspaceSummary.actionLabel}
+              </Link>
+            </div>
 
-              <div className="ref-stat-list">
-                {workspaceRows.map((item) => (
-                  <div key={item.label} className="ref-stat-row">
-                    <div className="ref-stat-label">
-                      <span className={`ref-expense-dot ref-expense-dot-${item.tone}`} />
-                      <span>{item.label}</span>
+            <div className="ref-workspace-route-list">
+              {workspaceModules.map((item) => (
+                <article key={item.label} className="ref-workspace-route">
+                  <div className="ref-workspace-route-copy">
+                    <span className={`ref-expense-dot ref-expense-dot-${item.tone}`} />
+                    <div>
+                      <strong>{item.label}</strong>
+                      <p>{item.value ? item.readyCopy : item.emptyCopy}</p>
                     </div>
-                    <strong>{item.value}</strong>
                   </div>
-                ))}
-              </div>
+                  <div className="ref-workspace-route-meta">
+                    <strong>{String(item.value).padStart(2, '0')}</strong>
+                    <Link to={item.route}>{item.value ? 'Open' : 'Create'}</Link>
+                  </div>
+                </article>
+              ))}
             </div>
           </article>
         </div>

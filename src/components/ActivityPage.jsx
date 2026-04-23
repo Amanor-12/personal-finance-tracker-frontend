@@ -11,6 +11,14 @@ const activityTypes = {
   recurring: { label: 'Recurring', route: '/recurring' },
   transaction: { label: 'Transaction', route: '/transactions' },
 };
+const activityFilterOptions = [
+  { label: 'Everything', value: 'all' },
+  { label: 'Transactions', value: 'transaction' },
+  { label: 'Accounts', value: 'account' },
+  { label: 'Budgets', value: 'budget' },
+  { label: 'Goals', value: 'goal' },
+  { label: 'Recurring', value: 'recurring' },
+];
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
@@ -110,6 +118,8 @@ function ActivityPage({ currentUser, onLogout }) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
     let isCancelled = false;
@@ -161,6 +171,22 @@ function ActivityPage({ currentUser, onLogout }) {
   }, [currentUser?.id, onLogout, refreshKey]);
 
   const events = useMemo(() => buildActivityEvents(records), [records]);
+  const filteredEvents = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return events.filter((event) => {
+      const matchesType = typeFilter === 'all' || event.type === typeFilter;
+      const matchesQuery =
+        !normalizedQuery ||
+        [event.title, event.description, activityTypes[event.type]?.label]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedQuery));
+
+      return matchesType && matchesQuery;
+    });
+  }, [events, query, typeFilter]);
+  const visibleEvents = filteredEvents.slice(0, 30);
+  const hasActiveFilters = Boolean(query.trim()) || typeFilter !== 'all';
   const stats = useMemo(
     () => [
       { label: 'Transactions', value: records.transactions.length },
@@ -219,6 +245,54 @@ function ActivityPage({ currentUser, onLogout }) {
           <Link to="/transactions">Add transaction</Link>
         </div>
 
+        {!isLoading && !loadError && events.length ? (
+          <>
+            <div className="activity-toolbar">
+              <label className="activity-search">
+                <span>Search the stream</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Merchant, goal, budget, account, or note"
+                />
+              </label>
+
+              <div className="activity-filter-pills" aria-label="Filter activity by type">
+                {activityFilterOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`activity-filter-pill${typeFilter === option.value ? ' is-active' : ''}`}
+                    onClick={() => setTypeFilter(option.value)}
+                    aria-pressed={typeFilter === option.value}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              {hasActiveFilters ? (
+                <button className="activity-clear-filters" type="button" onClick={() => {
+                  setQuery('');
+                  setTypeFilter('all');
+                }}>
+                  Clear filters
+                </button>
+              ) : null}
+            </div>
+
+            <div className="activity-results-meta">
+              <strong>
+                {visibleEvents.length === filteredEvents.length
+                  ? `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} in view`
+                  : `${visibleEvents.length} of ${filteredEvents.length} events in view`}
+              </strong>
+              <span>{hasActiveFilters ? 'Filtered from your private workspace records.' : 'Newest records appear first.'}</span>
+            </div>
+          </>
+        ) : null}
+
         {isLoading ? <ActivitySkeleton /> : null}
 
         {!isLoading && loadError ? (
@@ -231,9 +305,9 @@ function ActivityPage({ currentUser, onLogout }) {
           </div>
         ) : null}
 
-        {!isLoading && !loadError && events.length ? (
+        {!isLoading && !loadError && visibleEvents.length ? (
           <div className="activity-timeline">
-            {events.slice(0, 30).map((event) => {
+            {visibleEvents.map((event) => {
               const meta = activityTypes[event.type];
 
               return (
@@ -249,6 +323,23 @@ function ActivityPage({ currentUser, onLogout }) {
                 </Link>
               );
             })}
+          </div>
+        ) : null}
+
+        {!isLoading && !loadError && events.length && !filteredEvents.length ? (
+          <div className="activity-empty-state activity-empty-results">
+            <span className="activity-eyebrow">No matches</span>
+            <h2>No activity matches the current filters.</h2>
+            <p>Try another keyword or open the full stream again to keep reviewing workspace changes.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                setTypeFilter('all');
+              }}
+            >
+              Clear filters
+            </button>
           </div>
         ) : null}
 
