@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
 import { settingsStore } from '../utils/settingsStore';
 
@@ -17,6 +18,28 @@ const otherItems = [
   { label: 'Billing', to: '/billing', icon: 'billing' },
   { label: 'Settings', to: '/settings', icon: 'settings' },
   { label: 'Help & Support', to: '/help', icon: 'help' },
+];
+
+const searchItems = [
+  ...navItems.map((item) => ({
+    icon: item.icon,
+    label: item.label,
+    note: 'Open page',
+    section: 'Pages',
+    to: item.to,
+  })),
+  ...otherItems.map((item) => ({
+    icon: item.icon,
+    label: item.label,
+    note: 'Open page',
+    section: 'Pages',
+    to: item.to,
+  })),
+  { icon: 'transactions', label: 'Add transaction', note: 'Go to the ledger and create a new record', section: 'Actions', to: '/transactions' },
+  { icon: 'accounts', label: 'Add account', note: 'Open wallets and create a money location', section: 'Actions', to: '/accounts' },
+  { icon: 'budget', label: 'Create budget', note: 'Open budgets and set a monthly limit', section: 'Actions', to: '/budget' },
+  { icon: 'goals', label: 'Create goal', note: 'Open goals and add a savings target', section: 'Actions', to: '/goals' },
+  { icon: 'recurring', label: 'Add recurring payment', note: 'Open subscriptions and track a fixed bill', section: 'Actions', to: '/recurring' },
 ];
 
 function SidebarIcon({ type }) {
@@ -147,10 +170,51 @@ function FinanceLayout({
   children,
   rail,
 }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const initials = getInitials(currentUser?.fullName);
   const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
   const workspaceName = settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName).workspaceName;
   const hasRail = Boolean(rail);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  useEffect(() => {
+    setSearchQuery('');
+    setIsSearchFocused(false);
+  }, [location.pathname]);
+
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const searchResults = useMemo(() => {
+    const items = normalizedSearchQuery
+      ? searchItems.filter((item) =>
+          [item.label, item.note, item.section]
+            .filter(Boolean)
+            .some((value) => value.toLowerCase().includes(normalizedSearchQuery))
+        )
+      : searchItems;
+
+    return items.slice(0, 7);
+  }, [normalizedSearchQuery]);
+  const showSearchResults = isSearchFocused || Boolean(normalizedSearchQuery);
+
+  const handleSearchSelect = (to) => {
+    setSearchQuery('');
+    setIsSearchFocused(false);
+    navigate(to);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      setIsSearchFocused(false);
+      return;
+    }
+
+    if (event.key === 'Enter' && searchResults[0]) {
+      event.preventDefault();
+      handleSearchSelect(searchResults[0].to);
+    }
+  };
 
   return (
     <main className="ref-shell">
@@ -241,11 +305,56 @@ function FinanceLayout({
 
       <section className="ref-stage">
         <header className="ref-topbar">
-          <label className="ref-search">
+          <label className={`ref-search${showSearchResults ? ' is-open' : ''}`}>
             <span className="ref-search-icon">
               <SidebarIcon type="search" />
             </span>
-            <input aria-label="Search anything" placeholder="Search Anything..." readOnly value="" />
+            <input
+              aria-autocomplete="list"
+              aria-expanded={showSearchResults}
+              aria-label="Search pages and actions"
+              placeholder="Search pages, actions, support"
+              type="search"
+              value={searchQuery}
+              onBlur={() => {
+                window.setTimeout(() => setIsSearchFocused(false), 120);
+              }}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onKeyDown={handleSearchKeyDown}
+            />
+
+            {showSearchResults ? (
+              <div className="ref-search-panel" role="listbox" aria-label="Workspace search results">
+                {searchResults.length ? (
+                  <div className="ref-search-list">
+                    {searchResults.map((item) => (
+                      <button
+                        key={`${item.section}-${item.label}-${item.to}`}
+                        className="ref-search-item"
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleSearchSelect(item.to)}
+                      >
+                        <span className="ref-search-item-icon">
+                          <SidebarIcon type={item.icon} />
+                        </span>
+                        <span className="ref-search-item-copy">
+                          <small>{item.section}</small>
+                          <strong>{item.label}</strong>
+                          <span>{item.note}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="ref-search-empty">
+                    <strong>No matching routes</strong>
+                    <span>Try searching for transactions, wallets, budgets, goals, billing, or support.</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </label>
 
           <div className="ref-topbar-actions">

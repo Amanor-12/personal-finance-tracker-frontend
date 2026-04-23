@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
 import ReportsIcon from './reports/ReportsIcon';
-import { buildCategoryBreakdown, buildMerchantBreakdown, buildMonthlyTrend, getLargestTrendValue, summarizeReportTransactions } from './reports/reportUtils';
+import {
+  buildCategoryBreakdown,
+  buildMerchantBreakdown,
+  buildMonthlyTrend,
+  buildReportInsights,
+  getLargestTrendValue,
+  summarizeReportTransactions,
+} from './reports/reportUtils';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
 
@@ -76,6 +83,18 @@ function ReportsPage({ currentUser, onLogout }) {
   const merchants = useMemo(() => buildMerchantBreakdown(transactions).slice(0, 5), [transactions]);
   const trend = useMemo(() => buildMonthlyTrend(transactions), [transactions]);
   const largestTrend = useMemo(() => getLargestTrendValue(trend), [trend]);
+  const insights = useMemo(
+    () =>
+      buildReportInsights({
+        budgets,
+        goals,
+        recurringPayments,
+        summary,
+        topCategories: categories,
+        topMerchants: merchants,
+      }),
+    [budgets, categories, goals, merchants, recurringPayments, summary]
+  );
 
   const rail = (
     <aside className="activity-rail">
@@ -152,6 +171,18 @@ function ReportsPage({ currentUser, onLogout }) {
 
       {!isLoading && !loadError && transactions.length ? (
         <>
+          {insights.length ? (
+            <section className="reports-insight-strip" aria-label="Insight callouts">
+              {insights.map((insight) => (
+                <article className={`reports-insight-card reports-insight-card-${insight.tone}`} key={`${insight.label}-${insight.title}`}>
+                  <span>{insight.label}</span>
+                  <strong>{insight.title}</strong>
+                  <p>{insight.body}</p>
+                </article>
+              ))}
+            </section>
+          ) : null}
+
           <PremiumPanel eyebrow="Trend" title="Income vs expenses">
             <div className="reports-trend-chart premium-report-chart">
               {trend.map((item) => (
