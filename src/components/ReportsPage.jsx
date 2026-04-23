@@ -99,7 +99,7 @@ function ReportsPage({ currentUser, onLogout }) {
     <FinanceLayout
       currentUser={currentUser}
       onLogout={onLogout}
-      pageTitle="Reports"
+      pageTitle="Insights"
       pageSubtitle="An analytics workspace that stays quiet until real activity exists."
       rail={rail}
     >

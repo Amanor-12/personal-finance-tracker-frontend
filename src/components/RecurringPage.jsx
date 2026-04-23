@@ -168,7 +168,7 @@ function RecurringPage({ currentUser, onLogout }) {
       <FinanceLayout
         currentUser={currentUser}
         onLogout={onLogout}
-        pageTitle="Recurring"
+        pageTitle="Subscriptions"
         pageSubtitle="A renewal timeline for predictable bills and subscriptions."
         primaryActionLabel="+ Add recurring"
         onPrimaryAction={openCreate}

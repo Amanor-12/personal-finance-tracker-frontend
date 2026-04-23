@@ -164,7 +164,7 @@ function BudgetPage({ currentUser, onLogout }) {
       <FinanceLayout
         currentUser={currentUser}
         onLogout={onLogout}
-        pageTitle="Budget"
+        pageTitle="Budgets"
         pageSubtitle="A monthly planning board for category limits and pressure points."
         primaryActionLabel="+ Create budget"
         onPrimaryAction={openCreate}

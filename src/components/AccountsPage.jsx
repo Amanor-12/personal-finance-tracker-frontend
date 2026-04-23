@@ -169,7 +169,7 @@ function AccountsPage({ currentUser, onLogout }) {
       <FinanceLayout
         currentUser={currentUser}
         onLogout={onLogout}
-        pageTitle="Accounts"
+        pageTitle="Wallets"
         pageSubtitle="A private vault for every place your money lives."
         primaryActionLabel="+ Add account"
         onPrimaryAction={openAddDialog}

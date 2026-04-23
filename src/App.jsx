@@ -21,12 +21,12 @@ const TransactionsPage = lazy(() => import('./components/TransactionsPage'));
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
-  '/accounts': 'Accounts',
+  '/accounts': 'Wallets',
   '/transactions': 'Transactions',
-  '/budget': 'Budget',
+  '/budget': 'Budgets',
   '/goals': 'Goals',
-  '/recurring': 'Recurring',
-  '/reports': 'Reports',
+  '/recurring': 'Subscriptions',
+  '/reports': 'Insights',
   '/activity': 'Activity',
   '/billing': 'Billing',
   '/pricing': 'Pricing',

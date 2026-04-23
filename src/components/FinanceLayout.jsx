@@ -4,12 +4,12 @@ import { settingsStore } from '../utils/settingsStore';
 
 const navItems = [
   { label: 'Overview', to: '/dashboard', icon: 'overview' },
-  { label: 'Accounts', to: '/accounts', icon: 'accounts' },
+  { label: 'Wallets', to: '/accounts', icon: 'accounts' },
   { label: 'Transactions', to: '/transactions', icon: 'transactions' },
-  { label: 'Budget', to: '/budget', icon: 'budget' },
+  { label: 'Budgets', to: '/budget', icon: 'budget' },
   { label: 'Goals', to: '/goals', icon: 'goals' },
-  { label: 'Recurring', to: '/recurring', icon: 'recurring' },
-  { label: 'Reports', to: '/reports', icon: 'reports' },
+  { label: 'Subscriptions', to: '/recurring', icon: 'recurring' },
+  { label: 'Insights', to: '/reports', icon: 'reports' },
 ];
 
 const otherItems = [
