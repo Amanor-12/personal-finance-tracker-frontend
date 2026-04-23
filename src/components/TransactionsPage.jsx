@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
 import DeleteTransactionDialog from './transactions/DeleteTransactionDialog';
 import TransactionDetailDrawer from './transactions/TransactionDetailDrawer';
 import TransactionFormDialog from './transactions/TransactionFormDialog';
@@ -226,71 +226,47 @@ function TransactionsPage({ currentUser, onLogout }) {
         onPrimaryAction={openAddDialog}
         rail={rail}
       >
-        <section className="transactions-command-hero">
-          <div className="transactions-command-copy">
-            <span className="premium-eyebrow">Ledger ops</span>
-            <h2>Find, verify, and control every money movement.</h2>
-            <p>Search, filter, inspect, edit, and delete records from one serious transaction workspace.</p>
-            <div className="transactions-command-meta">
-              <span>{transactions.length} total</span>
-              <span>{visibleTransactions.length} visible</span>
-              <span>{categories.length} categories</span>
+        <section className="transactions-ops-console">
+          <div className="transactions-ops-lead">
+            <span>Ledger operations</span>
+            <h2>Transactions</h2>
+            <p>Review, search, edit, and verify every movement in the workspace without leaving the ledger.</p>
+            <div className="transactions-ops-metrics" aria-label="Transaction summary">
+              <div><span>Inflow</span><strong>{formatMoney(summary.income)}</strong></div>
+              <div><span>Outflow</span><strong>{formatMoney(summary.expenses)}</strong></div>
+              <div><span>Net</span><strong>{formatMoney(summary.net)}</strong></div>
+              <div><span>Records</span><strong>{totalSummary.count}</strong></div>
             </div>
-            <PremiumButton onClick={openAddDialog}>Add transaction</PremiumButton>
           </div>
 
-          <div className="transactions-ledger-preview" aria-hidden="true">
-            <div className="transactions-ledger-preview-top">
-              <span />
-              <strong>Ledger view</strong>
-              <em>Filtered</em>
+          <div className="transactions-ops-controls">
+            <label>
+              <span>Search ledger</span>
+              <input
+                aria-label="Search transactions"
+                placeholder="Merchant, category, account, status"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+            <label>
+              <span>Type</span>
+              <select aria-label="Transaction type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+                <option value="all">All types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </label>
+            <div className="transactions-ops-actions">
+              <button type="button" onClick={openAddDialog}>Add transaction</button>
+              <button type="button" onClick={() => {
+                setQuery('');
+                setTypeFilter('all');
+              }}>Clear</button>
             </div>
-            <div className="transactions-ledger-preview-grid">
-              <span>Merchant</span>
-              <span>Category</span>
-              <span>Status</span>
-              <span>Amount</span>
-            </div>
-            <div className="transactions-ledger-preview-line is-wide" />
-            <div className="transactions-ledger-preview-line" />
-            <div className="transactions-ledger-preview-line is-short" />
           </div>
         </section>
-
-        <PremiumMetrics>
-          <PremiumMetric label="Inflow" value={formatMoney(summary.income)} helper="Visible income" tone="indigo" />
-          <PremiumMetric label="Outflow" value={formatMoney(summary.expenses)} helper="Visible expenses" tone="teal" />
-          <PremiumMetric label="Net" value={formatMoney(summary.net)} helper="Visible cash flow" tone="violet" />
-          <PremiumMetric label="All records" value={String(totalSummary.count)} helper="Full ledger count" />
-        </PremiumMetrics>
-
-        <PremiumPanel
-          eyebrow="Command bar"
-          title="Find the record you need"
-          actions={
-            <PremiumButton tone="secondary" onClick={() => {
-              setQuery('');
-              setTypeFilter('all');
-            }}>
-              Clear
-            </PremiumButton>
-          }
-        >
-          <div className="premium-filter-bar">
-            <input
-              aria-label="Search transactions"
-              placeholder="Search merchant, category, account, or status"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            <select aria-label="Transaction type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-              <option value="all">All types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-            </select>
-          </div>
-        </PremiumPanel>
 
         <PremiumPanel eyebrow="Ledger" title="Transaction history">
           {isLoading ? <PremiumSkeleton count={5} /> : null}

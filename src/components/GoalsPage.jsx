@@ -4,7 +4,7 @@ import DeleteGoalDialog from './goals/DeleteGoalDialog';
 import GoalFormDialog from './goals/GoalFormDialog';
 import GoalsIcon from './goals/GoalsIcon';
 import { formatGoalCurrency, formatGoalDate, getGoalProgressPercent, getGoalTypeLabel } from './goals/goalUtils';
-import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeGoals = (goals) =>
@@ -156,41 +156,32 @@ function GoalsPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <section className="goals-portfolio-hero">
-          <div className="goals-portfolio-copy">
-            <span className="premium-eyebrow">Goal portfolio</span>
-            <h2>Make every target visible without making it loud.</h2>
-            <p>Track savings and payoff targets with simple progress, deadlines, and manual contributions.</p>
-            <div className="goals-portfolio-meta">
-              <span>{visibleGoals.length} visible</span>
-              <span>{progress}% funded</span>
-              <span>{summary.completed} complete</span>
-            </div>
-            <PremiumButton onClick={openCreate}>Create goal</PremiumButton>
+        <section className="goals-portfolio-console" aria-label="Goal portfolio console">
+          <div className="goals-portfolio-panel">
+            <span className="ref-section-chip">Goal portfolio</span>
+            <h2>Targets that feel calm and accountable.</h2>
+            <p>Track savings, payoff goals, and milestones with progress that stays useful without becoming noisy.</p>
+            <button className="ref-secondary-button" type="button" onClick={openCreate}>Create goal</button>
           </div>
 
-          <div className="goals-target-preview" aria-hidden="true">
-            <div className="goals-target-card is-front">
-              <span>Target</span>
-              <strong>Progress</strong>
-              <div><span style={{ width: `${progress ? Math.min(100, progress) : 34}%` }} /></div>
-            </div>
-            <div className="goals-target-card is-back" />
+          <article className="goals-progress-orb" style={{ '--goal-progress': `${Math.min(100, progress)}%` }}>
+            <span>{progress}%</span>
+            <strong>funded</strong>
+            <small>{visibleGoals.length} visible goals</small>
+          </article>
+
+          <div className="goals-portfolio-values">
+            <article><span>Target total</span><strong>{formatGoalCurrency(summary.target)}</strong></article>
+            <article><span>Committed</span><strong>{formatGoalCurrency(summary.current)}</strong></article>
+            <article><span>Remaining</span><strong>{formatGoalCurrency(summary.remaining)}</strong></article>
+            <article><span>Complete</span><strong>{summary.completed}</strong></article>
           </div>
-        </section>
 
-        <PremiumMetrics>
-          <PremiumMetric label="Target total" value={formatGoalCurrency(summary.target)} helper="Visible goals" tone="violet" />
-          <PremiumMetric label="Committed" value={formatGoalCurrency(summary.current)} helper="Saved or paid down" tone="teal" />
-          <PremiumMetric label="Remaining" value={formatGoalCurrency(summary.remaining)} helper="Left to finish" />
-          <PremiumMetric label="Complete" value={String(summary.completed)} helper="Finished goals" tone="indigo" />
-        </PremiumMetrics>
-
-        <PremiumPanel eyebrow="Focus" title="Search goals">
-          <div className="premium-filter-bar">
+          <label className="goals-portfolio-search">
+            <span>Find a goal</span>
             <input aria-label="Search goals" placeholder="Search title, status, or type" type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
-          </div>
-        </PremiumPanel>
+          </label>
+        </section>
 
         <PremiumPanel eyebrow="Targets" title="Goal portfolio">
           {isLoading ? <PremiumSkeleton count={4} /> : null}

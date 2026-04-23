@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import DeleteRecurringDialog from './recurring/DeleteRecurringDialog';
 import RecurringFormDialog from './recurring/RecurringFormDialog';
 import RecurringIcon from './recurring/RecurringIcon';
@@ -174,44 +174,35 @@ function RecurringPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <section className="recurring-renewal-hero">
-          <div className="recurring-renewal-copy">
-            <span className="premium-eyebrow">Renewal desk</span>
-            <h2>Know what repeats before it charges again.</h2>
-            <p>Track bills, subscriptions, rent, insurance, and memberships by next payment date and recurring impact.</p>
-            <div className="recurring-renewal-meta">
-              <span>{summary.active} active</span>
-              <span>{formatRecurringCurrency(summary.monthly)} monthly</span>
-              <span>{nextPayment ? formatDaysUntil(nextPayment.daysUntilNextPayment) : 'No upcoming'}</span>
+        <section className="recurring-queue-console" aria-label="Recurring payment queue">
+          <div className="recurring-queue-head">
+            <div>
+              <span className="ref-section-chip">Renewal queue</span>
+              <h2>Predictable charges, sorted before they hit.</h2>
+              <p>Track subscriptions, bills, rent, insurance, and memberships by impact and next due date.</p>
             </div>
-            <PremiumButton onClick={openCreate}>Add recurring</PremiumButton>
+            <button className="ref-secondary-button" type="button" onClick={openCreate}>Add recurring</button>
           </div>
 
-          <div className="recurring-renewal-preview" aria-hidden="true">
-            <div className="recurring-renewal-card">
-              <span>Next</span>
-              <strong>{nextPayment ? 'Scheduled' : 'Nothing scheduled'}</strong>
+          <div className="recurring-queue-body">
+            <article className="recurring-next-card">
+              <span>Next due</span>
+              <strong>{nextPayment?.name || 'Nothing scheduled'}</strong>
+              <p>{nextPayment ? `${formatRecurringCurrency(nextPayment.amount)} ${formatDaysUntil(nextPayment.daysUntilNextPayment)}` : 'Create one recurring item to build your queue.'}</p>
+            </article>
+
+            <div className="recurring-queue-stats">
+              <article><span>Monthly</span><strong>{formatRecurringCurrency(summary.monthly)}</strong></article>
+              <article><span>Annualized</span><strong>{formatRecurringCurrency(summary.annual)}</strong></article>
+              <article><span>Active</span><strong>{summary.active}</strong></article>
             </div>
-            <div className="recurring-renewal-path">
-              <span />
-              <span />
-              <span />
-            </div>
+
+            <label className="recurring-queue-search">
+              <span>Search renewals</span>
+              <input aria-label="Search recurring payments" placeholder="Bill, category, account, or status" type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
+            </label>
           </div>
         </section>
-
-        <PremiumMetrics>
-          <PremiumMetric label="Monthly" value={formatRecurringCurrency(summary.monthly)} helper="Active recurring impact" tone="teal" />
-          <PremiumMetric label="Annualized" value={formatRecurringCurrency(summary.annual)} helper="Projected active outflow" tone="indigo" />
-          <PremiumMetric label="Active" value={String(summary.active)} helper="Visible active items" />
-          <PremiumMetric label="Next" value={nextPayment ? formatDaysUntil(nextPayment.daysUntilNextPayment) : 'None'} helper="Closest renewal" tone="amber" />
-        </PremiumMetrics>
-
-        <PremiumPanel eyebrow="Timeline controls" title="Search renewals">
-          <div className="premium-filter-bar">
-            <input aria-label="Search recurring payments" placeholder="Search bill, category, account, or status" type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
-          </div>
-        </PremiumPanel>
 
         <PremiumPanel eyebrow="Renewals" title="Recurring payments">
           {isLoading ? <PremiumSkeleton count={4} /> : null}

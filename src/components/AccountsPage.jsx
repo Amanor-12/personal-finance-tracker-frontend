@@ -3,7 +3,7 @@ import FinanceLayout from './FinanceLayout';
 import AccountFormDialog from './accounts/AccountFormDialog';
 import AccountsIcon from './accounts/AccountsIcon';
 import { formatAccountCurrency, getAccountTypeLabel } from './accounts/accountUtils';
-import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { accountStore } from '../utils/accountStore';
 
 const summarizeAccounts = (accounts) => {
@@ -175,57 +175,36 @@ function AccountsPage({ currentUser, onLogout }) {
         onPrimaryAction={openAddDialog}
         rail={rail}
       >
-        <section className="accounts-vault-hero">
-          <div className="accounts-vault-hero-copy">
-            <span className="premium-eyebrow">Account vault</span>
-            <h2>A clean map of where your money lives.</h2>
-            <p>Group checking, savings, cards, cash, investments, and manual balances into one private account vault.</p>
-            <div className="accounts-vault-hero-meta">
-              <span>{summary.activeCount} active</span>
-              <span>{summary.archivedCount} archived</span>
-              <span>{summary.primary?.name || 'No primary'}</span>
-            </div>
-            <PremiumButton onClick={openAddDialog}>Add account</PremiumButton>
+        <section className="accounts-command-board" aria-label="Account workspace">
+          <div className="accounts-command-copy">
+            <span className="ref-section-chip">Vault workspace</span>
+            <h2>Every money location, organized.</h2>
+            <p>Create manual accounts for checking, savings, cards, cash, investments, and anything else you track.</p>
+            <button className="ref-secondary-button" type="button" onClick={openAddDialog}>Add account</button>
           </div>
 
-          <div className="accounts-vault-visual" aria-hidden="true">
-            <div className="accounts-safe-door">
-              <span className="accounts-safe-ring" />
-              <span className="accounts-safe-ring is-inner" />
-              <span className="accounts-safe-handle" />
-            </div>
-            <div className="accounts-vault-slots">
-              <span>Checking</span>
-              <span>Savings</span>
-              <span>Cards</span>
-            </div>
-          </div>
-        </section>
-
-        <PremiumMetrics>
-          <PremiumMetric label="Total balance" value={formatAccountCurrency(summary.totalBalance)} helper="Active accounts" tone="teal" />
-          <PremiumMetric label="Active" value={String(summary.activeCount)} helper="Open money locations" tone="indigo" />
-          <PremiumMetric label="Archived" value={String(summary.archivedCount)} helper="Hidden from active totals" />
-          <PremiumMetric label="Primary" value={summary.primary?.name || 'Not set'} helper="Default account" tone="violet" />
-        </PremiumMetrics>
-
-        <section className="accounts-vault-overview" aria-label="Account vault overview">
-          <article className="accounts-primary-vault">
+          <article className="accounts-command-primary">
             <span>Primary money location</span>
-            <h3>{summary.primary?.name || 'No primary account yet'}</h3>
+            <h3>{summary.primary?.name || 'Not selected yet'}</h3>
             <p>
               {summary.primary
-                ? `${formatAccountCurrency(summary.primary.currentBalance, summary.primary.currency)} available in ${getAccountTypeLabel(summary.primary.accountType)}.`
-                : 'Create an account and mark it primary when it should be the default for future workflows.'}
+                ? `${formatAccountCurrency(summary.primary.currentBalance, summary.primary.currency)} in ${getAccountTypeLabel(summary.primary.accountType)}.`
+                : 'Add an account, then choose which one should act as your default workspace account.'}
             </p>
           </article>
 
-          <article className="accounts-type-map">
-            <div>
+          <div className="accounts-command-stats" aria-label="Account summary">
+            <article><span>Total balance</span><strong>{formatAccountCurrency(summary.totalBalance)}</strong></article>
+            <article><span>Active</span><strong>{summary.activeCount}</strong></article>
+            <article><span>Archived</span><strong>{summary.archivedCount}</strong></article>
+          </div>
+
+          <div className="accounts-command-map">
+            <div className="accounts-command-map-head">
               <span>Account mix</span>
               <strong>{summary.activeCount} active</strong>
             </div>
-            <div className="accounts-type-list">
+            <div className="accounts-command-type-list">
               {Object.keys(typeBreakdown).length ? (
                 Object.entries(typeBreakdown).map(([label, count]) => (
                   <span key={label}>
@@ -237,25 +216,29 @@ function AccountsPage({ currentUser, onLogout }) {
                 <p>No account types yet.</p>
               )}
             </div>
-          </article>
-        </section>
-
-        <PremiumPanel eyebrow="Controls" title="Search your vault">
-          <div className="premium-filter-bar">
-            <input
-              aria-label="Search accounts"
-              placeholder="Search account, institution, type, or identifier"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-            <select aria-label="Account status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option value="active">Active</option>
-              <option value="archived">Archived</option>
-              <option value="all">All accounts</option>
-            </select>
           </div>
-        </PremiumPanel>
+
+          <div className="accounts-command-controls">
+            <label>
+              <span>Search vault</span>
+              <input
+                aria-label="Search accounts"
+                placeholder="Account, institution, type, or identifier"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+            <label>
+              <span>Status</span>
+              <select aria-label="Account status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="active">Active</option>
+                <option value="archived">Archived</option>
+                <option value="all">All accounts</option>
+              </select>
+            </label>
+          </div>
+        </section>
 
         <PremiumPanel eyebrow="Vault" title="Manual accounts">
           {isLoading ? <PremiumSkeleton count={4} /> : null}

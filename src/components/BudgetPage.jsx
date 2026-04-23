@@ -4,7 +4,7 @@ import BudgetFormDialog from './budgets/BudgetFormDialog';
 import BudgetsIcon from './budgets/BudgetsIcon';
 import DeleteBudgetDialog from './budgets/DeleteBudgetDialog';
 import { formatBudgetCurrency, formatBudgetPeriod, getCurrentBudgetPeriod } from './budgets/budgetUtils';
-import { PremiumButton, PremiumEmpty, PremiumMetric, PremiumMetrics, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeBudgets = (budgets) =>
@@ -89,6 +89,7 @@ function BudgetPage({ currentUser, onLogout }) {
     return currentBudgets.filter((budget) => !normalizedQuery || budget.categoryName.toLowerCase().includes(normalizedQuery));
   }, [currentBudgets, query]);
   const summary = useMemo(() => summarizeBudgets(visibleBudgets), [visibleBudgets]);
+  const spendRatio = summary.totalBudgeted ? Math.min(999, Math.round((summary.totalSpent / summary.totalBudgeted) * 100)) : 0;
 
   const openCreate = () => {
     setEditingBudget(null);
@@ -169,71 +170,43 @@ function BudgetPage({ currentUser, onLogout }) {
         onPrimaryAction={openCreate}
         rail={rail}
       >
-        <section className="budget-control-hero">
-          <div className="budget-control-copy">
-            <span className="premium-eyebrow">Budget control</span>
-            <h2>Turn monthly limits into clear decisions.</h2>
-            <p>Budget only the categories that matter, then track pressure as real transactions arrive.</p>
-            <div className="budget-control-meta">
-              <span>{formatBudgetPeriod(period.month, period.year)}</span>
-              <span>{visibleBudgets.length} visible</span>
-              <span>{summary.overspent} over limit</span>
-            </div>
-            <PremiumButton onClick={openCreate}>Create budget</PremiumButton>
-          </div>
-
-          <div className="budget-calendar-preview" aria-hidden="true">
-            <div className="budget-calendar-head">
-              <strong>Month plan</strong>
-              <span>Pressure map</span>
-            </div>
-            <div className="budget-calendar-grid">
-              {Array.from({ length: 18 }).map((_, index) => (
-                <span key={index} className={index % 5 === 0 ? 'is-active' : ''} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <PremiumMetrics>
-          <PremiumMetric label="Budgeted" value={formatBudgetCurrency(summary.totalBudgeted)} helper="Visible limits" tone="amber" />
-          <PremiumMetric label="Spent" value={formatBudgetCurrency(summary.totalSpent)} helper="Matched transactions" />
-          <PremiumMetric label="Remaining" value={formatBudgetCurrency(summary.remaining)} helper="Budget minus spend" tone="teal" />
-          <PremiumMetric label="Overspent" value={String(summary.overspent)} helper="Categories over limit" tone="violet" />
-        </PremiumMetrics>
-
-        <section className="budget-pressure-board" aria-label="Budget pressure board">
-          <article className="budget-pressure-main">
-            <span>Monthly pressure</span>
-            <h3>{summary.overspent ? `${summary.overspent} over limit` : 'No pressure detected'}</h3>
-            <p>
-              {currentBudgets.length
-                ? 'Pressure is calculated from your category budgets and matched spending for the active month.'
-                : 'Create one category budget to start measuring pressure honestly.'}
-            </p>
-          </article>
-          <article className="budget-pressure-meter">
-            <span>Spend ratio</span>
-            <strong>
-              {summary.totalBudgeted ? `${Math.min(999, Math.round((summary.totalSpent / summary.totalBudgeted) * 100))}%` : '0%'}
-            </strong>
+        <section className="budget-cockpit" aria-label="Budget cockpit">
+          <div className="budget-cockpit-header">
             <div>
-              <span style={{ width: summary.totalBudgeted ? `${Math.min(100, (summary.totalSpent / summary.totalBudgeted) * 100)}%` : '0%' }} />
+              <span className="ref-section-chip">Monthly plan</span>
+              <h2>{formatBudgetPeriod(period.month, period.year)}</h2>
+              <p>Budget categories only where limits help you make better decisions.</p>
             </div>
-          </article>
-        </section>
-
-        <PremiumPanel eyebrow="Planner controls" title="Focus this month">
-          <div className="premium-filter-bar">
-            <input
-              aria-label="Search budgets"
-              placeholder="Search category"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
+            <button className="ref-secondary-button" type="button" onClick={openCreate}>Create budget</button>
           </div>
-        </PremiumPanel>
+
+          <div className="budget-cockpit-grid">
+            <article className="budget-cockpit-meter">
+              <span>Spend ratio</span>
+              <strong>{spendRatio}%</strong>
+              <div><span style={{ width: `${Math.min(100, spendRatio)}%` }} /></div>
+              <p>{summary.overspent ? `${summary.overspent} category over limit` : 'No pressure detected'}</p>
+            </article>
+
+            <div className="budget-cockpit-ledger">
+              <article><span>Budgeted</span><strong>{formatBudgetCurrency(summary.totalBudgeted)}</strong></article>
+              <article><span>Spent</span><strong>{formatBudgetCurrency(summary.totalSpent)}</strong></article>
+              <article><span>Remaining</span><strong>{formatBudgetCurrency(summary.remaining)}</strong></article>
+              <article><span>Categories</span><strong>{visibleBudgets.length}</strong></article>
+            </div>
+
+            <label className="budget-cockpit-search">
+              <span>Find category</span>
+              <input
+                aria-label="Search budgets"
+                placeholder="Search category"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </label>
+          </div>
+        </section>
 
         <PremiumPanel eyebrow="Budget board" title="Category limits">
           {isLoading ? <PremiumSkeleton count={4} /> : null}

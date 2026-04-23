@@ -12397,3 +12397,551 @@ textarea:focus-visible,
     min-height: 220px;
   }
 }
+
+/* Tool-first finance workspaces */
+.transactions-ops-console,
+.accounts-command-board,
+.budget-cockpit,
+.goals-portfolio-console,
+.recurring-queue-console,
+.reports-analysis-console {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  border: 1px solid rgba(202, 210, 216, 0.72);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(40, 183, 207, 0.12), transparent 24%),
+    radial-gradient(circle at 8% 10%, rgba(111, 108, 249, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 253, 0.95));
+  box-shadow: 0 26px 60px rgba(17, 27, 66, 0.06);
+}
+
+.transactions-ops-console::before,
+.accounts-command-board::before,
+.budget-cockpit::before,
+.goals-portfolio-console::before,
+.recurring-queue-console::before,
+.reports-analysis-console::before {
+  content: '';
+  position: absolute;
+  inset: auto -76px -90px auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(111, 108, 249, 0.12) 0 34%, transparent 35% 100%);
+  pointer-events: none;
+}
+
+.transactions-ops-console {
+  padding: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.52fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.transactions-ops-lead,
+.transactions-ops-controls,
+.accounts-command-primary,
+.accounts-command-map,
+.accounts-command-controls,
+.budget-cockpit-meter,
+.budget-cockpit-ledger article,
+.budget-cockpit-search,
+.goals-progress-orb,
+.goals-portfolio-values article,
+.goals-portfolio-search,
+.recurring-next-card,
+.recurring-queue-stats article,
+.recurring-queue-search,
+.reports-analysis-state,
+.reports-analysis-kpis article {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(202, 210, 216, 0.68);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18px 38px rgba(17, 27, 66, 0.045);
+}
+
+.transactions-ops-lead {
+  min-height: 275px;
+  padding: 28px;
+  display: grid;
+  align-content: space-between;
+  border-radius: 26px;
+}
+
+.transactions-ops-lead > span,
+.transactions-ops-controls label span,
+.accounts-command-primary span,
+.accounts-command-map-head span,
+.accounts-command-controls label span,
+.budget-cockpit-meter > span,
+.budget-cockpit-ledger span,
+.budget-cockpit-search span,
+.goals-portfolio-panel > span,
+.goals-portfolio-values span,
+.goals-portfolio-search span,
+.recurring-next-card > span,
+.recurring-queue-stats span,
+.recurring-queue-search span,
+.reports-analysis-state span,
+.reports-analysis-kpis span {
+  color: #687388;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.transactions-ops-lead h2,
+.accounts-command-copy h2,
+.budget-cockpit-header h2,
+.goals-portfolio-panel h2,
+.recurring-queue-head h2,
+.reports-analysis-copy h2 {
+  margin: 14px 0 0;
+  color: var(--ref-navy);
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 0.96;
+  letter-spacing: -0.07em;
+}
+
+.transactions-ops-lead p,
+.accounts-command-copy p,
+.accounts-command-primary p,
+.budget-cockpit-header p,
+.budget-cockpit-meter p,
+.goals-portfolio-panel p,
+.recurring-queue-head p,
+.recurring-next-card p,
+.reports-analysis-copy p,
+.reports-analysis-state p {
+  max-width: 640px;
+  margin: 12px 0 0;
+  color: #738098;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.transactions-ops-metrics,
+.accounts-command-stats,
+.budget-cockpit-ledger,
+.goals-portfolio-values,
+.recurring-queue-stats,
+.reports-analysis-kpis {
+  display: grid;
+  gap: 12px;
+}
+
+.transactions-ops-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.transactions-ops-metrics div,
+.accounts-command-stats article {
+  min-height: 82px;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 20px;
+  background: rgba(248, 250, 253, 0.9);
+  border: 1px solid rgba(225, 230, 238, 0.9);
+}
+
+.transactions-ops-metrics strong,
+.accounts-command-stats strong,
+.budget-cockpit-ledger strong,
+.goals-portfolio-values strong,
+.recurring-queue-stats strong,
+.reports-analysis-kpis strong {
+  color: var(--ref-navy);
+  font-size: 1.16rem;
+  letter-spacing: -0.04em;
+}
+
+.transactions-ops-metrics span {
+  color: #7c879b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.transactions-ops-controls {
+  padding: 22px;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  border-radius: 26px;
+}
+
+.transactions-ops-controls label,
+.accounts-command-controls label,
+.budget-cockpit-search,
+.goals-portfolio-search,
+.recurring-queue-search {
+  display: grid;
+  gap: 8px;
+}
+
+.transactions-ops-controls input,
+.transactions-ops-controls select,
+.accounts-command-controls input,
+.accounts-command-controls select,
+.budget-cockpit-search input,
+.goals-portfolio-search input,
+.recurring-queue-search input {
+  min-height: 50px;
+  width: 100%;
+  border: 1px solid rgba(202, 210, 216, 0.78);
+  border-radius: 16px;
+  background: rgba(248, 250, 253, 0.92);
+  color: var(--ref-navy);
+  font: inherit;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.transactions-ops-controls input:focus,
+.transactions-ops-controls select:focus,
+.accounts-command-controls input:focus,
+.accounts-command-controls select:focus,
+.budget-cockpit-search input:focus,
+.goals-portfolio-search input:focus,
+.recurring-queue-search input:focus {
+  border-color: rgba(90, 99, 247, 0.42);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(90, 99, 247, 0.1);
+}
+
+.transactions-ops-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.transactions-ops-actions button {
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 15px;
+  border: 1px solid rgba(202, 210, 216, 0.72);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ref-navy);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.transactions-ops-actions button:first-child {
+  color: #ffffff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #6f6cf9 0%, #5748f7 45%, #28b7cf 100%);
+  box-shadow: 0 18px 36px rgba(84, 72, 247, 0.16);
+}
+
+.accounts-command-board {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(270px, 0.72fr);
+  gap: 18px;
+}
+
+.accounts-command-copy {
+  position: relative;
+  z-index: 1;
+  min-height: 260px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+}
+
+.accounts-command-primary,
+.accounts-command-map,
+.accounts-command-controls {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.accounts-command-primary h3,
+.reports-analysis-state strong,
+.recurring-next-card strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--ref-navy);
+  font-size: 1.38rem;
+  letter-spacing: -0.04em;
+}
+
+.accounts-command-stats {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.accounts-command-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.accounts-command-map-head strong {
+  color: var(--ref-navy);
+}
+
+.accounts-command-type-list {
+  display: grid;
+  gap: 10px;
+}
+
+.accounts-command-type-list span {
+  min-height: 42px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px;
+  color: #748096;
+  background: rgba(248, 250, 253, 0.92);
+  border: 1px solid rgba(225, 230, 238, 0.9);
+  font-weight: 800;
+}
+
+.accounts-command-type-list b {
+  color: var(--ref-navy);
+}
+
+.accounts-command-type-list p {
+  margin: 0;
+  color: #7c879b;
+}
+
+.accounts-command-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.budget-cockpit {
+  padding: 28px;
+  display: grid;
+  gap: 22px;
+}
+
+.budget-cockpit-header,
+.recurring-queue-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.budget-cockpit-grid,
+.recurring-queue-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.45fr) minmax(0, 1fr) minmax(240px, 0.55fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.budget-cockpit-meter,
+.budget-cockpit-search {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.budget-cockpit-meter strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--ref-navy);
+  font-size: 2.4rem;
+  letter-spacing: -0.07em;
+}
+
+.budget-cockpit-meter div,
+.budget-board-track,
+.goals-progress-track {
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(231, 237, 246, 0.95);
+}
+
+.budget-cockpit-meter div {
+  height: 14px;
+  margin-top: 18px;
+}
+
+.budget-cockpit-meter div span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2bc1b0 0%, #5a5ef6 100%);
+}
+
+.budget-cockpit-ledger {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.budget-cockpit-ledger article {
+  min-height: 112px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 22px;
+}
+
+.goals-portfolio-console {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) 230px minmax(260px, 0.55fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.goals-portfolio-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+}
+
+.goals-progress-orb {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  border-radius: 999px;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle closest-side, rgba(255, 255, 255, 0.96) 58%, transparent 59% 100%),
+    conic-gradient(#2bc1b0 0 var(--goal-progress), #5a5ef6 var(--goal-progress) calc(var(--goal-progress) + 16%), rgba(231, 237, 246, 0.92) 0 100%);
+}
+
+.goals-progress-orb span {
+  color: var(--ref-navy);
+  font-size: 2.25rem;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+}
+
+.goals-progress-orb strong,
+.goals-progress-orb small {
+  color: #748096;
+  font-size: 0.82rem;
+}
+
+.goals-portfolio-values {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.goals-portfolio-values article,
+.goals-portfolio-search {
+  min-height: 100px;
+  padding: 16px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 22px;
+}
+
+.goals-portfolio-search {
+  grid-column: 1 / -1;
+}
+
+.recurring-queue-console {
+  padding: 28px;
+  display: grid;
+  gap: 22px;
+}
+
+.recurring-next-card,
+.recurring-queue-search,
+.reports-analysis-state {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.recurring-queue-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recurring-queue-stats article {
+  min-height: 118px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 22px;
+}
+
+.reports-analysis-console {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(260px, 0.46fr);
+  gap: 18px;
+}
+
+.reports-analysis-copy {
+  position: relative;
+  z-index: 1;
+  min-height: 230px;
+  display: grid;
+  align-content: center;
+}
+
+.reports-analysis-kpis {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.reports-analysis-kpis article {
+  min-height: 102px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 22px;
+}
+
+@media (max-width: 1180px) {
+  .transactions-ops-console,
+  .accounts-command-board,
+  .budget-cockpit-grid,
+  .goals-portfolio-console,
+  .recurring-queue-body,
+  .reports-analysis-console {
+    grid-template-columns: 1fr;
+  }
+
+  .accounts-command-stats,
+  .reports-analysis-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .transactions-ops-metrics,
+  .accounts-command-stats,
+  .budget-cockpit-ledger,
+  .goals-portfolio-values,
+  .recurring-queue-stats,
+  .reports-analysis-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-cockpit-header,
+  .recurring-queue-head,
+  .transactions-ops-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
