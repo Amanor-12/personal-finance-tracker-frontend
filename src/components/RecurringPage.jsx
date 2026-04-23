@@ -205,16 +205,19 @@ function RecurringPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && visiblePayments.length ? (
-            <div className="premium-list">
+            <div className="recurring-timeline-list">
               {visiblePayments.map((payment) => (
-                <article className="premium-row" key={payment.id}>
-                  <div>
+                <article className="recurring-timeline-item" key={payment.id}>
+                  <span className="recurring-timeline-dot" />
+                  <div className="recurring-timeline-main">
                     <strong>{payment.name}</strong>
                     <small>{payment.categoryName} - {payment.accountName || 'No account'} - {getFrequencyLabel(payment.billingFrequency)}</small>
                   </div>
-                  <span>{formatRecurringDate(payment.nextPaymentDate)}</span>
-                  <strong>{formatRecurringCurrency(payment.amount)}</strong>
-                  <div className="premium-row-actions">
+                  <div className="recurring-timeline-date">
+                    <span>{formatRecurringDate(payment.nextPaymentDate)}</span>
+                    <strong>{formatRecurringCurrency(payment.amount)}</strong>
+                  </div>
+                  <div className="recurring-timeline-actions">
                     <button type="button" onClick={() => {
                       setEditingPayment(payment);
                       setIsFormOpen(true);

@@ -187,16 +187,23 @@ function GoalsPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && visibleGoals.length ? (
-            <div className="premium-list">
+            <div className="goals-card-grid">
               {visibleGoals.map((goal) => (
-                <article className="premium-row" key={goal.id}>
-                  <div>
-                    <strong>{goal.title}</strong>
-                    <small>{getGoalTypeLabel(goal.goalType)} - {formatGoalDate(goal.targetDate)}</small>
+                <article className="goals-portfolio-card" key={goal.id}>
+                  <div className="goals-card-top">
+                    <span>{getGoalTypeLabel(goal.goalType)}</span>
+                    <strong>{Math.round(getGoalProgressPercent(goal))}%</strong>
                   </div>
-                  <span>{Math.round(getGoalProgressPercent(goal))}% reached</span>
-                  <strong>{formatGoalCurrency(goal.remainingAmount)} left</strong>
-                  <div className="premium-row-actions">
+                  <h3>{goal.title}</h3>
+                  <p>Target date: {formatGoalDate(goal.targetDate)}</p>
+                  <div className="goals-progress-track">
+                    <span style={{ width: `${Math.min(100, getGoalProgressPercent(goal))}%` }} />
+                  </div>
+                  <div className="goals-card-values">
+                    <span>{formatGoalCurrency(goal.currentAmount)} saved</span>
+                    <strong>{formatGoalCurrency(goal.remainingAmount)} left</strong>
+                  </div>
+                  <div className="goals-card-actions">
                     <button type="button" onClick={() => {
                       setEditingGoal(goal);
                       setIsFormOpen(true);

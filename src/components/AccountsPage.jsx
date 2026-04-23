@@ -19,6 +19,15 @@ const summarizeAccounts = (accounts) => {
   };
 };
 
+const summarizeAccountTypes = (accounts) =>
+  accounts
+    .filter((account) => account.status === 'active')
+    .reduce((summary, account) => {
+      const label = getAccountTypeLabel(account.accountType);
+      summary[label] = (summary[label] || 0) + 1;
+      return summary;
+    }, {});
+
 function AccountsPage({ currentUser, onLogout }) {
   const [accounts, setAccounts] = useState([]);
   const [query, setQuery] = useState('');
@@ -87,6 +96,7 @@ function AccountsPage({ currentUser, onLogout }) {
   }, [accounts, query, statusFilter]);
 
   const summary = useMemo(() => summarizeAccounts(accounts), [accounts]);
+  const typeBreakdown = useMemo(() => summarizeAccountTypes(accounts), [accounts]);
 
   const openAddDialog = () => {
     setEditingAccount(null);
@@ -182,6 +192,37 @@ function AccountsPage({ currentUser, onLogout }) {
           <PremiumMetric label="Primary" value={summary.primary?.name || 'Not set'} helper="Default account" tone="violet" />
         </PremiumMetrics>
 
+        <section className="accounts-vault-overview" aria-label="Account vault overview">
+          <article className="accounts-primary-vault">
+            <span>Primary money location</span>
+            <h3>{summary.primary?.name || 'No primary account yet'}</h3>
+            <p>
+              {summary.primary
+                ? `${formatAccountCurrency(summary.primary.currentBalance, summary.primary.currency)} available in ${getAccountTypeLabel(summary.primary.accountType)}.`
+                : 'Create an account and mark it primary when it should be the default for future workflows.'}
+            </p>
+          </article>
+
+          <article className="accounts-type-map">
+            <div>
+              <span>Account mix</span>
+              <strong>{summary.activeCount} active</strong>
+            </div>
+            <div className="accounts-type-list">
+              {Object.keys(typeBreakdown).length ? (
+                Object.entries(typeBreakdown).map(([label, count]) => (
+                  <span key={label}>
+                    {label}
+                    <b>{count}</b>
+                  </span>
+                ))
+              ) : (
+                <p>No account types yet.</p>
+              )}
+            </div>
+          </article>
+        </section>
+
         <PremiumPanel eyebrow="Controls" title="Search your vault">
           <div className="premium-filter-bar">
             <input
@@ -207,16 +248,17 @@ function AccountsPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && visibleAccounts.length ? (
-            <div className="premium-list">
+            <div className="accounts-vault-list">
               {visibleAccounts.map((account) => (
-                <article className="premium-row" key={account.id}>
-                  <div>
-                    <strong>{account.name}</strong>
-                    <small>{account.institutionName || getAccountTypeLabel(account.accountType)} - {account.maskedIdentifier || 'No identifier'}</small>
+                <article className="accounts-vault-card" key={account.id}>
+                  <div className="accounts-vault-card-top">
+                    <span>{getAccountTypeLabel(account.accountType)}</span>
+                    <strong>{account.isPrimary ? 'Primary' : account.status}</strong>
                   </div>
-                  <span>{account.status}{account.isPrimary ? ' - Primary' : ''}</span>
-                  <strong>{formatAccountCurrency(account.currentBalance, account.currency)}</strong>
-                  <div className="premium-row-actions">
+                  <h3>{account.name}</h3>
+                  <p>{account.institutionName || account.maskedIdentifier || 'Manual account'}</p>
+                  <b>{formatAccountCurrency(account.currentBalance, account.currency)}</b>
+                  <div className="accounts-vault-card-actions">
                     <button type="button" onClick={() => openEditDialog(account)}>Edit</button>
                     {account.status === 'active' ? (
                       <button className="is-danger" type="button" onClick={() => archiveAccount(account)}>Archive</button>

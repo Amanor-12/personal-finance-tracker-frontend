@@ -11368,3 +11368,325 @@ textarea:focus-visible,
     min-height: auto;
   }
 }
+
+.accounts-vault-overview,
+.budget-pressure-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.62fr);
+  gap: 16px;
+}
+
+.accounts-primary-vault,
+.accounts-type-map,
+.budget-pressure-main,
+.budget-pressure-meter {
+  min-height: 194px;
+  padding: 24px;
+  display: grid;
+  align-content: space-between;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(207, 216, 230, 0.78);
+  box-shadow: 0 24px 54px rgba(17, 27, 66, 0.06);
+}
+
+.accounts-primary-vault {
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.22), transparent 18%),
+    linear-gradient(135deg, #111b42, #2454df 62%, #18aab2);
+}
+
+.accounts-type-map,
+.budget-pressure-meter {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.budget-pressure-main {
+  background:
+    radial-gradient(circle at 84% 18%, rgba(245, 158, 11, 0.18), transparent 22%),
+    linear-gradient(135deg, #fffdf7, #ffffff);
+}
+
+.accounts-primary-vault span,
+.accounts-type-map span,
+.budget-pressure-main span,
+.budget-pressure-meter span {
+  color: #748096;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.accounts-primary-vault span,
+.accounts-primary-vault p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.accounts-primary-vault h3,
+.accounts-type-map strong,
+.budget-pressure-main h3,
+.budget-pressure-meter strong {
+  margin: 10px 0 0;
+  color: var(--ref-navy);
+  font-size: clamp(1.5rem, 2.6vw, 2.15rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.accounts-primary-vault h3 {
+  color: #ffffff;
+}
+
+.accounts-primary-vault p,
+.budget-pressure-main p {
+  margin: 10px 0 0;
+  max-width: 560px;
+  line-height: 1.62;
+}
+
+.accounts-type-list {
+  display: grid;
+  gap: 8px;
+}
+
+.accounts-type-list span {
+  min-height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 14px;
+  color: #536078;
+  background: #f8fafc;
+  border: 1px solid rgba(215, 223, 235, 0.82);
+}
+
+.accounts-type-list p {
+  margin: 0;
+  color: #748096;
+}
+
+.accounts-vault-list,
+.goals-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.accounts-vault-card,
+.goals-portfolio-card {
+  min-height: 230px;
+  padding: 20px;
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(34, 185, 190, 0.1), transparent 22%),
+    #f8fafc;
+  border: 1px solid rgba(215, 223, 235, 0.86);
+}
+
+.accounts-vault-card-top,
+.goals-card-top,
+.goals-card-values,
+.recurring-timeline-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accounts-vault-card-top span,
+.accounts-vault-card-top strong,
+.goals-card-top span,
+.goals-card-top strong {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #536078;
+  background: #ffffff;
+  border: 1px solid rgba(207, 216, 230, 0.82);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.accounts-vault-card h3,
+.goals-portfolio-card h3 {
+  margin: 0;
+  color: var(--ref-navy);
+  font-size: 1.35rem;
+  letter-spacing: -0.045em;
+}
+
+.accounts-vault-card p,
+.goals-portfolio-card p {
+  margin: 0;
+  color: #748096;
+}
+
+.accounts-vault-card b {
+  color: var(--ref-navy);
+  font-size: 1.5rem;
+  letter-spacing: -0.05em;
+}
+
+.accounts-vault-card-actions,
+.goals-card-actions,
+.budget-board-actions,
+.recurring-timeline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accounts-vault-card-actions button,
+.goals-card-actions button,
+.budget-board-actions button,
+.recurring-timeline-actions button {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: #536078;
+  background: #ffffff;
+  border: 1px solid rgba(207, 216, 230, 0.92);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.accounts-vault-card-actions button.is-danger,
+.goals-card-actions button.is-danger,
+.budget-board-actions button.is-danger,
+.recurring-timeline-actions button.is-danger {
+  color: #b42318;
+}
+
+.budget-pressure-meter div,
+.budget-board-track,
+.goals-progress-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9eef6;
+}
+
+.budget-pressure-meter div span,
+.budget-board-track span,
+.goals-progress-track span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #665df5, #22b9be);
+}
+
+.budget-board-list {
+  display: grid;
+  gap: 12px;
+}
+
+.budget-board-row {
+  min-height: 108px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto) auto;
+  gap: 18px;
+  align-items: center;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid rgba(215, 223, 235, 0.86);
+}
+
+.budget-board-main,
+.budget-board-values {
+  display: grid;
+  gap: 8px;
+}
+
+.budget-board-main strong,
+.budget-board-values strong,
+.recurring-timeline-main strong,
+.recurring-timeline-date strong {
+  color: var(--ref-navy);
+}
+
+.budget-board-main span,
+.budget-board-values span,
+.recurring-timeline-main small,
+.recurring-timeline-date span {
+  color: #748096;
+}
+
+.goals-progress-track {
+  height: 14px;
+}
+
+.goals-card-values strong {
+  color: var(--ref-navy);
+}
+
+.goals-card-values span {
+  color: #748096;
+}
+
+.recurring-timeline-list {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+
+.recurring-timeline-list::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 16px;
+  width: 2px;
+  background: linear-gradient(180deg, #22b9be, #665df5);
+  opacity: 0.2;
+}
+
+.recurring-timeline-item {
+  position: relative;
+  min-height: 92px;
+  padding: 16px 16px 16px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto) auto;
+  gap: 16px;
+  align-items: center;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid rgba(215, 223, 235, 0.86);
+}
+
+.recurring-timeline-dot {
+  position: absolute;
+  left: 10px;
+  top: 36px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22b9be, #665df5);
+  box-shadow: 0 0 0 6px #eef4ff;
+}
+
+.recurring-timeline-main {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 980px) {
+  .accounts-vault-overview,
+  .budget-pressure-board,
+  .accounts-vault-list,
+  .goals-card-grid,
+  .budget-board-row,
+  .recurring-timeline-item {
+    grid-template-columns: 1fr;
+  }
+
+  .recurring-timeline-item {
+    padding-left: 42px;
+  }
+}

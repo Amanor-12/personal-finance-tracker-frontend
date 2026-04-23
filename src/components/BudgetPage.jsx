@@ -186,6 +186,27 @@ function BudgetPage({ currentUser, onLogout }) {
           <PremiumMetric label="Overspent" value={String(summary.overspent)} helper="Categories over limit" tone="violet" />
         </PremiumMetrics>
 
+        <section className="budget-pressure-board" aria-label="Budget pressure board">
+          <article className="budget-pressure-main">
+            <span>Monthly pressure</span>
+            <h3>{summary.overspent ? `${summary.overspent} over limit` : 'No pressure detected'}</h3>
+            <p>
+              {currentBudgets.length
+                ? 'Pressure is calculated from your category budgets and matched spending for the active month.'
+                : 'Create one category budget to start measuring pressure honestly.'}
+            </p>
+          </article>
+          <article className="budget-pressure-meter">
+            <span>Spend ratio</span>
+            <strong>
+              {summary.totalBudgeted ? `${Math.min(999, Math.round((summary.totalSpent / summary.totalBudgeted) * 100))}%` : '0%'}
+            </strong>
+            <div>
+              <span style={{ width: summary.totalBudgeted ? `${Math.min(100, (summary.totalSpent / summary.totalBudgeted) * 100)}%` : '0%' }} />
+            </div>
+          </article>
+        </section>
+
         <PremiumPanel eyebrow="Planner controls" title="Focus this month">
           <div className="premium-filter-bar">
             <input
@@ -206,16 +227,21 @@ function BudgetPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && visibleBudgets.length ? (
-            <div className="premium-list">
+            <div className="budget-board-list">
               {visibleBudgets.map((budget) => (
-                <article className="premium-row" key={budget.id}>
-                  <div>
+                <article className="budget-board-row" key={budget.id}>
+                  <div className="budget-board-main">
                     <strong>{budget.categoryName}</strong>
-                    <small>{formatBudgetPeriod(budget.month, budget.year)}</small>
+                    <span>{formatBudgetPeriod(budget.month, budget.year)}</span>
+                    <div className="budget-board-track">
+                      <span style={{ width: `${Math.min(100, budget.amountLimit ? (budget.spentAmount / budget.amountLimit) * 100 : 0)}%` }} />
+                    </div>
                   </div>
-                  <span>{formatBudgetCurrency(budget.spentAmount)} spent</span>
-                  <strong>{formatBudgetCurrency(budget.amountLimit)}</strong>
-                  <div className="premium-row-actions">
+                  <div className="budget-board-values">
+                    <span>{formatBudgetCurrency(budget.spentAmount)} spent</span>
+                    <strong>{formatBudgetCurrency(budget.remainingAmount)} left</strong>
+                  </div>
+                  <div className="budget-board-actions">
                     <button type="button" onClick={() => {
                       setEditingBudget(budget);
                       setIsFormOpen(true);
