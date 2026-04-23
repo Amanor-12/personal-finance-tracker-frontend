@@ -13122,12 +13122,9 @@ textarea:focus-visible,
 .budget-cockpit-visual {
   position: relative;
   min-height: 182px;
-  display: grid;
-  align-items: end;
-  justify-items: center;
+  overflow: hidden;
 }
 
-.transactions-ops-visual-line,
 .budget-cockpit-bar {
   position: absolute;
   bottom: 22px;
@@ -13137,19 +13134,16 @@ textarea:focus-visible,
   box-shadow: 0 14px 28px rgba(22, 32, 84, 0.18);
 }
 
-.transactions-ops-visual-line.line-a,
 .budget-cockpit-bar-a {
   left: 30px;
   height: 42px;
 }
 
-.transactions-ops-visual-line.line-b,
 .budget-cockpit-bar-b {
   left: 72px;
   height: 86px;
 }
 
-.transactions-ops-visual-line.line-c,
 .budget-cockpit-bar-c {
   left: 114px;
   height: 124px;
@@ -13158,6 +13152,122 @@ textarea:focus-visible,
 .budget-cockpit-bar-d {
   left: 156px;
   height: 68px;
+}
+
+.transactions-ops-visual {
+  display: block;
+}
+
+.transactions-ops-orbit {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  width: 166px;
+  height: 166px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.12), transparent 66%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+}
+
+.transactions-ops-lane {
+  position: absolute;
+  left: 18px;
+  right: 26px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.05));
+}
+
+.transactions-ops-lane.lane-a {
+  top: 42px;
+}
+
+.transactions-ops-lane.lane-b {
+  top: 88px;
+  right: 56px;
+}
+
+.transactions-ops-lane.lane-c {
+  top: 134px;
+  right: 92px;
+}
+
+.transactions-ops-chip {
+  position: absolute;
+  min-width: 134px;
+  min-height: 56px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.09));
+  box-shadow: 0 18px 36px rgba(17, 27, 66, 0.14);
+  backdrop-filter: blur(20px);
+}
+
+.transactions-ops-chip.chip-inflow {
+  left: 16px;
+  top: 14px;
+}
+
+.transactions-ops-chip.chip-review {
+  left: 54px;
+  top: 66px;
+}
+
+.transactions-ops-chip.chip-outflow {
+  right: 12px;
+  bottom: 18px;
+}
+
+.transactions-ops-chip-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.transactions-ops-chip-icon .ledger-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.transactions-ops-chip.chip-inflow .transactions-ops-chip-icon {
+  color: #aaf4e5;
+  background: rgba(35, 194, 178, 0.2);
+}
+
+.transactions-ops-chip.chip-review .transactions-ops-chip-icon {
+  color: #d8ddff;
+  background: rgba(113, 108, 249, 0.22);
+}
+
+.transactions-ops-chip.chip-outflow .transactions-ops-chip-icon {
+  color: #ffd8a3;
+  background: rgba(245, 156, 19, 0.22);
+}
+
+.transactions-ops-chip-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.transactions-ops-chip-copy strong {
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.transactions-ops-chip-copy small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .transactions-ops-secondary,
@@ -13231,6 +13341,104 @@ textarea:focus-visible,
   backdrop-filter: none;
 }
 
+.transactions-ops-secondary .transactions-ops-metrics div:nth-child(1) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(37, 192, 176, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 252, 250, 0.96));
+}
+
+.transactions-ops-secondary .transactions-ops-metrics div:nth-child(2) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(245, 156, 19, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 241, 0.96));
+}
+
+.transactions-ops-secondary .transactions-ops-metrics div:nth-child(3) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(111, 108, 249, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 246, 255, 0.96));
+}
+
+.transactions-ops-secondary .transactions-ops-metrics div:nth-child(4) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 255, 0.96));
+}
+
+.transactions-ops-secondary .transactions-ops-controls {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.96));
+}
+
+.accounts-wallet-secondary .accounts-command-stats article:nth-child(1) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.15), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 255, 0.96));
+}
+
+.accounts-wallet-secondary .accounts-command-stats article:nth-child(2) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(37, 192, 176, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 252, 250, 0.96));
+}
+
+.accounts-wallet-secondary .accounts-command-stats article:nth-child(3) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(111, 108, 249, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 246, 255, 0.96));
+}
+
+.accounts-wallet-secondary .accounts-command-map {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(111, 108, 249, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 255, 0.96));
+}
+
+.accounts-wallet-secondary .accounts-command-controls {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(37, 192, 176, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 251, 252, 0.96));
+}
+
+.recurring-queue-secondary .recurring-queue-stats article:nth-child(1) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(37, 192, 176, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 252, 250, 0.96));
+}
+
+.recurring-queue-secondary .recurring-queue-stats article:nth-child(2) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(245, 156, 19, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 242, 0.96));
+}
+
+.recurring-queue-secondary .recurring-queue-stats article:nth-child(3) {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(111, 108, 249, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 246, 255, 0.96));
+}
+
+.recurring-queue-secondary .recurring-queue-search {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.12), transparent 26%),
+    radial-gradient(circle at 16% 110%, rgba(37, 192, 176, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+}
+
+.recurring-queue-secondary .recurring-queue-search::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: 0;
+  width: 84px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #5a5ef6 0%, #25c0b0 100%);
+}
+
 .transactions-ops-secondary .transactions-ops-metrics span,
 .transactions-ops-secondary .transactions-ops-controls label span,
 .accounts-wallet-secondary .accounts-command-stats span,
@@ -13297,8 +13505,30 @@ textarea:focus-visible,
   color: var(--ref-navy);
 }
 
+.accounts-wallet-board .accounts-wallet-preview-note {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(76, 108, 244, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 248, 255, 0.86));
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 22px 40px rgba(17, 27, 66, 0.12);
+}
+
+.accounts-wallet-board .accounts-wallet-preview-note small {
+  color: #5b6eb6;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .accounts-wallet-board .accounts-wallet-preview-note span {
   color: #6f7a90;
+}
+
+.accounts-wallet-board .accounts-wallet-actions > span {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .settings-command-hero,

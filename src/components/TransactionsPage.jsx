@@ -234,9 +234,40 @@ function TransactionsPage({ currentUser, onLogout }) {
           </div>
 
           <div className="transactions-ops-visual" aria-hidden="true">
-            <span className="transactions-ops-visual-line line-a" />
-            <span className="transactions-ops-visual-line line-b" />
-            <span className="transactions-ops-visual-line line-c" />
+            <span className="transactions-ops-orbit" />
+            <span className="transactions-ops-lane lane-a" />
+            <span className="transactions-ops-lane lane-b" />
+            <span className="transactions-ops-lane lane-c" />
+
+            <div className="transactions-ops-chip chip-inflow">
+              <span className="transactions-ops-chip-icon">
+                <TransactionsIcon type="arrowDown" />
+              </span>
+              <div className="transactions-ops-chip-copy">
+                <strong>Inflow</strong>
+                <small>Captured</small>
+              </div>
+            </div>
+
+            <div className="transactions-ops-chip chip-review">
+              <span className="transactions-ops-chip-icon">
+                <TransactionsIcon type="ledger" />
+              </span>
+              <div className="transactions-ops-chip-copy">
+                <strong>Ledger</strong>
+                <small>Verified</small>
+              </div>
+            </div>
+
+            <div className="transactions-ops-chip chip-outflow">
+              <span className="transactions-ops-chip-icon">
+                <TransactionsIcon type="arrowUp" />
+              </span>
+              <div className="transactions-ops-chip-copy">
+                <strong>Outflow</strong>
+                <small>Tracked</small>
+              </div>
+            </div>
           </div>
         </section>
 

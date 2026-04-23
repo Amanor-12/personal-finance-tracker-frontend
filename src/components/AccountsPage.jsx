@@ -272,11 +272,12 @@ function AccountsPage({ currentUser, onLogout }) {
               )}
             </div>
             <div className="accounts-wallet-preview-note">
+              <small>{summary.primary ? 'Primary route' : 'Vault ready'}</small>
               <strong>{summary.primary?.name || 'Choose a primary account'}</strong>
               <span>
                 {summary.primary
-                  ? `${getAccountTypeLabel(summary.primary.accountType)} used as your default money location.`
-                  : 'Your first account becomes the foundation for transactions and reports.'}
+                  ? `${getAccountTypeLabel(summary.primary.accountType)} used first across Ledgr.`
+                  : 'Add one account to power transactions, budgets, goals, and reports.'}
               </span>
             </div>
           </div>
