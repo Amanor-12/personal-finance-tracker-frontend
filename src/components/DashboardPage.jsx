@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
+import { accountStore } from '../utils/accountStore';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
 
@@ -34,6 +35,13 @@ const defaultSnapshot = {
   recentTransactions: [],
   budgetProgress: [],
   monthlyTrend: [],
+};
+
+const defaultWorkspaceSignals = {
+  accounts: 0,
+  budgets: 0,
+  goals: 0,
+  recurring: 0,
 };
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -177,6 +185,7 @@ function DashboardPage({ currentUser, onLogout }) {
   const [cards, setCards] = useState([]);
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [snapshot, setSnapshot] = useState(defaultSnapshot);
+  const [workspaceSignals, setWorkspaceSignals] = useState(defaultWorkspaceSignals);
   const [dataMessage, setDataMessage] = useState('');
   const [cardForm, setCardForm] = useState(() => createCardForm(currentUser?.fullName));
   const [paymentForm, setPaymentForm] = useState(() => createPaymentForm());
@@ -193,6 +202,7 @@ function DashboardPage({ currentUser, onLogout }) {
         setCards([]);
         setExpenseCategories([]);
         setSnapshot(defaultSnapshot);
+        setWorkspaceSignals(defaultWorkspaceSignals);
         setActiveCardId('');
         setIsLoading(false);
         return;
@@ -207,6 +217,12 @@ function DashboardPage({ currentUser, onLogout }) {
           financeStore.getDashboardSnapshot(currentUser.id),
           financeStore.getCategoriesForUser(currentUser.id),
         ]);
+        const [accountsResult, budgetsResult, goalsResult, recurringResult] = await Promise.allSettled([
+          accountStore.getAccountsForUser(currentUser.id),
+          financeStore.getBudgetsForUser(currentUser.id),
+          financeStore.getGoalsForUser(currentUser.id),
+          financeStore.getRecurringPaymentsForUser(currentUser.id),
+        ]);
 
         if (isCancelled) {
           return;
@@ -217,6 +233,18 @@ function DashboardPage({ currentUser, onLogout }) {
         setCards(nextCards);
         setSnapshot(nextSnapshot);
         setExpenseCategories(nextExpenseCategories);
+        setWorkspaceSignals({
+          accounts:
+            accountsResult.status === 'fulfilled'
+              ? accountsResult.value.filter((account) => account.status === 'active').length
+              : 0,
+          budgets: budgetsResult.status === 'fulfilled' ? budgetsResult.value.length : 0,
+          goals: goalsResult.status === 'fulfilled' ? goalsResult.value.length : 0,
+          recurring:
+            recurringResult.status === 'fulfilled'
+              ? recurringResult.value.filter((payment) => payment.status === 'active').length
+              : 0,
+        });
         setActiveCardId((currentActiveCardId) =>
           nextCards.some((card) => card.id === currentActiveCardId) ? currentActiveCardId : nextCards[0]?.id || ''
         );
@@ -233,6 +261,7 @@ function DashboardPage({ currentUser, onLogout }) {
         setCards([]);
         setExpenseCategories([]);
         setSnapshot(defaultSnapshot);
+        setWorkspaceSignals(defaultWorkspaceSignals);
         setDataMessage(error.message || 'Could not load your workspace.');
       } finally {
         if (!isCancelled) {
@@ -292,12 +321,14 @@ function DashboardPage({ currentUser, onLogout }) {
   const heroPills = [
     totalCards ? `${totalCards} cards` : 'No cards',
     recentPayments.length ? `${recentPayments.length} payments` : '0 payments',
+    workspaceSignals.accounts ? `${workspaceSignals.accounts} accounts` : '0 accounts',
   ];
 
   const workspaceRows = [
-    { label: 'Cards', value: String(totalCards).padStart(2, '0'), tone: 'teal' },
-    { label: 'Payments', value: String(snapshot.recentTransactions.length).padStart(2, '0'), tone: 'violet' },
-    { label: 'Sync', value: 'API', tone: 'orange' },
+    { label: 'Accounts', value: String(workspaceSignals.accounts).padStart(2, '0'), tone: 'teal' },
+    { label: 'Budgets', value: String(workspaceSignals.budgets).padStart(2, '0'), tone: 'blue' },
+    { label: 'Goals', value: String(workspaceSignals.goals).padStart(2, '0'), tone: 'violet' },
+    { label: 'Renewals', value: String(workspaceSignals.recurring).padStart(2, '0'), tone: 'orange' },
   ];
 
   const flowState = recentPayments.length
