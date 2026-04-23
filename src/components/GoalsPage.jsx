@@ -169,7 +169,9 @@ function GoalsPage({ currentUser, onLogout }) {
             <strong>funded</strong>
             <small>{visibleGoals.length} visible goals</small>
           </article>
+        </section>
 
+        <section className="goals-portfolio-secondary" aria-label="Goal portfolio summary">
           <div className="goals-portfolio-values">
             <article><span>Target total</span><strong>{formatGoalCurrency(summary.target)}</strong></article>
             <article><span>Committed</span><strong>{formatGoalCurrency(summary.current)}</strong></article>

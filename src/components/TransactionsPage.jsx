@@ -231,12 +231,21 @@ function TransactionsPage({ currentUser, onLogout }) {
             <span>Ledger operations</span>
             <h2>Transactions</h2>
             <p>Review, search, edit, and verify every movement in the workspace without leaving the ledger.</p>
-            <div className="transactions-ops-metrics" aria-label="Transaction summary">
-              <div><span>Inflow</span><strong>{formatMoney(summary.income)}</strong></div>
-              <div><span>Outflow</span><strong>{formatMoney(summary.expenses)}</strong></div>
-              <div><span>Net</span><strong>{formatMoney(summary.net)}</strong></div>
-              <div><span>Records</span><strong>{totalSummary.count}</strong></div>
-            </div>
+          </div>
+
+          <div className="transactions-ops-visual" aria-hidden="true">
+            <span className="transactions-ops-visual-line line-a" />
+            <span className="transactions-ops-visual-line line-b" />
+            <span className="transactions-ops-visual-line line-c" />
+          </div>
+        </section>
+
+        <section className="transactions-ops-secondary" aria-label="Transaction tools">
+          <div className="transactions-ops-metrics" aria-label="Transaction summary">
+            <div><span>Inflow</span><strong>{formatMoney(summary.income)}</strong></div>
+            <div><span>Outflow</span><strong>{formatMoney(summary.expenses)}</strong></div>
+            <div><span>Net</span><strong>{formatMoney(summary.net)}</strong></div>
+            <div><span>Records</span><strong>{totalSummary.count}</strong></div>
           </div>
 
           <div className="transactions-ops-controls">

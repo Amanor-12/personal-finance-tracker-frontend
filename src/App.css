@@ -13071,3 +13071,309 @@ textarea:focus-visible,
     padding: 22px;
   }
 }
+
+/* Simplified hero hierarchy with separate operational layers */
+.transactions-ops-console,
+.accounts-wallet-board,
+.budget-cockpit,
+.goals-portfolio-console,
+.recurring-queue-console,
+.reports-analysis-console {
+  min-height: 244px;
+  align-items: center;
+}
+
+.transactions-ops-console {
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+.accounts-wallet-board {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.budget-cockpit {
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+.goals-portfolio-console {
+  grid-template-columns: minmax(0, 1fr) 220px;
+}
+
+.recurring-queue-console,
+.reports-analysis-console {
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+.transactions-ops-lead,
+.accounts-command-copy,
+.goals-portfolio-panel,
+.reports-analysis-copy,
+.budget-cockpit-header,
+.recurring-queue-head {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.transactions-ops-visual,
+.budget-cockpit-visual {
+  position: relative;
+  min-height: 182px;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+}
+
+.transactions-ops-visual-line,
+.budget-cockpit-bar {
+  position: absolute;
+  bottom: 22px;
+  width: 22px;
+  border-radius: 999px 999px 14px 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(134, 245, 229, 0.52));
+  box-shadow: 0 14px 28px rgba(22, 32, 84, 0.18);
+}
+
+.transactions-ops-visual-line.line-a,
+.budget-cockpit-bar-a {
+  left: 30px;
+  height: 42px;
+}
+
+.transactions-ops-visual-line.line-b,
+.budget-cockpit-bar-b {
+  left: 72px;
+  height: 86px;
+}
+
+.transactions-ops-visual-line.line-c,
+.budget-cockpit-bar-c {
+  left: 114px;
+  height: 124px;
+}
+
+.budget-cockpit-bar-d {
+  left: 156px;
+  height: 68px;
+}
+
+.transactions-ops-secondary,
+.accounts-wallet-secondary,
+.budget-cockpit-secondary,
+.goals-portfolio-secondary,
+.recurring-queue-secondary,
+.reports-analysis-secondary {
+  display: grid;
+  gap: 18px;
+}
+
+.accounts-wallet-secondary,
+.goals-portfolio-secondary {
+  margin-top: 18px;
+}
+
+.accounts-wallet-utility-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 18px;
+}
+
+.transactions-ops-secondary .transactions-ops-metrics,
+.accounts-wallet-secondary .accounts-command-stats,
+.reports-analysis-secondary .reports-analysis-kpis,
+.goals-portfolio-secondary .goals-portfolio-values,
+.recurring-queue-secondary .recurring-queue-stats {
+  display: grid;
+  gap: 14px;
+}
+
+.transactions-ops-secondary .transactions-ops-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.accounts-wallet-secondary .accounts-command-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.goals-portfolio-secondary .goals-portfolio-values {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.recurring-queue-secondary .recurring-queue-stats,
+.reports-analysis-secondary .reports-analysis-kpis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.reports-analysis-secondary .reports-analysis-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.transactions-ops-secondary .transactions-ops-metrics div,
+.accounts-wallet-secondary .accounts-command-stats article,
+.accounts-wallet-secondary .accounts-command-map,
+.accounts-wallet-secondary .accounts-command-controls,
+.budget-cockpit-secondary .budget-cockpit-meter,
+.budget-cockpit-secondary .budget-cockpit-ledger article,
+.budget-cockpit-secondary .budget-cockpit-search,
+.goals-portfolio-secondary .goals-portfolio-values article,
+.goals-portfolio-secondary .goals-portfolio-search,
+.recurring-queue-secondary .recurring-queue-stats article,
+.recurring-queue-secondary .recurring-queue-search,
+.reports-analysis-secondary .reports-analysis-kpis article {
+  border: 1px solid rgba(202, 210, 216, 0.72);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(109, 136, 255, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 253, 0.96));
+  box-shadow: 0 22px 48px rgba(17, 27, 66, 0.06);
+  backdrop-filter: none;
+}
+
+.transactions-ops-secondary .transactions-ops-metrics span,
+.transactions-ops-secondary .transactions-ops-controls label span,
+.accounts-wallet-secondary .accounts-command-stats span,
+.accounts-wallet-secondary .accounts-command-map span,
+.accounts-wallet-secondary .accounts-command-controls label span,
+.budget-cockpit-secondary .budget-cockpit-meter span,
+.budget-cockpit-secondary .budget-cockpit-ledger span,
+.budget-cockpit-secondary .budget-cockpit-search span,
+.goals-portfolio-secondary .goals-portfolio-values span,
+.goals-portfolio-secondary .goals-portfolio-search span,
+.recurring-queue-secondary .recurring-queue-stats span,
+.recurring-queue-secondary .recurring-queue-search span,
+.reports-analysis-secondary .reports-analysis-kpis span {
+  color: #6f7a90;
+}
+
+.transactions-ops-secondary strong,
+.accounts-wallet-secondary strong,
+.accounts-wallet-secondary b,
+.budget-cockpit-secondary strong,
+.goals-portfolio-secondary strong,
+.recurring-queue-secondary strong,
+.reports-analysis-secondary strong {
+  color: var(--ref-navy);
+}
+
+.transactions-ops-secondary input,
+.transactions-ops-secondary select,
+.accounts-wallet-secondary input,
+.accounts-wallet-secondary select,
+.budget-cockpit-secondary input,
+.budget-cockpit-secondary select,
+.goals-portfolio-secondary input,
+.recurring-queue-secondary input,
+.reports-analysis-secondary input {
+  border-color: rgba(202, 210, 216, 0.78);
+  background: rgba(248, 250, 253, 0.92);
+  color: var(--ref-navy);
+}
+
+.transactions-ops-secondary input::placeholder,
+.accounts-wallet-secondary input::placeholder,
+.budget-cockpit-secondary input::placeholder,
+.goals-portfolio-secondary input::placeholder,
+.recurring-queue-secondary input::placeholder,
+.reports-analysis-secondary input::placeholder {
+  color: #98a3b6;
+}
+
+.transactions-ops-secondary .transactions-ops-actions button,
+.accounts-wallet-secondary .accounts-wallet-actions > span {
+  color: var(--ref-navy);
+  border-color: rgba(202, 210, 216, 0.72);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.transactions-ops-secondary .transactions-ops-actions button:first-child {
+  color: #ffffff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #6f6cf9 0%, #5748f7 45%, #28b7cf 100%);
+}
+
+.accounts-wallet-board .accounts-wallet-preview-note strong {
+  color: var(--ref-navy);
+}
+
+.accounts-wallet-board .accounts-wallet-preview-note span {
+  color: #6f7a90;
+}
+
+.settings-command-hero,
+.billing-studio-hero,
+.activity-ledger-hero,
+.support-concierge-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  border: 1px solid rgba(95, 109, 226, 0.12);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(142, 179, 255, 0.34), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(103, 77, 245, 0.3), transparent 28%),
+    linear-gradient(135deg, #6d88ff 0%, #4d6bf4 24%, #4b47ea 54%, #6a33d7 100%);
+  box-shadow: 0 28px 54px rgba(82, 72, 240, 0.18);
+}
+
+.settings-command-hero h2,
+.billing-studio-hero h2,
+.activity-ledger-hero h2,
+.support-concierge-hero h2,
+.settings-command-hero p,
+.billing-studio-hero p,
+.activity-ledger-hero p,
+.support-concierge-hero p,
+.settings-command-hero span,
+.billing-studio-hero span,
+.activity-ledger-hero span,
+.support-concierge-hero span {
+  color: #ffffff;
+}
+
+.settings-command-card,
+.billing-status-card,
+.support-search {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px);
+}
+
+.support-search input {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.support-search input::placeholder {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+@media (max-width: 1180px) {
+  .accounts-wallet-utility-grid,
+  .transactions-ops-secondary .transactions-ops-metrics,
+  .accounts-wallet-secondary .accounts-command-stats,
+  .goals-portfolio-secondary .goals-portfolio-values,
+  .recurring-queue-secondary .recurring-queue-stats,
+  .reports-analysis-secondary .reports-analysis-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .transactions-ops-console,
+  .accounts-wallet-board,
+  .budget-cockpit,
+  .goals-portfolio-console,
+  .recurring-queue-console,
+  .reports-analysis-console,
+  .accounts-wallet-utility-grid,
+  .transactions-ops-secondary .transactions-ops-metrics,
+  .accounts-wallet-secondary .accounts-command-stats,
+  .goals-portfolio-secondary .goals-portfolio-values,
+  .recurring-queue-secondary .recurring-queue-stats,
+  .reports-analysis-secondary .reports-analysis-kpis {
+    grid-template-columns: 1fr;
+  }
+}

@@ -184,13 +184,15 @@ function RecurringPage({ currentUser, onLogout }) {
             <button className="ref-secondary-button" type="button" onClick={openCreate}>Add recurring</button>
           </div>
 
-          <div className="recurring-queue-body">
-            <article className="recurring-next-card">
-              <span>Next due</span>
-              <strong>{nextPayment?.name || 'Nothing scheduled'}</strong>
-              <p>{nextPayment ? `${formatRecurringCurrency(nextPayment.amount)} ${formatDaysUntil(nextPayment.daysUntilNextPayment)}` : 'Create one recurring item to build your queue.'}</p>
-            </article>
+          <article className="recurring-next-card">
+            <span>Next due</span>
+            <strong>{nextPayment?.name || 'Nothing scheduled'}</strong>
+            <p>{nextPayment ? `${formatRecurringCurrency(nextPayment.amount)} ${formatDaysUntil(nextPayment.daysUntilNextPayment)}` : 'Create one recurring item to build your queue.'}</p>
+          </article>
+        </section>
 
+        <section className="recurring-queue-secondary" aria-label="Recurring payment tools">
+          <div className="recurring-queue-body">
             <div className="recurring-queue-stats">
               <article><span>Monthly</span><strong>{formatRecurringCurrency(summary.monthly)}</strong></article>
               <article><span>Annualized</span><strong>{formatRecurringCurrency(summary.annual)}</strong></article>

@@ -280,14 +280,17 @@ function AccountsPage({ currentUser, onLogout }) {
               </span>
             </div>
           </div>
+        </section>
 
+        <section className="accounts-wallet-secondary" aria-label="Account workspace tools">
           <div className="accounts-command-stats" aria-label="Account summary">
             <article><span>Total balance</span><strong>{formatAccountCurrency(summary.totalBalance)}</strong></article>
             <article><span>Active</span><strong>{summary.activeCount}</strong></article>
             <article><span>Archived</span><strong>{summary.archivedCount}</strong></article>
           </div>
 
-          <div className="accounts-command-map">
+          <div className="accounts-wallet-utility-grid">
+            <div className="accounts-command-map">
             <div className="accounts-command-map-head">
               <span>Account mix</span>
               <strong>{summary.activeCount} active</strong>
@@ -304,27 +307,28 @@ function AccountsPage({ currentUser, onLogout }) {
                 <p>No account types yet.</p>
               )}
             </div>
-          </div>
+            </div>
 
-          <div className="accounts-command-controls">
-            <label>
-              <span>Search vault</span>
-              <input
-                aria-label="Search accounts"
-                placeholder="Account, institution, type, or identifier"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Status</span>
-              <select aria-label="Account status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="active">Active</option>
-                <option value="archived">Archived</option>
-                <option value="all">All accounts</option>
-              </select>
-            </label>
+            <div className="accounts-command-controls">
+              <label>
+                <span>Search vault</span>
+                <input
+                  aria-label="Search accounts"
+                  placeholder="Account, institution, type, or identifier"
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>Status</span>
+                <select aria-label="Account status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                  <option value="active">Active</option>
+                  <option value="archived">Archived</option>
+                  <option value="all">All accounts</option>
+                </select>
+              </label>
+            </div>
           </div>
         </section>
 

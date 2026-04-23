@@ -171,7 +171,7 @@ function BudgetPage({ currentUser, onLogout }) {
         rail={rail}
       >
         <section className="budget-cockpit" aria-label="Budget cockpit">
-          <div className="budget-cockpit-header">
+          <div className="budget-cockpit-header budget-cockpit-hero">
             <div>
               <span className="ref-section-chip">Monthly plan</span>
               <h2>{formatBudgetPeriod(period.month, period.year)}</h2>
@@ -180,6 +180,15 @@ function BudgetPage({ currentUser, onLogout }) {
             <button className="ref-secondary-button" type="button" onClick={openCreate}>Create budget</button>
           </div>
 
+          <div className="budget-cockpit-visual" aria-hidden="true">
+            <span className="budget-cockpit-bar budget-cockpit-bar-a" />
+            <span className="budget-cockpit-bar budget-cockpit-bar-b" />
+            <span className="budget-cockpit-bar budget-cockpit-bar-c" />
+            <span className="budget-cockpit-bar budget-cockpit-bar-d" />
+          </div>
+        </section>
+
+        <section className="budget-cockpit-secondary" aria-label="Budget tools">
           <div className="budget-cockpit-grid">
             <article className="budget-cockpit-meter">
               <span>Spend ratio</span>

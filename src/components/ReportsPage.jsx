@@ -115,7 +115,9 @@ function ReportsPage({ currentUser, onLogout }) {
           <strong>{transactions.length ? 'Signal available' : 'Waiting for transactions'}</strong>
           <p>{transactions.length ? `${transactions.length} transactions ready for analysis.` : 'Add transactions first so charts do not become decoration.'}</p>
         </div>
+      </section>
 
+      <section className="reports-analysis-secondary" aria-label="Insight summary">
         <div className="reports-analysis-kpis">
           <article><span>Income</span><strong>{formatMoney(summary.income)}</strong></article>
           <article><span>Expenses</span><strong>{formatMoney(summary.expenses)}</strong></article>
