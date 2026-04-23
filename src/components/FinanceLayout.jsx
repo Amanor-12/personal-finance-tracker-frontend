@@ -4,12 +4,17 @@ import { settingsStore } from '../utils/settingsStore';
 
 const navItems = [
   { label: 'Overview', to: '/dashboard', icon: 'overview' },
+  { label: 'Accounts', to: '/accounts', icon: 'accounts' },
   { label: 'Transactions', to: '/transactions', icon: 'transactions' },
   { label: 'Budget', to: '/budget', icon: 'budget' },
   { label: 'Goals', to: '/goals', icon: 'goals' },
+  { label: 'Recurring', to: '/recurring', icon: 'recurring' },
+  { label: 'Reports', to: '/reports', icon: 'reports' },
 ];
 
 const otherItems = [
+  { label: 'Activity', to: '/activity', icon: 'activity' },
+  { label: 'Billing', to: '/billing', icon: 'billing' },
   { label: 'Settings', to: '/settings', icon: 'settings' },
   { label: 'Help & Support', to: '/help', icon: 'help' },
 ];
@@ -59,6 +64,31 @@ function SidebarIcon({ type }) {
         <path d="M3.2 12.2h10" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
       </>
     ),
+    recurring: (
+      <>
+        <path d="M4.5 5.3h5.4A2.4 2.4 0 0 1 12.3 7.7v.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="m10.4 3.6 1.9 1.7-1.9 1.7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+        <path d="M11.5 10.7H6.1a2.4 2.4 0 0 1-2.4-2.4v-.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="m5.6 12.4-1.9-1.7L5.6 9" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+      </>
+    ),
+    billing: (
+      <>
+        <rect x="3.2" y="4" width="9.6" height="8" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M4.4 6.7h7.2M5.4 10h2.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <circle cx="10.6" cy="10" r=".8" fill="currentColor" />
+      </>
+    ),
+    activity: (
+      <>
+        <path d="M3.4 11.6h9.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="M4.2 9.2 6.4 7l1.8 1.5 3.2-4.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+        <circle cx="4.2" cy="9.2" r=".8" fill="currentColor" />
+        <circle cx="6.4" cy="7" r=".8" fill="currentColor" />
+        <circle cx="8.2" cy="8.5" r=".8" fill="currentColor" />
+        <circle cx="11.4" cy="4.4" r=".8" fill="currentColor" />
+      </>
+    ),
     settings: (
       <>
         <circle cx="8" cy="8" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.45" />
@@ -69,6 +99,12 @@ function SidebarIcon({ type }) {
       <>
         <circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" strokeWidth="1.45" />
         <path d="M6.6 6.4a1.7 1.7 0 1 1 2.5 1.5c-.8.4-1.1.8-1.1 1.5M8 11.7h.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+      </>
+    ),
+    message: (
+      <>
+        <path d="M3.4 4.2h9.2v6.5H6.3l-2.9 2V4.2Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.45" />
+        <path d="M5.6 6.7h4.8M5.6 8.8h3.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.35" />
       </>
     ),
     search: (
@@ -213,12 +249,12 @@ function FinanceLayout({
           </label>
 
           <div className="ref-topbar-actions">
-            <button className="ref-icon-button" type="button" aria-label="Notifications">
+            <NavLink className="ref-icon-button" to="/activity" aria-label="Activity and notifications">
               <SidebarIcon type="bell" />
-            </button>
-            <button className="ref-icon-button" type="button" aria-label="Messages">
+            </NavLink>
+            <NavLink className="ref-icon-button" to="/help" aria-label="Help and support">
               <SidebarIcon type="message" />
-            </button>
+            </NavLink>
 
             <div className="ref-user-chip">
               <div className="ref-user-avatar">{initials}</div>

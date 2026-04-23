@@ -1,6 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { z } from 'zod';
 import FinanceLayout from './FinanceLayout';
-import { cardStore } from '../utils/cardStore';
+import { accountStore } from '../utils/accountStore';
+import { authStore } from '../utils/authStore';
 import { financeStore } from '../utils/financeStore';
 import { settingsStore } from '../utils/settingsStore';
 
@@ -8,37 +13,75 @@ const currencyOptions = ['USD', 'CAD', 'GBP', 'EUR'];
 const weekStartOptions = ['Monday', 'Sunday'];
 const amountViewOptions = ['Compact', 'Detailed'];
 
-const createProfileForm = (user, settings) => ({
-  fullName: user?.fullName || '',
-  email: user?.email || '',
-  workspaceName: settings.workspaceName,
+const settingsSections = [
+  { id: 'profile', label: 'Profile', note: 'Name, email, workspace' },
+  { id: 'preferences', label: 'Preferences', note: 'Currency, calendar, display' },
+  { id: 'notifications', label: 'Notifications', note: 'Money reminders' },
+  { id: 'security', label: 'Security', note: 'Password and sessions' },
+  { id: 'billing', label: 'Billing', note: 'Plan and invoices' },
+  { id: 'data', label: 'Data', note: 'Export and deletion' },
+];
+
+const profileSchema = z.object({
+  email: z.string().trim().email('Enter a valid email address.'),
+  fullName: z.string().trim().min(2, 'Name must be at least 2 characters.').max(120, 'Keep name under 120 characters.'),
+  workspaceName: z.string().trim().min(2, 'Workspace name must be at least 2 characters.').max(80, 'Keep workspace under 80 characters.'),
 });
 
-const createPreferenceForm = (settings) => ({
-  currency: settings.currency,
-  weekStart: settings.weekStart,
-  amountView: settings.amountView,
+const preferencesSchema = z.object({
+  amountView: z.enum(['Compact', 'Detailed']),
+  currency: z.enum(['USD', 'CAD', 'GBP', 'EUR']),
+  weekStart: z.enum(['Monday', 'Sunday']),
 });
 
-const createAlertForm = (settings) => ({
-  paymentReminders: settings.paymentReminders,
-  weeklySummary: settings.weeklySummary,
-  loginAlerts: settings.loginAlerts,
+const notificationSchema = z.object({
+  loginAlerts: z.boolean(),
+  paymentReminders: z.boolean(),
+  weeklySummary: z.boolean(),
 });
 
-function SettingsToggle({ checked, label, note, onChange }) {
+const passwordSchema = z
+  .object({
+    confirmPassword: z.string().min(8, 'Confirm the new password.'),
+    currentPassword: z.string().min(1, 'Current password is required.'),
+    newPassword: z.string().min(8, 'Use at least 8 characters.').max(72, 'Keep password under 72 characters.'),
+  })
+  .superRefine((values, context) => {
+    if (values.newPassword !== values.confirmPassword) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Passwords do not match.',
+        path: ['confirmPassword'],
+      });
+    }
+  });
+
+function FieldError({ message }) {
+  return message ? <span className="settings-field-error">{message}</span> : null;
+}
+
+function SettingsToggle({ checked, label, note, register }) {
   return (
     <label className="settings-toggle">
-      <div className="settings-toggle-copy">
+      <span className="settings-toggle-copy">
         <strong>{label}</strong>
         <span>{note}</span>
-      </div>
-
+      </span>
       <span className={`settings-toggle-pill${checked ? ' is-active' : ''}`}>
-        <input type="checkbox" checked={checked} onChange={onChange} />
+        <input type="checkbox" {...register} />
         <span className="settings-toggle-knob" />
       </span>
     </label>
+  );
+}
+
+function SectionHeader({ eyebrow, title, body }) {
+  return (
+    <div className="settings-editor-head">
+      <span>{eyebrow}</span>
+      <h3>{title}</h3>
+      <p>{body}</p>
+    </div>
   );
 }
 
@@ -47,39 +90,102 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     () => settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName),
     [currentUser?.fullName, currentUser?.id]
   );
-
-  const [cardsCount, setCardsCount] = useState(0);
-  const [paymentsCount, setPaymentsCount] = useState(0);
-
-  const [profileForm, setProfileForm] = useState(() => createProfileForm(currentUser, storedSettings));
-  const [preferenceForm, setPreferenceForm] = useState(() => createPreferenceForm(storedSettings));
-  const [alertForm, setAlertForm] = useState(() => createAlertForm(storedSettings));
+  const [activeSection, setActiveSection] = useState('profile');
+  const [workspaceStats, setWorkspaceStats] = useState({
+    accounts: 0,
+    budgets: 0,
+    goals: 0,
+    recurring: 0,
+    transactions: 0,
+  });
+  const [metricsError, setMetricsError] = useState('');
   const [profileMessage, setProfileMessage] = useState('');
-  const [preferenceMessage, setPreferenceMessage] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
+  const [preferencesMessage, setPreferencesMessage] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [securityMessage, setSecurityMessage] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+
+  const profileForm = useForm({
+    defaultValues: {
+      email: currentUser?.email || '',
+      fullName: currentUser?.fullName || '',
+      workspaceName: storedSettings.workspaceName,
+    },
+    resolver: zodResolver(profileSchema),
+  });
+  const preferencesForm = useForm({
+    defaultValues: {
+      amountView: storedSettings.amountView,
+      currency: storedSettings.currency,
+      weekStart: storedSettings.weekStart,
+    },
+    resolver: zodResolver(preferencesSchema),
+  });
+  const notificationForm = useForm({
+    defaultValues: {
+      loginAlerts: storedSettings.loginAlerts,
+      paymentReminders: storedSettings.paymentReminders,
+      weeklySummary: storedSettings.weeklySummary,
+    },
+    resolver: zodResolver(notificationSchema),
+  });
+  const passwordForm = useForm({
+    defaultValues: {
+      confirmPassword: '',
+      currentPassword: '',
+      newPassword: '',
+    },
+    resolver: zodResolver(passwordSchema),
+  });
+  const notificationValues = notificationForm.watch();
+
+  useEffect(() => {
+    profileForm.reset({
+      email: currentUser?.email || '',
+      fullName: currentUser?.fullName || '',
+      workspaceName: storedSettings.workspaceName,
+    });
+    preferencesForm.reset({
+      amountView: storedSettings.amountView,
+      currency: storedSettings.currency,
+      weekStart: storedSettings.weekStart,
+    });
+    notificationForm.reset({
+      loginAlerts: storedSettings.loginAlerts,
+      paymentReminders: storedSettings.paymentReminders,
+      weeklySummary: storedSettings.weeklySummary,
+    });
+  }, [currentUser?.email, currentUser?.fullName, notificationForm, preferencesForm, profileForm, storedSettings]);
 
   useEffect(() => {
     let isCancelled = false;
 
-    const loadMetrics = async () => {
+    const loadWorkspaceStats = async () => {
       if (!currentUser?.id) {
-        setCardsCount(0);
-        setPaymentsCount(0);
         return;
       }
 
+      setMetricsError('');
+
       try {
-        const [cards, snapshot] = await Promise.all([
-          cardStore.getCardsForUser(currentUser.id),
-          financeStore.getDashboardSnapshot(currentUser.id),
+        const [accounts, transactions, budgets, goals, recurring] = await Promise.all([
+          accountStore.getAccountsForUser(currentUser.id),
+          financeStore.getTransactionsForUser(currentUser.id),
+          financeStore.getBudgetsForUser(currentUser.id),
+          financeStore.getGoalsForUser(currentUser.id),
+          financeStore.getRecurringPaymentsForUser(currentUser.id),
         ]);
 
-        if (isCancelled) {
-          return;
+        if (!isCancelled) {
+          setWorkspaceStats({
+            accounts: accounts.length,
+            budgets: budgets.length,
+            goals: goals.length,
+            recurring: recurring.length,
+            transactions: transactions.length,
+          });
         }
-
-        setCardsCount(cards.length);
-        setPaymentsCount(snapshot.recentTransactions.length);
       } catch (error) {
         if (isCancelled) {
           return;
@@ -87,121 +193,113 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
 
         if (error.status === 401) {
           await onLogout();
+          return;
         }
+
+        setMetricsError(error.message || 'Workspace metrics could not load.');
       }
     };
 
-    loadMetrics();
+    loadWorkspaceStats();
 
     return () => {
       isCancelled = true;
     };
   }, [currentUser?.id, onLogout]);
 
-  const handleProfileChange = (event) => {
-    const { name, value } = event.target;
-    setProfileForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
+  const handleProfileSubmit = async (values) => {
+    setIsSavingProfile(true);
     setProfileMessage('');
-  };
-
-  const handlePreferenceChange = (event) => {
-    const { name, value } = event.target;
-    setPreferenceForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-    setPreferenceMessage('');
-  };
-
-  const handleAlertToggle = (name) => {
-    setAlertForm((currentForm) => ({
-      ...currentForm,
-      [name]: !currentForm[name],
-    }));
-    setAlertMessage('');
-  };
-
-  const handleProfileSubmit = async (event) => {
-    event.preventDefault();
 
     try {
       const updatedUser = await onUpdateProfile({
-        fullName: profileForm.fullName,
-        email: profileForm.email,
+        email: values.email,
+        fullName: values.fullName,
       });
 
       const nextSettings = settingsStore.updateSettings(
         updatedUser.id,
-        {
-          workspaceName: profileForm.workspaceName.trim() || `${updatedUser.fullName.split(' ')[0]} Space`,
-        },
+        { workspaceName: values.workspaceName.trim() },
         updatedUser.fullName
       );
 
-      setProfileForm(createProfileForm(updatedUser, nextSettings));
+      profileForm.reset({
+        email: updatedUser.email,
+        fullName: updatedUser.fullName,
+        workspaceName: nextSettings.workspaceName,
+      });
       setProfileMessage('Profile saved.');
     } catch (error) {
-      setProfileMessage(error.message);
+      setProfileMessage(error.message || 'Profile could not be saved.');
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
-  const handlePreferenceSubmit = (event) => {
-    event.preventDefault();
-
-    const nextSettings = settingsStore.updateSettings(currentUser.id, preferenceForm, currentUser.fullName);
-    setPreferenceForm(createPreferenceForm(nextSettings));
-    setPreferenceMessage('Preferences saved.');
+  const handlePreferencesSubmit = (values) => {
+    const nextSettings = settingsStore.updateSettings(currentUser.id, values, currentUser.fullName);
+    preferencesForm.reset({
+      amountView: nextSettings.amountView,
+      currency: nextSettings.currency,
+      weekStart: nextSettings.weekStart,
+    });
+    setPreferencesMessage('Preferences saved.');
   };
 
-  const handleAlertSubmit = (event) => {
-    event.preventDefault();
-
-    const nextSettings = settingsStore.updateSettings(currentUser.id, alertForm, currentUser.fullName);
-    setAlertForm(createAlertForm(nextSettings));
-    setAlertMessage('Alerts saved.');
+  const handleNotificationsSubmit = (values) => {
+    const nextSettings = settingsStore.updateSettings(currentUser.id, values, currentUser.fullName);
+    notificationForm.reset({
+      loginAlerts: nextSettings.loginAlerts,
+      paymentReminders: nextSettings.paymentReminders,
+      weeklySummary: nextSettings.weeklySummary,
+    });
+    setNotificationMessage('Notifications saved.');
   };
+
+  const handlePasswordSubmit = async (values) => {
+    setIsSavingPassword(true);
+    setSecurityMessage('');
+
+    try {
+      await authStore.updatePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
+      passwordForm.reset();
+      setSecurityMessage('Password updated.');
+    } catch (error) {
+      setSecurityMessage(error.message || 'Password could not be updated.');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
+  const totalObjects =
+    workspaceStats.accounts +
+    workspaceStats.transactions +
+    workspaceStats.budgets +
+    workspaceStats.goals +
+    workspaceStats.recurring;
 
   const rail = (
-    <>
-      <article className="ref-panel settings-rail-card">
-        <div className="settings-rail-head">
-          <span className="ref-section-chip settings-chip">Connected</span>
-          <h3>Workspace status</h3>
-          <p>Your profile now syncs with the backend API.</p>
-        </div>
-
-        <div className="settings-metric-list">
-          <div className="settings-metric">
-            <span>Cards</span>
-            <strong>{String(cardsCount).padStart(2, '0')}</strong>
-          </div>
-          <div className="settings-metric">
-            <span>Payments</span>
-            <strong>{String(paymentsCount).padStart(2, '0')}</strong>
-          </div>
-          <div className="settings-metric">
-            <span>Mode</span>
-            <strong>API</strong>
-          </div>
-        </div>
+    <aside className="settings-trust-rail">
+      <article className="settings-trust-card settings-trust-card-dark">
+        <span>Trust boundary</span>
+        <h3>Signed-in workspace only</h3>
+        <p>Settings and finance records are read through authenticated routes for the current user.</p>
       </article>
 
-      <article className="ref-panel settings-rail-card">
-        <div className="settings-rail-head">
-          <h3>Privacy</h3>
-          <p>Preferences stay local, profile data is synced.</p>
-        </div>
-
-        <div className="settings-tag-list">
-          <span className="settings-tag">Private</span>
-          <span className="settings-tag">Editable</span>
-          <span className="settings-tag">Synced</span>
+      <article className="settings-trust-card">
+        <span>Workspace inventory</span>
+        <strong>{metricsError ? 'Unavailable' : totalObjects}</strong>
+        <p>{metricsError || 'Real saved objects in this workspace.'}</p>
+        <div className="settings-mini-metrics">
+          <span>{workspaceStats.accounts} accounts</span>
+          <span>{workspaceStats.transactions} transactions</span>
+          <span>{workspaceStats.budgets + workspaceStats.goals + workspaceStats.recurring} plans</span>
         </div>
       </article>
-    </>
+    </aside>
   );
 
   return (
@@ -209,134 +307,251 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Settings"
-      pageSubtitle="Profile sync and workspace preferences."
+      pageSubtitle="Control identity, security, preferences, billing, and data boundaries."
       rail={rail}
     >
-      <article className="ref-panel settings-hero-card">
-        <span className="ref-section-chip settings-chip">Settings</span>
-        <h2>Keep Ledgr yours.</h2>
-        <p>Update your profile, workspace, and app preferences.</p>
-      </article>
+      <section className="settings-command-hero">
+        <div>
+          <span className="settings-command-kicker">Account command</span>
+          <h2>Quiet controls for serious money software.</h2>
+          <p>Keep profile, security, notifications, and data controls separated so sensitive actions never feel casual.</p>
+        </div>
+        <div className="settings-command-card" aria-label="Account state">
+          <span>Signed in as</span>
+          <strong>{currentUser?.email}</strong>
+          <p>{storedSettings.workspaceName}</p>
+        </div>
+      </section>
 
-      <div className="settings-grid">
-        <article className="ref-panel settings-card">
-          <div className="settings-card-head">
-            <h3>Profile</h3>
-            <p>Name, email, and workspace title.</p>
-          </div>
-
-          <form className="settings-form" onSubmit={handleProfileSubmit}>
-            {profileMessage ? <p className="settings-message">{profileMessage}</p> : null}
-
-            <div className="settings-field-grid">
-              <label className="settings-field">
-                <span>Full name</span>
-                <input name="fullName" type="text" value={profileForm.fullName} onChange={handleProfileChange} />
-              </label>
-
-              <label className="settings-field">
-                <span>Email</span>
-                <input name="email" type="email" value={profileForm.email} onChange={handleProfileChange} />
-              </label>
-
-              <label className="settings-field settings-field-wide">
-                <span>Workspace name</span>
-                <input name="workspaceName" type="text" value={profileForm.workspaceName} onChange={handleProfileChange} />
-              </label>
-            </div>
-
-            <button className="settings-save-button" type="submit">
-              Save profile
+      <section className="settings-hq">
+        <aside className="settings-section-nav" aria-label="Settings sections">
+          {settingsSections.map((section) => (
+            <button
+              key={section.id}
+              className={`settings-section-button${activeSection === section.id ? ' is-active' : ''}`}
+              type="button"
+              onClick={() => setActiveSection(section.id)}
+            >
+              <strong>{section.label}</strong>
+              <span>{section.note}</span>
             </button>
-          </form>
-        </article>
+          ))}
+        </aside>
 
-        <article className="ref-panel settings-card">
-          <div className="settings-card-head">
-            <h3>Preferences</h3>
-            <p>Set your default local view.</p>
-          </div>
-
-          <form className="settings-form" onSubmit={handlePreferenceSubmit}>
-            {preferenceMessage ? <p className="settings-message">{preferenceMessage}</p> : null}
-
-            <div className="settings-field-grid">
-              <label className="settings-field">
-                <span>Currency</span>
-                <select name="currency" value={preferenceForm.currency} onChange={handlePreferenceChange}>
-                  {currencyOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="settings-field">
-                <span>Week start</span>
-                <select name="weekStart" value={preferenceForm.weekStart} onChange={handlePreferenceChange}>
-                  {weekStartOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="settings-field settings-field-wide">
-                <span>Amount view</span>
-                <select name="amountView" value={preferenceForm.amountView} onChange={handlePreferenceChange}>
-                  {amountViewOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <button className="settings-save-button" type="submit">
-              Save preferences
-            </button>
-          </form>
-        </article>
-
-        <article className="ref-panel settings-card settings-card-wide">
-          <div className="settings-card-head">
-            <h3>Alerts</h3>
-            <p>Choose what should stay on.</p>
-          </div>
-
-          <form className="settings-form" onSubmit={handleAlertSubmit}>
-            {alertMessage ? <p className="settings-message">{alertMessage}</p> : null}
-
-            <div className="settings-toggle-list">
-              <SettingsToggle
-                checked={alertForm.paymentReminders}
-                label="Payment reminders"
-                note="Keep local due-date reminders visible."
-                onChange={() => handleAlertToggle('paymentReminders')}
+        <div className="settings-editor">
+          {activeSection === 'profile' ? (
+            <article className="settings-editor-card">
+              <SectionHeader
+                eyebrow="Identity"
+                title="Profile and workspace"
+                body="Name and email update through your backend. Workspace label stays client-side until preferences are promoted to the API."
               />
-              <SettingsToggle
-                checked={alertForm.weeklySummary}
-                label="Weekly summary"
-                note="Show a simple weekly recap later."
-                onChange={() => handleAlertToggle('weeklySummary')}
-              />
-              <SettingsToggle
-                checked={alertForm.loginAlerts}
-                label="Login alerts"
-                note="Keep sign-in alerts enabled."
-                onChange={() => handleAlertToggle('loginAlerts')}
-              />
-            </div>
+              <form className="settings-form" onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
+                {profileMessage ? <p className="settings-message">{profileMessage}</p> : null}
+                <div className="settings-field-grid">
+                  <label className="settings-field">
+                    <span>Full name</span>
+                    <input type="text" {...profileForm.register('fullName')} disabled={isSavingProfile} />
+                    <FieldError message={profileForm.formState.errors.fullName?.message} />
+                  </label>
+                  <label className="settings-field">
+                    <span>Email</span>
+                    <input type="email" {...profileForm.register('email')} disabled={isSavingProfile} />
+                    <FieldError message={profileForm.formState.errors.email?.message} />
+                  </label>
+                  <label className="settings-field settings-field-wide">
+                    <span>Workspace name</span>
+                    <input type="text" {...profileForm.register('workspaceName')} disabled={isSavingProfile} />
+                    <FieldError message={profileForm.formState.errors.workspaceName?.message} />
+                  </label>
+                </div>
+                <button className="settings-save-button" type="submit" disabled={isSavingProfile}>
+                  {isSavingProfile ? 'Saving...' : 'Save profile'}
+                </button>
+              </form>
+            </article>
+          ) : null}
 
-            <button className="settings-save-button" type="submit">
-              Save alerts
-            </button>
-          </form>
-        </article>
-      </div>
+          {activeSection === 'preferences' ? (
+            <article className="settings-editor-card">
+              <SectionHeader
+                eyebrow="Display"
+                title="Money display defaults"
+                body="Set the baseline language for amounts, weeks, and display density before deeper backend preferences are added."
+              />
+              <form className="settings-form" onSubmit={preferencesForm.handleSubmit(handlePreferencesSubmit)}>
+                {preferencesMessage ? <p className="settings-message">{preferencesMessage}</p> : null}
+                <div className="settings-field-grid">
+                  <label className="settings-field">
+                    <span>Currency</span>
+                    <select {...preferencesForm.register('currency')}>
+                      {currencyOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="settings-field">
+                    <span>Week starts</span>
+                    <select {...preferencesForm.register('weekStart')}>
+                      {weekStartOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="settings-field settings-field-wide">
+                    <span>Amount view</span>
+                    <select {...preferencesForm.register('amountView')}>
+                      {amountViewOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <button className="settings-save-button" type="submit">
+                  Save preferences
+                </button>
+              </form>
+            </article>
+          ) : null}
+
+          {activeSection === 'notifications' ? (
+            <article className="settings-editor-card">
+              <SectionHeader
+                eyebrow="Notifications"
+                title="Choose what deserves attention"
+                body="These switches prepare the product for backend reminders without sending fake alerts."
+              />
+              <form className="settings-form" onSubmit={notificationForm.handleSubmit(handleNotificationsSubmit)}>
+                {notificationMessage ? <p className="settings-message">{notificationMessage}</p> : null}
+                <div className="settings-toggle-list">
+                  <SettingsToggle
+                    checked={notificationValues.paymentReminders}
+                    label="Payment reminders"
+                    note="Show reminders for recurring payments when reminder delivery is connected."
+                    register={notificationForm.register('paymentReminders')}
+                  />
+                  <SettingsToggle
+                    checked={notificationValues.weeklySummary}
+                    label="Weekly summary"
+                    note="Prepare a weekly recap of actual activity."
+                    register={notificationForm.register('weeklySummary')}
+                  />
+                  <SettingsToggle
+                    checked={notificationValues.loginAlerts}
+                    label="Login alerts"
+                    note="Keep account-access visibility enabled."
+                    register={notificationForm.register('loginAlerts')}
+                  />
+                </div>
+                <button className="settings-save-button" type="submit">
+                  Save notifications
+                </button>
+              </form>
+            </article>
+          ) : null}
+
+          {activeSection === 'security' ? (
+            <article className="settings-editor-card">
+              <SectionHeader
+                eyebrow="Security"
+                title="Password and session controls"
+                body="Password updates use the authenticated backend endpoint. Session management can attach here later."
+              />
+              <form className="settings-form" onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
+                {securityMessage ? <p className="settings-message">{securityMessage}</p> : null}
+                <div className="settings-field-grid">
+                  <label className="settings-field settings-field-wide">
+                    <span>Current password</span>
+                    <input
+                      type="password"
+                      autoComplete="current-password"
+                      {...passwordForm.register('currentPassword')}
+                      disabled={isSavingPassword}
+                    />
+                    <FieldError message={passwordForm.formState.errors.currentPassword?.message} />
+                  </label>
+                  <label className="settings-field">
+                    <span>New password</span>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      {...passwordForm.register('newPassword')}
+                      disabled={isSavingPassword}
+                    />
+                    <FieldError message={passwordForm.formState.errors.newPassword?.message} />
+                  </label>
+                  <label className="settings-field">
+                    <span>Confirm password</span>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      {...passwordForm.register('confirmPassword')}
+                      disabled={isSavingPassword}
+                    />
+                    <FieldError message={passwordForm.formState.errors.confirmPassword?.message} />
+                  </label>
+                </div>
+                <button className="settings-save-button" type="submit" disabled={isSavingPassword}>
+                  {isSavingPassword ? 'Updating...' : 'Update password'}
+                </button>
+              </form>
+            </article>
+          ) : null}
+
+          {activeSection === 'billing' ? (
+            <article className="settings-editor-card settings-split-card">
+              <SectionHeader
+                eyebrow="Subscription"
+                title="Billing belongs in a dedicated workspace"
+                body="Plan state, checkout, invoices, and Stripe portal access need their own audit-friendly surface."
+              />
+              <div className="settings-status-stack">
+                <div>
+                  <span>Billing area</span>
+                  <strong>Stripe-ready</strong>
+                  <p>Open the billing workspace to review plan status and manage invoices.</p>
+                </div>
+                <Link className="settings-save-button settings-link-button" to="/billing">
+                  Open billing
+                </Link>
+              </div>
+            </article>
+          ) : null}
+
+          {activeSection === 'data' ? (
+            <article className="settings-editor-card settings-split-card">
+              <SectionHeader
+                eyebrow="Data"
+                title="Export and deletion guardrails"
+                body="High-risk actions should stay explicit, confirmed, and backed by safe backend behavior."
+              />
+              <div className="settings-data-grid">
+                <div>
+                  <span>Workspace objects</span>
+                  <strong>{totalObjects}</strong>
+                  <p>Accounts, transactions, budgets, goals, and recurring payments.</p>
+                </div>
+                <div>
+                  <span>Export</span>
+                  <strong>API planned</strong>
+                  <p>CSV/export should be served by a backend route before launch.</p>
+                </div>
+                <div className="settings-danger-zone">
+                  <span>Delete account</span>
+                  <strong>Confirmation required</strong>
+                  <p>Enable only after backend re-auth, cascade safety, and audit logging are ready.</p>
+                </div>
+              </div>
+            </article>
+          ) : null}
+        </div>
+      </section>
     </FinanceLayout>
   );
 }

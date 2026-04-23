@@ -157,7 +157,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         });
       }
 
-      navigate('/dashboard');
+      navigate(isLogin ? '/dashboard' : '/onboarding');
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -185,12 +185,18 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
             <div className="authx-card-copy">
               <span className="authx-panel-kicker">{isLogin ? 'Secure access' : 'Create access'}</span>
-              <h1>{isLogin ? 'Access your Ledgr workspace' : 'Create your Ledgr account'}</h1>
+              <h1>{isLogin ? 'Welcome back.' : 'Start with Ledgr.'}</h1>
               <p>
                 {isLogin
-                  ? 'Sign in with your account to reach your private finance dashboard.'
-                  : 'Create your account here, then the backend API will keep your workspace synced.'}
+                  ? 'Sign in to your private finance workspace.'
+                  : 'Create your account and open your finance workspace.'}
               </p>
+            </div>
+
+            <div className="authx-feature-row" aria-hidden="true">
+              <span>Private</span>
+              <span>Fast</span>
+              <span>Clean</span>
             </div>
 
             {message ? <p className="authx-error">{message}</p> : null}
@@ -308,9 +314,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
                     className="authx-text-link"
                     type="button"
                     onClick={() =>
-                      setMessage(
-                        'Password recovery is not wired yet. Use your current credentials for now.'
-                      )
+                      setMessage('Password recovery is not wired yet. Use your current credentials for now.')
                     }
                   >
                     Forgot password?
@@ -339,8 +343,8 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
             <span className="authx-kicker">Product preview</span>
             <div className="authx-preview-pills">
               <span>Private</span>
-              <span>Secure</span>
-              <span>Live</span>
+              <span>Premium</span>
+              <span>Quiet</span>
             </div>
           </div>
 
@@ -355,51 +359,119 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
               <BrandLogo className="authx-surface-brand" compact markOnly subtitle="" title="" tone="dark" />
             </div>
 
-            <div className="authx-dashboard-preview">
-              <aside className="authx-mini-sidebar">
-                <div className="authx-mini-sidebar-brand">
-                  <BrandLogo className="authx-mini-brand" compact subtitle="" title="Ledgr" tone="dark" />
+            <div className="authx-scene">
+              <aside className="authx-scene-rail">
+                <div className="authx-scene-rail-brand">
+                  <BrandLogo className="authx-scene-brand" compact markOnly subtitle="" title="" tone="dark" />
                 </div>
-                <div className="authx-mini-nav">
-                  <span className="is-active">Overview</span>
-                  <span>Transactions</span>
-                  <span>Budget</span>
-                  <span>Goals</span>
+
+                <div className="authx-scene-rail-nav">
+                  <span className="authx-scene-rail-pill is-active" />
+                  <span className="authx-scene-rail-pill" />
+                  <span className="authx-scene-rail-pill" />
                 </div>
+
+                <span className="authx-scene-rail-footer">Signature</span>
               </aside>
 
-              <div className="authx-mini-stage">
-                <section className="authx-mini-hero">
-                  <span className="authx-mini-chip">Connected</span>
-                  <h2>Finance, in sync.</h2>
-                  <p>Your frontend signs in through the API and loads live dashboard data.</p>
-                </section>
+              <div className="authx-scene-main">
+                <section className="authx-scene-hero">
+                  <span className="authx-scene-chip">Ledgr signature</span>
+                  <h2>Private finance, shaped with restraint.</h2>
+                  <p>A softer premium workspace with calm structure and modern depth.</p>
 
-                <section className="authx-mini-wallet-card">
-                  <div className="authx-mini-wallet-top">
-                    <span className="authx-mini-wallet-mark" />
-                    <span>Primary card</span>
+                  <div className="authx-scene-hero-tags">
+                    <span>Quiet</span>
+                    <span>Secure</span>
+                    <span>Modern</span>
                   </div>
-                  <strong>•••• 5432</strong>
-                  <small>Backend connected</small>
+
+                  <div className="authx-scene-hero-orbit authx-scene-hero-orbit-one" />
+                  <div className="authx-scene-hero-orbit authx-scene-hero-orbit-two" />
+                  <div className="authx-scene-hero-glass" />
                 </section>
 
-                <section className="authx-mini-chart">
-                  <div className="authx-mini-bar authx-mini-bar-one" />
-                  <div className="authx-mini-bar authx-mini-bar-two" />
-                  <div className="authx-mini-bar authx-mini-bar-three" />
-                  <div className="authx-mini-bar authx-mini-bar-four" />
-                </section>
+                <div className="authx-scene-grid">
+                  <section className="authx-scene-showcase">
+                    <div className="authx-scene-card-head">
+                      <strong>Design language</strong>
+                      <span>Preview</span>
+                    </div>
 
-                <section className="authx-mini-expense-card">
-                  <div className="authx-mini-ring authx-mini-ring-one" />
-                  <div className="authx-mini-ring authx-mini-ring-two" />
-                  <div className="authx-mini-ring authx-mini-ring-three" />
-                  <div className="authx-mini-expense-copy">
-                    <strong>Live totals</strong>
-                    <span>Transactions, budgets, and profile data come from your API.</span>
-                  </div>
-                </section>
+                    <div className="authx-scene-showcase-body">
+                      <div className="authx-scene-showcase-glow" />
+                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-one" />
+                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-two" />
+                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-three" />
+
+                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-a">Cards</span>
+                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-b">Plans</span>
+                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-c">Goals</span>
+
+                      <div className="authx-scene-showcase-core">
+                        <BrandLogo className="authx-scene-showcase-brand" compact markOnly subtitle="" title="" tone="dark" />
+                      </div>
+                    </div>
+
+                    <div className="authx-scene-showcase-copy">
+                      <strong>Clean layers</strong>
+                      <span>Composition only</span>
+                    </div>
+                  </section>
+
+                  <aside className="authx-scene-side-column">
+                    <section className="authx-scene-stack">
+                      <div className="authx-scene-card-layer authx-scene-card-layer-back" />
+
+                      <div className="authx-scene-card-layer authx-scene-card-layer-front">
+                        <div className="authx-scene-card-top">
+                          <span className="authx-scene-card-mark" />
+                          <span className="authx-scene-card-dots">
+                            <span />
+                            <span />
+                          </span>
+                        </div>
+
+                        <span className="authx-scene-card-chip" />
+                        <strong>Ledgr Edition</strong>
+                        <small>Private surface</small>
+                      </div>
+                    </section>
+
+                    <section className="authx-scene-notes">
+                      <div className="authx-scene-card-head">
+                        <strong>Principles</strong>
+                        <span>Preview</span>
+                      </div>
+
+                      <div className="authx-scene-note-list">
+                        <div className="authx-scene-note-row">
+                          <span className="authx-scene-note-dot violet" />
+                          <div>
+                            <strong>Private by default</strong>
+                            <span>Calm visual hierarchy</span>
+                          </div>
+                        </div>
+
+                        <div className="authx-scene-note-row">
+                          <span className="authx-scene-note-dot teal" />
+                          <div>
+                            <strong>Clean surfaces</strong>
+                            <span>Soft contrast, less noise</span>
+                          </div>
+                        </div>
+
+                        <div className="authx-scene-note-row">
+                          <span className="authx-scene-note-dot gold" />
+                          <div>
+                            <strong>Premium motion</strong>
+                            <span>Depth without clutter</span>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </aside>
+                </div>
               </div>
             </div>
           </div>

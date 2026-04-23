@@ -1,18 +1,36 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
-import DashboardPage from './components/DashboardPage';
-import LoginPage from './components/LoginPage';
-import PlaceholderPage from './components/PlaceholderPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import SettingsPage from './components/SettingsPage';
 import { authStore } from './utils/authStore';
+
+const AccountsPage = lazy(() => import('./components/AccountsPage'));
+const ActivityPage = lazy(() => import('./components/ActivityPage'));
+const BillingPage = lazy(() => import('./components/BillingPage'));
+const BudgetPage = lazy(() => import('./components/BudgetPage'));
+const DashboardPage = lazy(() => import('./components/DashboardPage'));
+const GoalsPage = lazy(() => import('./components/GoalsPage'));
+const LoginPage = lazy(() => import('./components/LoginPage'));
+const OnboardingPage = lazy(() => import('./components/OnboardingPage'));
+const PricingPage = lazy(() => import('./components/PricingPage'));
+const RecurringPage = lazy(() => import('./components/RecurringPage'));
+const ReportsPage = lazy(() => import('./components/ReportsPage'));
+const SettingsPage = lazy(() => import('./components/SettingsPage'));
+const SupportPage = lazy(() => import('./components/SupportPage'));
+const TransactionsPage = lazy(() => import('./components/TransactionsPage'));
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
+  '/accounts': 'Accounts',
   '/transactions': 'Transactions',
   '/budget': 'Budget',
   '/goals': 'Goals',
+  '/recurring': 'Recurring',
+  '/reports': 'Reports',
+  '/activity': 'Activity',
+  '/billing': 'Billing',
+  '/pricing': 'Pricing',
+  '/onboarding': 'Onboarding',
   '/settings': 'Settings',
   '/help': 'Help',
 };
@@ -23,6 +41,11 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
+    if (location.pathname === '/pricing') {
+      document.title = 'Ledgr | Pricing';
+      return;
+    }
+
     if (!currentUser) {
       document.title = 'Ledgr | Access';
       return;
@@ -83,9 +106,9 @@ function App() {
   };
 
   const handleUpdateProfile = async (payload) => {
-    const updatedUser = await authStore.updateProfile(currentUser.id, payload);
-    setCurrentUser(updatedUser);
-    return updatedUser;
+    const user = await authStore.updateProfile(currentUser.id, payload);
+    setCurrentUser(user);
+    return user;
   };
 
   if (isAuthLoading) {
@@ -93,6 +116,7 @@ function App() {
   }
 
   return (
+    <Suspense fallback={<main className="app-loading-state">Loading workspace...</main>}>
     <Routes>
       <Route path="/" element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />} />
 
@@ -118,6 +142,17 @@ function App() {
         }
       />
 
+      <Route path="/pricing" element={<PricingPage currentUser={currentUser} />} />
+
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <OnboardingPage currentUser={currentUser} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/dashboard"
         element={
@@ -131,11 +166,16 @@ function App() {
         path="/settings"
         element={
           <ProtectedRoute currentUser={currentUser}>
-            <SettingsPage
-              currentUser={currentUser}
-              onLogout={handleLogout}
-              onUpdateProfile={handleUpdateProfile}
-            />
+            <SettingsPage currentUser={currentUser} onLogout={handleLogout} onUpdateProfile={handleUpdateProfile} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/accounts"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <AccountsPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -144,7 +184,7 @@ function App() {
         path="/transactions"
         element={
           <ProtectedRoute currentUser={currentUser}>
-            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Transactions" />
+            <TransactionsPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -153,7 +193,7 @@ function App() {
         path="/budget"
         element={
           <ProtectedRoute currentUser={currentUser}>
-            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Budget" />
+            <BudgetPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -162,7 +202,43 @@ function App() {
         path="/goals"
         element={
           <ProtectedRoute currentUser={currentUser}>
-            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Goals" />
+            <GoalsPage currentUser={currentUser} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/recurring"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <RecurringPage currentUser={currentUser} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <ReportsPage currentUser={currentUser} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/activity"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <ActivityPage currentUser={currentUser} onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/billing"
+        element={
+          <ProtectedRoute currentUser={currentUser}>
+            <BillingPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -171,13 +247,14 @@ function App() {
         path="/help"
         element={
           <ProtectedRoute currentUser={currentUser}>
-            <PlaceholderPage currentUser={currentUser} onLogout={handleLogout} title="Help & Support" />
+            <SupportPage currentUser={currentUser} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
 
       <Route path="*" element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />} />
     </Routes>
+    </Suspense>
   );
 }
 
