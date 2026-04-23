@@ -161,7 +161,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
     } catch (error) {
       const authMessage =
         error.message === 'Request failed'
-          ? 'Ledgr could not reach the API. Start the backend server, then try again.'
+          ? 'Ledgr cannot reach the finance service. Start the backend server, then try again.'
           : error.message;
 
       setMessage(authMessage || 'Ledgr could not complete that request. Please try again.');
@@ -343,141 +343,49 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
           </div>
         </section>
 
-        <section className="authx-preview-column" aria-hidden="true">
-          <div className="authx-preview-header">
-            <span className="authx-kicker">Product preview</span>
-            <div className="authx-preview-pills">
-              <span>Private</span>
-              <span>Premium</span>
-              <span>Quiet</span>
-            </div>
-          </div>
-
-          <div className="authx-preview-surface">
-            <div className="authx-surface-topbar">
-              <div className="authx-surface-dots">
-                <span />
-                <span />
-                <span />
+        <section className="authx-preview-column" aria-label="Ledgr product summary">
+          <div className="authx-product-stage">
+            <div className="authx-product-nav">
+              <span className="authx-kicker">Ledgr workspace</span>
+              <div className="authx-preview-pills">
+                <span>Private</span>
+                <span>Organized</span>
+                <span>Clear</span>
               </div>
-              <div className="authx-surface-search" />
-              <BrandLogo className="authx-surface-brand" compact markOnly subtitle="" title="" tone="dark" />
             </div>
 
-            <div className="authx-scene">
-              <aside className="authx-scene-rail">
-                <div className="authx-scene-rail-brand">
-                  <BrandLogo className="authx-scene-brand" compact markOnly subtitle="" title="" tone="dark" />
-                </div>
+            <section className="authx-product-hero">
+              <div className="authx-product-copy">
+                <span className="authx-scene-chip">Private finance workspace</span>
+                <h2>Money feels clearer when everything has a place.</h2>
+                <p>
+                  Sign in to organize accounts, spending, budgets, subscriptions, and goals from one calm workspace.
+                </p>
 
-                <div className="authx-scene-rail-nav">
-                  <span className="authx-scene-rail-pill is-active" />
-                  <span className="authx-scene-rail-pill" />
-                  <span className="authx-scene-rail-pill" />
-                </div>
-
-                <span className="authx-scene-rail-footer">Signature</span>
-              </aside>
-
-              <div className="authx-scene-main">
-                <section className="authx-scene-hero">
-                  <span className="authx-scene-chip">Ledgr signature</span>
-                  <h2>Private finance, shaped with restraint.</h2>
-                  <p>A softer premium workspace with calm structure and modern depth.</p>
-
-                  <div className="authx-scene-hero-tags">
-                    <span>Quiet</span>
-                    <span>Secure</span>
-                    <span>Modern</span>
-                  </div>
-
-                  <div className="authx-scene-hero-orbit authx-scene-hero-orbit-one" />
-                  <div className="authx-scene-hero-orbit authx-scene-hero-orbit-two" />
-                  <div className="authx-scene-hero-glass" />
-                </section>
-
-                <div className="authx-scene-grid">
-                  <section className="authx-scene-showcase">
-                    <div className="authx-scene-card-head">
-                      <strong>Design language</strong>
-                      <span>Preview</span>
-                    </div>
-
-                    <div className="authx-scene-showcase-body">
-                      <div className="authx-scene-showcase-glow" />
-                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-one" />
-                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-two" />
-                      <div className="authx-scene-showcase-orbit authx-scene-showcase-orbit-three" />
-
-                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-a">Cards</span>
-                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-b">Plans</span>
-                      <span className="authx-scene-showcase-pill authx-scene-showcase-pill-c">Goals</span>
-
-                      <div className="authx-scene-showcase-core">
-                        <BrandLogo className="authx-scene-showcase-brand" compact markOnly subtitle="" title="" tone="dark" />
-                      </div>
-                    </div>
-
-                    <div className="authx-scene-showcase-copy">
-                      <strong>Clean layers</strong>
-                      <span>Composition only</span>
-                    </div>
-                  </section>
-
-                  <aside className="authx-scene-side-column">
-                    <section className="authx-scene-stack">
-                      <div className="authx-scene-card-layer authx-scene-card-layer-back" />
-
-                      <div className="authx-scene-card-layer authx-scene-card-layer-front">
-                        <div className="authx-scene-card-top">
-                          <span className="authx-scene-card-mark" />
-                          <span className="authx-scene-card-dots">
-                            <span />
-                            <span />
-                          </span>
-                        </div>
-
-                        <span className="authx-scene-card-chip" />
-                        <strong>Ledgr Edition</strong>
-                        <small>Private surface</small>
-                      </div>
-                    </section>
-
-                    <section className="authx-scene-notes">
-                      <div className="authx-scene-card-head">
-                        <strong>Principles</strong>
-                        <span>Preview</span>
-                      </div>
-
-                      <div className="authx-scene-note-list">
-                        <div className="authx-scene-note-row">
-                          <span className="authx-scene-note-dot violet" />
-                          <div>
-                            <strong>Private by default</strong>
-                            <span>Calm visual hierarchy</span>
-                          </div>
-                        </div>
-
-                        <div className="authx-scene-note-row">
-                          <span className="authx-scene-note-dot teal" />
-                          <div>
-                            <strong>Clean surfaces</strong>
-                            <span>Soft contrast, less noise</span>
-                          </div>
-                        </div>
-
-                        <div className="authx-scene-note-row">
-                          <span className="authx-scene-note-dot gold" />
-                          <div>
-                            <strong>Premium motion</strong>
-                            <span>Depth without clutter</span>
-                          </div>
-                        </div>
-                      </div>
-                    </section>
-                  </aside>
+                <div className="authx-product-tags">
+                  <span>Accounts</span>
+                  <span>Transactions</span>
+                  <span>Budgets</span>
+                  <span>Goals</span>
                 </div>
               </div>
+
+              <div className="authx-product-card" aria-hidden="true">
+                <span className="authx-product-card-chip" />
+                <strong>Ready to organize</strong>
+                <small>Your workspace, your records</small>
+                <div className="authx-product-card-lines">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            </section>
+
+            <div className="authx-product-showcase-row" aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </div>
           </div>
         </section>

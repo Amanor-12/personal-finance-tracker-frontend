@@ -1,10 +1,16 @@
 import { sessionStore } from './sessionStore';
 
+const API_OFFLINE_MESSAGE = 'Ledgr cannot reach the finance service. Start the backend server, then try again.';
+
 const getErrorMessage = (payload) =>
-  payload?.message ||
-  payload?.error ||
-  payload?.errors?.[0]?.message ||
-  'Request failed.';
+  typeof payload === 'string'
+    ? payload.toLowerCase().includes('proxy') || payload.toLowerCase().includes('econnrefused')
+      ? API_OFFLINE_MESSAGE
+      : payload || 'Request failed.'
+    : payload?.message ||
+      payload?.error ||
+      payload?.errors?.[0]?.message ||
+      'Request failed.';
 
 const buildError = (status, payload) => {
   const error = new Error(getErrorMessage(payload));
@@ -41,11 +47,20 @@ const request = async (path, { method = 'GET', body, headers = {}, auth = true }
     nextHeaders.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(path, {
-    method,
-    headers: nextHeaders,
-    body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
-  });
+  let response;
+
+  try {
+    response = await fetch(path, {
+      method,
+      headers: nextHeaders,
+      body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
+    });
+  } catch (error) {
+    throw buildError(0, {
+      message: API_OFFLINE_MESSAGE,
+      cause: error.message,
+    });
+  }
 
   const payload = await parseResponse(response);
 
