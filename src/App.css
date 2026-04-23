@@ -11530,6 +11530,21 @@ textarea:focus-visible,
   border: 1px solid rgba(215, 223, 235, 0.86);
 }
 
+.accounts-vault-card-product {
+  min-height: 0;
+  padding: 16px;
+  align-content: start;
+  gap: 16px;
+  background:
+    radial-gradient(circle at 88% 14%, rgba(40, 183, 207, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff, #fbfcfd);
+}
+
+.accounts-vault-card-body {
+  display: grid;
+  gap: 8px;
+}
+
 .accounts-vault-card-top,
 .goals-card-top,
 .goals-card-values,
@@ -12297,6 +12312,26 @@ textarea:focus-visible,
 .accounts-wallet-preview-card {
   min-height: 172px;
   max-width: 100%;
+}
+
+.accounts-wallet-preview-card:not(.ref-stack-card) {
+  position: relative;
+  width: 100%;
+  border: 0;
+}
+
+.accounts-wallet-preview-card.is-compact {
+  min-height: 154px;
+  padding: 15px 15px 13px;
+  box-shadow: 0 22px 42px rgba(45, 75, 235, 0.16);
+}
+
+.accounts-wallet-preview-card.is-compact .ref-wallet-chip {
+  margin: 14px 0 12px;
+}
+
+.accounts-wallet-preview-card.is-compact .ref-wallet-card-copy strong {
+  font-size: 1.15rem;
 }
 
 .accounts-wallet-preview-note {

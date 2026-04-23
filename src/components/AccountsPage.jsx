@@ -28,16 +28,29 @@ const summarizeAccountTypes = (accounts) =>
       return summary;
     }, {});
 
-function AccountPreviewCard({ account, depth = 0, placeholder = false }) {
+const getAccountTheme = (accountType) => {
+  if (accountType === 'savings' || accountType === 'investment') {
+    return 'emerald';
+  }
+
+  if (accountType === 'cash') {
+    return 'sunset';
+  }
+
+  return 'indigo';
+};
+
+function AccountPreviewCard({ account, depth = 0, placeholder = false, stacked = true, compact = false }) {
   const accountType = placeholder ? 'Preview account' : getAccountTypeLabel(account.accountType);
   const title = placeholder ? 'Ledgr' : account.name;
   const balance = placeholder ? 'Add your first account' : formatAccountCurrency(account.currentBalance, account.currency);
   const identifier = placeholder ? '**** ----' : account.maskedIdentifier || account.institutionName || 'Manual account';
   const footer = placeholder ? 'preview' : account.isPrimary ? 'primary' : account.status;
+  const theme = placeholder ? 'indigo' : getAccountTheme(account.accountType);
 
   return (
     <article
-      className={`accounts-wallet-preview-card ref-wallet-card ref-stack-card theme-indigo${placeholder ? ' is-placeholder' : ''}`}
+      className={`accounts-wallet-preview-card ref-wallet-card theme-${theme}${stacked ? ' ref-stack-card' : ''}${compact ? ' is-compact' : ''}${placeholder ? ' is-placeholder' : ''}`}
       style={{
         '--stack-x': `${depth * 16}px`,
         '--stack-y': `${depth * 20}px`,
@@ -325,14 +338,19 @@ function AccountsPage({ currentUser, onLogout }) {
           {!isLoading && !loadError && visibleAccounts.length ? (
             <div className="accounts-vault-list">
               {visibleAccounts.map((account) => (
-                <article className="accounts-vault-card" key={account.id}>
-                  <div className="accounts-vault-card-top">
-                    <span>{getAccountTypeLabel(account.accountType)}</span>
-                    <strong>{account.isPrimary ? 'Primary' : account.status}</strong>
+                <article className="accounts-vault-card accounts-vault-card-product" key={account.id}>
+                  <AccountPreviewCard account={account} stacked={false} compact />
+
+                  <div className="accounts-vault-card-body">
+                    <div className="accounts-vault-card-top">
+                      <span>{getAccountTypeLabel(account.accountType)}</span>
+                      <strong>{account.isPrimary ? 'Primary' : account.status}</strong>
+                    </div>
+                    <h3>{account.name}</h3>
+                    <p>{account.institutionName || account.maskedIdentifier || 'Manual account'}</p>
+                    <b>{formatAccountCurrency(account.currentBalance, account.currency)}</b>
                   </div>
-                  <h3>{account.name}</h3>
-                  <p>{account.institutionName || account.maskedIdentifier || 'Manual account'}</p>
-                  <b>{formatAccountCurrency(account.currentBalance, account.currency)}</b>
+
                   <div className="accounts-vault-card-actions">
                     <button type="button" onClick={() => openEditDialog(account)}>Edit</button>
                     {account.status === 'active' && !account.isPrimary ? (
