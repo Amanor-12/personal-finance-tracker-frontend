@@ -11690,3 +11690,245 @@ textarea:focus-visible,
     padding-left: 42px;
   }
 }
+
+/* Overview-matched palette pass */
+.premium-hero-ledger,
+.premium-hero-vault,
+.premium-hero-plan,
+.premium-hero-renewal,
+.premium-hero-analytics,
+.premium-hero-control,
+.settings-command-hero,
+.billing-studio-hero,
+.activity-ledger-hero,
+.support-concierge-hero {
+  background:
+    radial-gradient(circle at 88% 20%, rgba(40, 183, 207, 0.12), transparent 24%),
+    radial-gradient(circle at 12% 0%, rgba(109, 136, 255, 0.1), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 253, 0.94));
+  border-color: rgba(202, 210, 216, 0.72);
+  box-shadow: 0 26px 60px rgba(17, 27, 66, 0.06);
+}
+
+.premium-hero-goal,
+.pricing-market-hero,
+.onboarding-rail,
+.accounts-primary-vault,
+.settings-command-card,
+.billing-status-card {
+  background:
+    radial-gradient(circle at right center, rgba(255, 255, 255, 0.14), transparent 30%),
+    linear-gradient(135deg, #6d88ff 0%, #4e6af5 24%, #4a44eb 48%, #6828d8 100%);
+  box-shadow: 0 28px 52px rgba(82, 72, 240, 0.16);
+}
+
+.premium-hero h2,
+.settings-command-hero h2,
+.billing-studio-hero h2,
+.activity-ledger-hero h2,
+.support-concierge-hero h2 {
+  color: var(--ref-navy);
+}
+
+.premium-hero p,
+.settings-command-hero p,
+.billing-studio-hero p,
+.activity-ledger-hero p,
+.support-concierge-hero p {
+  color: #7a8499;
+}
+
+.premium-hero-goal h2,
+.premium-hero-goal p,
+.pricing-market-hero h1,
+.pricing-market-hero p,
+.onboarding-rail h1,
+.onboarding-rail p,
+.accounts-primary-vault h3,
+.accounts-primary-vault p,
+.accounts-primary-vault span,
+.settings-command-card span,
+.settings-command-card strong,
+.settings-command-card p,
+.billing-status-card span,
+.billing-status-card strong,
+.billing-status-card p {
+  color: #ffffff;
+}
+
+.premium-eyebrow,
+.settings-command-kicker,
+.billing-eyebrow,
+.activity-eyebrow,
+.support-eyebrow,
+.pricing-eyebrow,
+.onboarding-eyebrow {
+  color: #285c70;
+  background: rgba(210, 248, 248, 0.82);
+}
+
+.premium-hero-goal .premium-eyebrow,
+.pricing-market-hero .pricing-eyebrow,
+.onboarding-rail .onboarding-eyebrow {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.premium-primary-action,
+.ref-primary-button,
+.pricing-primary-button,
+.billing-primary-action,
+.onboarding-primary,
+.settings-save-button,
+.support-path-card a,
+.support-rail-card a {
+  background: linear-gradient(135deg, #6f6cf9 0%, #5748f7 45%, #28b7cf 100%);
+  box-shadow: 0 16px 30px rgba(84, 72, 247, 0.18);
+}
+
+.premium-secondary-action,
+.billing-secondary-action,
+.pricing-secondary-button,
+.onboarding-secondary,
+.activity-ledger-hero button,
+.activity-workbench-head a,
+.support-empty-search button {
+  color: #687388;
+  background: rgba(248, 250, 253, 0.96);
+  border: 1px solid rgba(202, 210, 216, 0.72);
+}
+
+.premium-metric,
+.premium-panel,
+.settings-editor-card,
+.settings-trust-card,
+.billing-readiness-card,
+.billing-sidecar-dark,
+.billing-control-strip article,
+.billing-invoices,
+.activity-ledger,
+.activity-signal-card,
+.support-rail-card,
+.support-path-card,
+.support-faq-card,
+.support-empty-search,
+.accounts-type-map,
+.budget-pressure-main,
+.budget-pressure-meter,
+.accounts-vault-card,
+.goals-portfolio-card,
+.budget-board-row,
+.recurring-timeline-item,
+.pricing-proof-grid article,
+.pricing-comparison,
+.pricing-card,
+.onboarding-card {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(202, 210, 216, 0.72);
+  box-shadow: 0 24px 54px rgba(17, 27, 66, 0.055);
+}
+
+.premium-metric-indigo,
+.premium-metric-teal,
+.premium-metric-amber,
+.premium-metric-violet,
+.budget-pressure-main,
+.accounts-vault-card,
+.goals-portfolio-card,
+.activity-signal-card-light,
+.support-path-card {
+  background:
+    radial-gradient(circle at 88% 16%, rgba(40, 183, 207, 0.08), transparent 24%),
+    linear-gradient(180deg, #ffffff, #fbfcfd);
+}
+
+.settings-trust-card-dark,
+.billing-sidecar-dark,
+.support-rail-card-dark,
+.activity-rail-card-dark,
+.activity-signal-card:first-child {
+  color: var(--ref-navy);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(109, 136, 255, 0.12), transparent 24%),
+    linear-gradient(180deg, #ffffff, #f8fafd);
+  border-color: rgba(202, 210, 216, 0.72);
+}
+
+.settings-trust-card-dark h3,
+.settings-trust-card-dark p,
+.settings-trust-card-dark span,
+.billing-sidecar-dark h3,
+.billing-sidecar-dark p,
+.billing-sidecar-dark span,
+.support-rail-card-dark h3,
+.support-rail-card-dark p,
+.support-rail-card-dark span,
+.activity-rail-card-dark h3,
+.activity-rail-card-dark p,
+.activity-rail-card-dark span,
+.activity-signal-card:first-child h3,
+.activity-signal-card:first-child p,
+.activity-signal-card:first-child span {
+  color: inherit;
+}
+
+.premium-hero-visual,
+.support-search,
+.settings-hq .settings-section-nav,
+.billing-readiness-card,
+.accounts-type-list span,
+.budget-board-row,
+.recurring-timeline-item,
+.activity-event,
+.support-faq-list article {
+  background: rgba(248, 250, 253, 0.96);
+}
+
+.premium-bars span,
+.budget-pressure-meter div span,
+.budget-board-track span,
+.goals-progress-track span,
+.recurring-timeline-dot,
+.activity-event-dot {
+  background: linear-gradient(90deg, #2bc1b0 0%, #5a5ef6 100%);
+}
+
+.premium-rings {
+  background:
+    radial-gradient(circle, transparent 0 32%, rgba(255, 255, 255, 0.88) 33% 43%, transparent 44%),
+    conic-gradient(#6855f4 0 48%, #28c1b1 48% 76%, rgba(236, 239, 245, 0.9) 76% 100%);
+}
+
+.premium-timeline span {
+  background: linear-gradient(90deg, #6f6cf9, #28b7cf);
+}
+
+.premium-timeline span:nth-child(2) {
+  background: linear-gradient(90deg, #28b7cf, #9ee8e1);
+}
+
+.premium-timeline span:nth-child(3) {
+  background: linear-gradient(90deg, #6d88ff, #d9d8ff);
+}
+
+.pricing-market-shell,
+.onboarding-shell {
+  background:
+    radial-gradient(circle at top left, rgba(45, 75, 235, 0.12), transparent 18%),
+    radial-gradient(circle at right 20%, rgba(37, 39, 215, 0.08), transparent 18%),
+    radial-gradient(circle at bottom left, rgba(37, 192, 176, 0.08), transparent 20%),
+    linear-gradient(180deg, #f8f9fb 0%, #eef3f8 100%);
+}
+
+.pricing-card.is-featured {
+  border-color: rgba(108, 102, 248, 0.28);
+  box-shadow: 0 28px 62px rgba(82, 72, 240, 0.12);
+}
+
+.pricing-card-head > strong,
+.accounts-vault-card-top strong,
+.goals-card-top strong {
+  color: #ffffff;
+  background: linear-gradient(135deg, #6f6cf9 0%, #5748f7 45%, #28b7cf 100%);
+  border-color: transparent;
+}
