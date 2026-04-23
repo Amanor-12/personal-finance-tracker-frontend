@@ -159,7 +159,12 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
       navigate(isLogin ? '/dashboard' : '/onboarding');
     } catch (error) {
-      setMessage(error.message);
+      const authMessage =
+        error.message === 'Request failed'
+          ? 'Ledgr could not reach the API. Start the backend server, then try again.'
+          : error.message;
+
+      setMessage(authMessage || 'Ledgr could not complete that request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
