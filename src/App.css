@@ -456,7 +456,7 @@
   font-weight: 700;
 }
 
-.ref-secondary-button {
+.ref-hero-card .ref-secondary-button {
   min-height: 40px;
   margin-top: 18px;
   padding: 0 16px;
@@ -465,7 +465,7 @@
   box-shadow: none;
 }
 
-.ref-secondary-button:hover {
+.ref-hero-card .ref-secondary-button:hover {
   background: rgba(255, 255, 255, 0.22);
 }
 
@@ -12375,9 +12375,9 @@ textarea:focus-visible,
 .goals-portfolio-console {
   padding: 28px;
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) 230px minmax(260px, 0.55fr);
-  gap: 18px;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) 220px minmax(280px, 0.72fr);
+  gap: 22px;
+  align-items: center;
 }
 
 .goals-portfolio-panel {
@@ -12386,9 +12386,14 @@ textarea:focus-visible,
   display: grid;
   align-content: center;
   justify-items: start;
+  min-width: 0;
+  max-width: 520px;
 }
 
 .goals-progress-orb {
+  width: min(100%, 220px);
+  align-self: center;
+  justify-self: center;
   display: grid;
   place-items: center;
   align-content: center;
@@ -12415,6 +12420,7 @@ textarea:focus-visible,
 
 .goals-portfolio-values {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: stretch;
 }
 
 .goals-portfolio-values article,
