@@ -1,39 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
-
-const supportPaths = [
-  {
-    title: 'Set up accounts',
-    body: 'Create manual accounts first so every transaction has a clear money location.',
-    cta: 'Open accounts',
-    keywords: 'accounts wallets bank cash card setup',
-    to: '/accounts',
-  },
-  {
-    title: 'Record transactions',
-    body: 'Track income, expenses, transfers, categories, notes, edits, and deletion.',
-    cta: 'Open transactions',
-    keywords: 'transactions income expense transfer category delete edit',
-    to: '/transactions',
-  },
-  {
-    title: 'Plan spending',
-    body: 'Use budgets and goals once you are ready to plan with real categories and amounts.',
-    cta: 'Open budget',
-    keywords: 'budget goals spending plan saving',
-    to: '/budget',
-  },
-  {
-    title: 'Review insights',
-    body: 'Reports become useful after real transactions exist. Empty states stay honest until then.',
-    cta: 'Open reports',
-    keywords: 'reports insights analytics charts cash flow',
-    to: '/reports',
-  },
-];
-
-const faqItems = [
+import { useBillingAccess } from '../context/BillingAccessContext';
+const baseFaqItems = [
   {
     question: 'Why does my workspace start empty?',
     answer: 'Ledgr does not seed fake money data. Your workspace only shows accounts, transactions, budgets, goals, and recurring payments you create or connect later.',
@@ -53,7 +22,77 @@ const faqItems = [
 ];
 
 function SupportPage({ currentUser, onLogout }) {
+  const { access, billing, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [query, setQuery] = useState('');
+  const isPremium = access.isPremium;
+  const hasRecurringAccess = hasFeature('recurringPayments');
+  const hasReportsAccess = hasFeature('reports');
+  const planLabel = billing?.currentPlan?.name || (isPremium ? 'Premium' : 'Free');
+  const supportPaths = useMemo(
+    () => [
+      {
+        title: 'Set up accounts',
+        body: 'Create manual accounts first so every transaction, budget, and goal has a clear money location.',
+        cta: 'Open accounts',
+        keywords: 'accounts wallets bank cash card setup',
+        to: '/accounts',
+      },
+      {
+        title: 'Record transactions',
+        body: 'Track income, expenses, transfers, categories, notes, edits, and deletion from one ledger.',
+        cta: 'Open transactions',
+        keywords: 'transactions income expense transfer category delete edit ledger',
+        to: '/transactions',
+      },
+      {
+        title: 'Plan spending',
+        body: 'Use budgets and goals together so day-to-day spend and longer-term targets stay connected.',
+        cta: 'Open budget',
+        keywords: 'budget goals spending plan saving',
+        to: '/budget',
+      },
+      {
+        title: hasRecurringAccess ? 'Track recurring bills' : 'Unlock recurring payments',
+        body: hasRecurringAccess
+          ? 'Subscriptions, rent, insurance, and memberships stay in one renewal queue with due dates and annualized cost.'
+          : 'Recurring bills are part of Premium so active customers can see subscriptions and fixed costs before they hit.',
+        cta: hasRecurringAccess ? 'Open subscriptions' : 'View premium',
+        keywords: 'subscriptions recurring bills rent insurance premium renewals',
+        to: hasRecurringAccess ? '/recurring' : '/pricing',
+      },
+      {
+        title: hasReportsAccess ? 'Read advanced insights' : 'Unlock advanced reports',
+        body: hasReportsAccess
+          ? 'Backend-powered reporting answers real questions about merchants, categories, concentration, and cash flow.'
+          : 'Reports are Premium because they move the user from recording money to understanding it with real backend analysis.',
+        cta: hasReportsAccess ? 'Open insights' : 'View premium',
+        keywords: 'reports insights analytics merchants concentration premium',
+        to: hasReportsAccess ? '/reports' : '/pricing',
+      },
+      {
+        title: isPremium ? 'Manage your premium plan' : 'Compare plans and billing',
+        body: isPremium
+          ? 'Open billing to manage invoices, payment methods, portal access, and subscription state.'
+          : 'See what Premium adds, what Free still includes, and how billing stays separate from personal spending.',
+        cta: isPremium ? 'Open billing' : 'View pricing',
+        keywords: 'billing pricing plan invoices checkout stripe premium',
+        to: isPremium ? '/billing' : '/pricing',
+      },
+    ],
+    [hasRecurringAccess, hasReportsAccess, isPremium]
+  );
+  const faqItems = useMemo(
+    () => [
+      ...baseFaqItems,
+      {
+        question: 'What does Premium actually unlock?',
+        answer: isPremium
+          ? 'Your workspace currently includes recurring payment tracking, backend-powered reports, unlimited planning space, and priority support access.'
+          : 'Premium unlocks recurring payment tracking, backend-powered reports, unlimited planning capacity, and priority support without changing your core manual tracking workflow.',
+      },
+    ],
+    [isPremium]
+  );
   const visiblePaths = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -64,14 +103,19 @@ function SupportPage({ currentUser, onLogout }) {
     return supportPaths.filter((path) =>
       [path.title, path.body, path.keywords].some((value) => value.toLowerCase().includes(normalizedQuery))
     );
-  }, [query]);
+  }, [query, supportPaths]);
 
   const rail = (
     <aside className="support-concierge-rail">
       <article className="support-rail-card support-rail-card-dark">
-        <span>Support model</span>
-        <h3>Self-serve first</h3>
-        <p>Help should move users to the right action before they need direct contact.</p>
+        <span>{isBillingLoading ? 'Plan access' : `${planLabel} support`}</span>
+        <h3>{isPremium ? 'Priority support is active' : 'Self-serve support on Free'}</h3>
+        <p>
+          {isPremium
+            ? 'Billing, premium tools, and priority support live inside the same workspace.'
+            : 'Free customers get guided product help. Premium adds faster support and deeper finance tooling.'}
+        </p>
+        <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage billing' : 'See premium'}</Link>
       </article>
       <article className="support-rail-card">
         <span>Account controls</span>
@@ -96,16 +140,30 @@ function SupportPage({ currentUser, onLogout }) {
           <h2>Fast answers. Clear next steps.</h2>
           <p>Search the core product areas and move directly into the workflow that solves the issue.</p>
         </div>
-        <label className="support-search">
-          <span>Search help</span>
-          <input
-            aria-label="Search support content"
-            type="search"
-            value={query}
-            placeholder="Try accounts, transactions, billing..."
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
+        <div className="support-hero-tools">
+          <label className="support-search">
+            <span>Search help</span>
+            <input
+              aria-label="Search support content"
+              type="search"
+              value={query}
+              placeholder="Try accounts, transactions, billing..."
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </label>
+
+          <div className="support-plan-note">
+            <div>
+              <span>{isBillingLoading ? 'Loading access' : `${planLabel} workspace`}</span>
+              <strong>
+                {isPremium
+                  ? 'Premium tools and priority support are already available.'
+                  : 'Premium adds renewals, deeper reports, and faster support.'}
+              </strong>
+            </div>
+            <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage plan' : 'View premium'}</Link>
+          </div>
+        </div>
       </section>
 
       <section className="support-path-grid" aria-label="Support paths">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
@@ -176,6 +177,7 @@ function WalletStackCard({ card, depth = 0, placeholder = false, isActive = fals
 }
 
 function DashboardPage({ currentUser, onLogout }) {
+  const { access: billingAccess, billing, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isCardComposerOpen, setIsCardComposerOpen] = useState(false);
@@ -193,6 +195,9 @@ function DashboardPage({ currentUser, onLogout }) {
   const [paymentMessage, setPaymentMessage] = useState('');
 
   const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
+  const isPremium = billingAccess.isPremium;
+  const hasRecurringAccess = hasFeature('recurringPayments');
+  const planLabel = billing?.currentPlan?.name || (isPremium ? 'Premium' : 'Free');
 
   useEffect(() => {
     let isCancelled = false;
@@ -353,14 +358,21 @@ function DashboardPage({ currentUser, onLogout }) {
       label: 'Renewals',
       value: workspaceSignals.recurring,
       tone: 'orange',
-      route: '/recurring',
-      emptyCopy: 'Track recurring bills before they surprise you.',
-      readyCopy: 'Upcoming renewals are already in view.',
+      route: hasRecurringAccess ? '/recurring' : '/pricing',
+      emptyCopy: hasRecurringAccess
+        ? 'Track recurring bills before they surprise you.'
+        : 'Premium adds subscriptions, rent, and fixed charges in one renewal queue.',
+      readyCopy: hasRecurringAccess
+        ? 'Upcoming renewals are already in view.'
+        : 'Upgrade to unlock recurring control before charges land.',
+      locked: !hasRecurringAccess,
+      actionLabel: hasRecurringAccess ? undefined : 'Unlock',
     },
   ];
-  const connectedModules = workspaceModules.filter((module) => module.value > 0).length;
-  const nextWorkspaceModule = workspaceModules.find((module) => module.value === 0) || workspaceModules[0];
-  const workspaceSummary = connectedModules === workspaceModules.length
+  const accessibleModules = workspaceModules.filter((module) => !module.locked);
+  const connectedModules = accessibleModules.filter((module) => module.value > 0).length;
+  const nextWorkspaceModule = accessibleModules.find((module) => module.value === 0) || accessibleModules[0] || workspaceModules[0];
+  const workspaceSummary = connectedModules === accessibleModules.length
     ? {
         kicker: 'Workspace connected',
         title: 'Overview is linked to every core finance area.',
@@ -375,6 +387,32 @@ function DashboardPage({ currentUser, onLogout }) {
         actionLabel: `Open ${nextWorkspaceModule.label.toLowerCase()}`,
         actionRoute: nextWorkspaceModule.route,
       };
+  const premiumWorkspace = isBillingLoading
+    ? {
+        kicker: 'Plan access',
+        title: 'Checking premium workspace controls.',
+        copy: 'Loading recurring, reporting, and billing access for this account.',
+        actionLabel: 'Billing',
+        actionRoute: '/billing',
+        pills: ['Recurring', 'Reports', 'Support'],
+      }
+    : isPremium
+      ? {
+          kicker: `${planLabel} active`,
+          title: 'Recurring control and advanced insights are live.',
+          copy: 'Use subscriptions, reports, and billing as part of the same finance workspace without switching products.',
+          actionLabel: 'Manage billing',
+          actionRoute: '/billing',
+          pills: ['Recurring queue', 'Insight lab', 'Priority support'],
+        }
+      : {
+          kicker: `${planLabel} workspace`,
+          title: 'Premium unlocks renewals, deeper analysis, and more planning room.',
+          copy: 'Stay on Free for manual tracking, then upgrade when you need recurring bills, backend-powered reports, and unlimited planning capacity.',
+          actionLabel: 'View premium',
+          actionRoute: '/pricing',
+          pills: ['Recurring bills', 'Reports', 'Unlimited planning'],
+        };
 
   const flowState = recentPayments.length
     ? {
@@ -836,9 +874,30 @@ function DashboardPage({ currentUser, onLogout }) {
               </Link>
             </div>
 
+            <div className="ref-workspace-plan-strip">
+              <div className="ref-workspace-plan-copy">
+                <span className="ref-workspace-plan-kicker">{premiumWorkspace.kicker}</span>
+                <strong>{premiumWorkspace.title}</strong>
+                <p>{premiumWorkspace.copy}</p>
+              </div>
+
+              <div className="ref-workspace-plan-meta">
+                <div className="ref-workspace-plan-pills" aria-label="Plan capabilities">
+                  {premiumWorkspace.pills.map((pill) => (
+                    <span key={pill} className="ref-workspace-plan-pill">
+                      {pill}
+                    </span>
+                  ))}
+                </div>
+                <Link className="ref-workspace-plan-link" to={premiumWorkspace.actionRoute}>
+                  {premiumWorkspace.actionLabel}
+                </Link>
+              </div>
+            </div>
+
             <div className="ref-workspace-route-list">
               {workspaceModules.map((item) => (
-                <article key={item.label} className="ref-workspace-route">
+                <article key={item.label} className={`ref-workspace-route${item.locked ? ' is-locked' : ''}`}>
                   <div className="ref-workspace-route-copy">
                     <span className={`ref-expense-dot ref-expense-dot-${item.tone}`} />
                     <div>
@@ -847,8 +906,8 @@ function DashboardPage({ currentUser, onLogout }) {
                     </div>
                   </div>
                   <div className="ref-workspace-route-meta">
-                    <strong>{String(item.value).padStart(2, '0')}</strong>
-                    <Link to={item.route}>{item.value ? 'Open' : 'Create'}</Link>
+                    <strong>{item.locked ? 'Pro' : String(item.value).padStart(2, '0')}</strong>
+                    <Link to={item.route}>{item.actionLabel || (item.value ? 'Open' : 'Create')}</Link>
                   </div>
                 </article>
               ))}
