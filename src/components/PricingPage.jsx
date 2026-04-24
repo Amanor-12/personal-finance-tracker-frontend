@@ -4,12 +4,13 @@ import BrandLogo from './BrandLogo';
 import { billingPlans, billingStore } from '../utils/billingStore';
 
 const comparisonRows = [
+  { label: 'Best for', free: 'Manual tracking', premium: 'Active money management' },
   { label: 'Accounts', free: '2 active', premium: 'Unlimited' },
   { label: 'Budgets', free: 'Up to 6', premium: 'Unlimited' },
   { label: 'Goals', free: 'Up to 3', premium: 'Unlimited' },
-  { label: 'Recurring payments workspace', free: '-', premium: 'Included' },
-  { label: 'Reports and insight surfaces', free: '-', premium: 'Included' },
-  { label: 'Billing portal and invoice history', free: '-', premium: 'Included' },
+  { label: 'Recurring bill and renewal control', free: '-', premium: 'Included' },
+  { label: 'Server-backed reports and insights', free: '-', premium: 'Included' },
+  { label: 'Priority support and billing portal', free: '-', premium: 'Included' },
 ];
 
 function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
@@ -95,9 +96,9 @@ function PricingPage({ currentUser }) {
       <section className="pricing-market-hero">
         <div>
           <span className="pricing-eyebrow">Stripe-ready SaaS billing</span>
-          <h1>Pricing for a private finance workspace, not fake finance data.</h1>
+          <h1>Free for clean tracking. Premium for recurring control and real analysis.</h1>
           <p>
-            Pick a Ledgr plan. Your personal accounts, transactions, budgets, and goals stay separate from app billing.
+            Start on Free for manual finance tracking. Upgrade when you want recurring payment management, deeper reporting, and more room to scale the workspace.
           </p>
         </div>
         <div className="pricing-toggle" aria-label="Billing cadence">
@@ -131,6 +132,24 @@ function PricingPage({ currentUser }) {
             plan={plan}
           />
         ))}
+      </section>
+
+      <section className="pricing-proof-grid">
+        <article>
+          <span>Recurring control</span>
+          <strong>See bills before they hit</strong>
+          <p>Premium adds a dedicated renewal workspace for subscriptions, rent, insurance, and fixed commitments.</p>
+        </article>
+        <article>
+          <span>Analytics</span>
+          <strong>Move past raw transaction lists</strong>
+          <p>Premium reports answer real questions about concentration, merchants, and cash flow instead of showing decorative charts.</p>
+        </article>
+        <article>
+          <span>Scale</span>
+          <strong>Unlimited planning space</strong>
+          <p>Premium removes the starter limits on accounts, budgets, and goals so active customers do not outgrow the workspace.</p>
+        </article>
       </section>
 
       <section className="pricing-proof-grid">

@@ -204,8 +204,8 @@ function RecurringPage({ currentUser, onLogout }) {
         {!isBillingLoading && !hasRecurringAccess ? (
           <FeatureGate
             eyebrow="Premium access"
-            features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Recurring outflow planning', 'Priority support']}
-            helper="Recurring payments are part of Ledgr Premium. Upgrade to track subscriptions, rent, insurance, and fixed monthly charges in one queue."
+            features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Monthly fixed-cost view', 'Annualized commitment view']}
+            helper="Recurring payments are part of Ledgr Premium because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
             title="Unlock recurring payment tracking"
           />
         ) : null}

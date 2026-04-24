@@ -157,8 +157,8 @@ function ReportsPage({ currentUser, onLogout }) {
       {!isBillingLoading && !hasReportsAccess ? (
         <FeatureGate
           eyebrow="Premium access"
-          features={['Server-backed reporting', 'Spending concentration', 'Merchant analysis', 'Monthly cash-flow trends']}
-          helper="Insights are part of Ledgr Premium. Upgrade to unlock backend-powered reporting across income, expenses, merchants, and cash flow."
+          features={['Server-backed reporting', 'Date-range analytics', 'Merchant concentration analysis', 'Budget pressure and recurring-load insight']}
+          helper="Insights are part of Ledgr Premium because this is where customers move from recording money to understanding it. Upgrade to unlock backend-powered reporting across income, spending, merchants, and cash flow."
           title="Unlock advanced reporting"
         />
       ) : null}
