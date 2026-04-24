@@ -36,10 +36,12 @@ export const subscriptionStatusCopy = {
   active: 'Active',
   canceled: 'Canceled',
   incomplete: 'Incomplete',
+  incomplete_expired: 'Incomplete expired',
   none: 'No paid subscription',
   not_configured: 'Stripe not configured',
   past_due: 'Past due',
   trialing: 'Trialing',
+  unpaid: 'Unpaid',
 };
 
 export const billingStore = {
