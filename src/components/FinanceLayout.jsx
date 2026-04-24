@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { settingsStore } from '../utils/settingsStore';
 
 const navItems = [
@@ -9,8 +10,8 @@ const navItems = [
   { label: 'Transactions', to: '/transactions', icon: 'transactions' },
   { label: 'Budgets', to: '/budget', icon: 'budget' },
   { label: 'Goals', to: '/goals', icon: 'goals' },
-  { label: 'Subscriptions', to: '/recurring', icon: 'recurring' },
-  { label: 'Insights', to: '/reports', icon: 'reports' },
+  { label: 'Subscriptions', to: '/recurring', icon: 'recurring', featureKey: 'recurringPayments' },
+  { label: 'Insights', to: '/reports', icon: 'reports', featureKey: 'reports' },
 ];
 
 const otherItems = [
@@ -18,28 +19,6 @@ const otherItems = [
   { label: 'Billing', to: '/billing', icon: 'billing' },
   { label: 'Settings', to: '/settings', icon: 'settings' },
   { label: 'Help & Support', to: '/help', icon: 'help' },
-];
-
-const searchItems = [
-  ...navItems.map((item) => ({
-    icon: item.icon,
-    label: item.label,
-    note: 'Open page',
-    section: 'Pages',
-    to: item.to,
-  })),
-  ...otherItems.map((item) => ({
-    icon: item.icon,
-    label: item.label,
-    note: 'Open page',
-    section: 'Pages',
-    to: item.to,
-  })),
-  { icon: 'transactions', label: 'Add transaction', note: 'Go to the ledger and create a new record', section: 'Actions', to: '/transactions' },
-  { icon: 'accounts', label: 'Add account', note: 'Open wallets and create a money location', section: 'Actions', to: '/accounts' },
-  { icon: 'budget', label: 'Create budget', note: 'Open budgets and set a monthly limit', section: 'Actions', to: '/budget' },
-  { icon: 'goals', label: 'Create goal', note: 'Open goals and add a savings target', section: 'Actions', to: '/goals' },
-  { icon: 'recurring', label: 'Add recurring payment', note: 'Open subscriptions and track a fixed bill', section: 'Actions', to: '/recurring' },
 ];
 
 function SidebarIcon({ type }) {
@@ -178,11 +157,46 @@ function FinanceLayout({
   const hasRail = Boolean(rail);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { hasFeature, isLoading: isBillingLoading } = useBillingAccess();
 
   useEffect(() => {
     setSearchQuery('');
     setIsSearchFocused(false);
   }, [location.pathname]);
+
+  const searchItems = useMemo(
+    () => [
+      ...navItems.map((item) => ({
+        icon: item.icon,
+        label: item.label,
+        note:
+          item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading
+            ? 'Premium page'
+            : 'Open page',
+        section: 'Pages',
+        to: item.to,
+      })),
+      ...otherItems.map((item) => ({
+        icon: item.icon,
+        label: item.label,
+        note: 'Open page',
+        section: 'Pages',
+        to: item.to,
+      })),
+      { icon: 'transactions', label: 'Add transaction', note: 'Go to the ledger and create a new record', section: 'Actions', to: '/transactions' },
+      { icon: 'accounts', label: 'Add account', note: 'Open wallets and create a money location', section: 'Actions', to: '/accounts' },
+      { icon: 'budget', label: 'Create budget', note: 'Open budgets and set a monthly limit', section: 'Actions', to: '/budget' },
+      { icon: 'goals', label: 'Create goal', note: 'Open goals and add a savings target', section: 'Actions', to: '/goals' },
+      {
+        icon: 'recurring',
+        label: 'Add recurring payment',
+        note: hasFeature('recurringPayments') ? 'Open subscriptions and track a fixed bill' : 'Premium feature',
+        section: 'Actions',
+        to: '/recurring',
+      },
+    ],
+    [hasFeature, isBillingLoading]
+  );
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const searchResults = useMemo(() => {
@@ -245,13 +259,16 @@ function FinanceLayout({
                 item.to ? (
                   <NavLink
                     key={item.label}
-                    className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}`}
+                    className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}${item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? ' is-premium' : ''}`}
                     to={item.to}
                   >
                     <span className="ref-nav-icon">
                       <SidebarIcon type={item.icon} />
                     </span>
                     <span>{item.label}</span>
+                    {item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? (
+                      <small className="ref-nav-badge">Premium</small>
+                    ) : null}
                   </NavLink>
                 ) : (
                   <div key={item.label} className="ref-nav-item is-disabled">

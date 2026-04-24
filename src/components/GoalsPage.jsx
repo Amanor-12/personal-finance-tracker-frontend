@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ResourceLimitCard } from './billing/FeatureGate';
 import FinanceLayout from './FinanceLayout';
 import DeleteGoalDialog from './goals/DeleteGoalDialog';
 import GoalFormDialog from './goals/GoalFormDialog';
 import GoalsIcon from './goals/GoalsIcon';
 import { formatGoalCurrency, formatGoalDate, getGoalProgressPercent, getGoalTypeLabel } from './goals/goalUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeGoals = (goals) =>
@@ -20,6 +23,8 @@ const summarizeGoals = (goals) =>
   );
 
 function GoalsPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const [goals, setGoals] = useState([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -76,8 +81,16 @@ function GoalsPage({ currentUser, onLogout }) {
   }, [goals, query]);
   const summary = useMemo(() => summarizeGoals(visibleGoals), [visibleGoals]);
   const progress = summary.target ? Math.round((summary.current / summary.target) * 100) : 0;
+  const goalLimit = access.limits.goals;
+  const goalUsage = access.usage.goals || 0;
+  const canCreateGoal = goalLimit === null || goalUsage < goalLimit;
 
   const openCreate = () => {
+    if (!canCreateGoal) {
+      navigate('/pricing');
+      return;
+    }
+
     setEditingGoal(null);
     setSaveError('');
     setIsFormOpen(true);
@@ -89,6 +102,7 @@ function GoalsPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.saveGoal(currentUser.id, payload);
+      await refreshBillingAccess();
       setIsFormOpen(false);
       setEditingGoal(null);
       setRefreshKey((value) => value + 1);
@@ -99,6 +113,7 @@ function GoalsPage({ currentUser, onLogout }) {
       }
 
       setSaveError(error.message || 'Goal could not be saved.');
+      await refreshBillingAccess();
     } finally {
       setIsSaving(false);
     }
@@ -113,6 +128,7 @@ function GoalsPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.deleteGoal(currentUser.id, deleteCandidate.id);
+      await refreshBillingAccess();
       setDeleteCandidate(null);
       setRefreshKey((value) => value + 1);
     } catch (error) {
@@ -152,8 +168,8 @@ function GoalsPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle="Goals"
         pageSubtitle="A calm milestone portfolio for savings and payoff targets."
-        primaryActionLabel="+ Create goal"
-        onPrimaryAction={openCreate}
+        primaryActionLabel={!isBillingLoading && !canCreateGoal ? 'Upgrade' : '+ Create goal'}
+        onPrimaryAction={!isBillingLoading && !canCreateGoal ? () => navigate('/pricing') : openCreate}
         rail={rail}
       >
         <section className="goals-portfolio-console" aria-label="Goal portfolio console">
@@ -172,6 +188,15 @@ function GoalsPage({ currentUser, onLogout }) {
         </section>
 
         <section className="goals-portfolio-secondary" aria-label="Goal portfolio summary">
+          {!isBillingLoading && goalLimit !== null ? (
+            <ResourceLimitCard
+              body="Free workspaces can track a focused set of targets. Upgrade when you want more simultaneous savings or payoff goals."
+              limit={goalLimit}
+              resourceLabel="goals"
+              usage={goalUsage}
+            />
+          ) : null}
+
           <div className="goals-portfolio-values">
             <article><span>Target total</span><strong>{formatGoalCurrency(summary.target)}</strong></article>
             <article><span>Committed</span><strong>{formatGoalCurrency(summary.current)}</strong></article>

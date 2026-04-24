@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
+import { FeatureGate } from './billing/FeatureGate';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import DeleteRecurringDialog from './recurring/DeleteRecurringDialog';
 import RecurringFormDialog from './recurring/RecurringFormDialog';
 import RecurringIcon from './recurring/RecurringIcon';
 import { formatDaysUntil, formatRecurringCurrency, formatRecurringDate, getFrequencyLabel } from './recurring/recurringUtils';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
 
@@ -23,6 +26,8 @@ const summarizePayments = (payments) =>
   );
 
 function RecurringPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const { hasFeature, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const [payments, setPayments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -41,6 +46,19 @@ function RecurringPage({ currentUser, onLogout }) {
     let isCancelled = false;
 
     const loadPayments = async () => {
+      if (isBillingLoading) {
+        return;
+      }
+
+      if (!hasRecurringAccess) {
+        setPayments([]);
+        setCategories([]);
+        setAccounts([]);
+        setLoadError('');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setLoadError('');
 
@@ -84,7 +102,7 @@ function RecurringPage({ currentUser, onLogout }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser.id, onLogout, refreshKey]);
+  }, [currentUser.id, hasRecurringAccess, isBillingLoading, onLogout, refreshKey]);
 
   const visiblePayments = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -107,6 +125,7 @@ function RecurringPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.saveRecurringPayment(currentUser.id, payload);
+      await refreshBillingAccess();
       setIsFormOpen(false);
       setEditingPayment(null);
       setRefreshKey((value) => value + 1);
@@ -131,6 +150,7 @@ function RecurringPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.deleteRecurringPayment(currentUser.id, deleteCandidate.id);
+      await refreshBillingAccess();
       setDeleteCandidate(null);
       setRefreshKey((value) => value + 1);
     } catch (error) {
@@ -163,6 +183,8 @@ function RecurringPage({ currentUser, onLogout }) {
     </aside>
   );
 
+  const hasRecurringAccess = hasFeature('recurringPayments');
+
   return (
     <>
       <FinanceLayout
@@ -170,10 +192,27 @@ function RecurringPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle="Subscriptions"
         pageSubtitle="A renewal timeline for predictable bills and subscriptions."
-        primaryActionLabel="+ Add recurring"
-        onPrimaryAction={openCreate}
+        primaryActionLabel={!isBillingLoading && !hasRecurringAccess ? 'Upgrade' : '+ Add recurring'}
+        onPrimaryAction={!isBillingLoading && !hasRecurringAccess ? () => navigate('/pricing') : openCreate}
         rail={rail}
       >
+        {isBillingLoading ? (
+          <PremiumPanel eyebrow="Access" title="Checking plan access">
+            <PremiumSkeleton count={3} />
+          </PremiumPanel>
+        ) : null}
+
+        {!isBillingLoading && !hasRecurringAccess ? (
+          <FeatureGate
+            eyebrow="Premium access"
+            features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Recurring outflow planning', 'Priority support']}
+            helper="Recurring payments are part of Ledgr Premium. Upgrade to track subscriptions, rent, insurance, and fixed monthly charges in one queue."
+            title="Unlock recurring payment tracking"
+          />
+        ) : null}
+
+        {!isBillingLoading && hasRecurringAccess ? (
+          <>
         <section className="recurring-queue-console" aria-label="Recurring payment queue">
           <div className="recurring-queue-head">
             <div>
@@ -252,6 +291,8 @@ function RecurringPage({ currentUser, onLogout }) {
             <PremiumEmpty title="No renewals match this search" body="Clear the search to return to the full renewal timeline." actionLabel="Clear search" onAction={() => setQuery('')} />
           ) : null}
         </PremiumPanel>
+          </>
+        ) : null}
       </FinanceLayout>
 
       {isFormOpen ? (

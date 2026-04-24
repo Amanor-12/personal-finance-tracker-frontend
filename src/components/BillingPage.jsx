@@ -222,6 +222,15 @@ function BillingPage({ currentUser, onLogout }) {
                 {isOpeningPortal ? 'Opening...' : 'Manage billing'}
               </button>
             </article>
+            <article>
+              <span>Workspace access</span>
+              <strong>{billing?.access?.isPremium ? 'Premium unlocked' : 'Free limits active'}</strong>
+              <p>
+                {billing?.access?.isPremium
+                  ? 'Recurring payments, reports, and expanded planning limits are active.'
+                  : `Free includes ${billing?.access?.limits?.accounts ?? 0} accounts, ${billing?.access?.limits?.budgets ?? 0} budgets, and ${billing?.access?.limits?.goals ?? 0} goals.`}
+              </p>
+            </article>
           </section>
 
           <section className="billing-plan-grid" aria-label="Ledgr plans">

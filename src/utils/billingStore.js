@@ -8,7 +8,7 @@ export const billingPlans = [
     interval: 'none',
     price: '$0',
     description: 'Manual tracking for a private finance workspace.',
-    features: ['Manual accounts', 'Transactions', 'Budgets', 'Goals'],
+    features: ['Up to 2 active accounts', 'Transactions', 'Up to 6 budgets', 'Up to 3 goals'],
   },
   {
     id: 'premium_monthly',
@@ -18,7 +18,7 @@ export const billingPlans = [
     price: '$8',
     suffix: '/ month',
     description: 'Advanced tracking, recurring payments, and reporting.',
-    features: ['Recurring payments', 'Reports', 'Priority support', 'Billing portal'],
+    features: ['Recurring payments', 'Reports', 'Unlimited planning spaces', 'Priority support'],
   },
   {
     id: 'premium_annual',
@@ -44,10 +44,88 @@ export const subscriptionStatusCopy = {
   unpaid: 'Unpaid',
 };
 
+export const defaultBillingAccess = {
+  currentPlanId: 'free',
+  featureAccess: {
+    billingPortal: false,
+    prioritySupport: false,
+    recurringPayments: false,
+    reports: false,
+  },
+  isPremium: false,
+  limits: {
+    accounts: 2,
+    budgets: 6,
+    goals: 3,
+  },
+  upgradePlanId: 'premium_monthly',
+  usage: {
+    accounts: 0,
+    budgets: 0,
+    goals: 0,
+    recurringPayments: 0,
+  },
+};
+
+const getFallbackAccess = (billing) => {
+  const currentPlanId = billing?.currentPlan?.id || 'free';
+  const status = billing?.subscription?.status || 'none';
+  const hasPremiumAccess =
+    currentPlanId !== 'free' &&
+    ['active', 'trialing', 'past_due', 'incomplete', 'unpaid'].includes(status);
+
+  if (hasPremiumAccess) {
+    return {
+      ...defaultBillingAccess,
+      currentPlanId,
+      featureAccess: {
+        billingPortal: true,
+        prioritySupport: true,
+        recurringPayments: true,
+        reports: true,
+      },
+      isPremium: true,
+      limits: {
+        accounts: null,
+        budgets: null,
+        goals: null,
+      },
+    };
+  }
+
+  return defaultBillingAccess;
+};
+
+export const resolveBillingAccess = (billing) => {
+  if (billing?.access) {
+    return {
+      ...defaultBillingAccess,
+      ...billing.access,
+      featureAccess: {
+        ...defaultBillingAccess.featureAccess,
+        ...(billing.access.featureAccess || {}),
+      },
+      limits: {
+        ...defaultBillingAccess.limits,
+        ...(billing.access.limits || {}),
+      },
+      usage: {
+        ...defaultBillingAccess.usage,
+        ...(billing.access.usage || {}),
+      },
+    };
+  }
+
+  return getFallbackAccess(billing);
+};
+
 export const billingStore = {
   async getOverview() {
     const payload = await apiClient.get('/api/billing/subscription');
-    return payload.billing;
+    return {
+      ...payload.billing,
+      access: resolveBillingAccess(payload.billing),
+    };
   },
   async createCheckoutSession(planId) {
     const payload = await apiClient.post('/api/billing/checkout', {

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
+import { BillingAccessProvider } from './context/BillingAccessContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authStore } from './utils/authStore';
 
@@ -34,6 +35,12 @@ const pageTitles = {
   '/settings': 'Settings',
   '/help': 'Help',
 };
+
+const withProtectedWorkspace = (currentUser, onLogout, element) => (
+  <ProtectedRoute currentUser={currentUser}>
+    <BillingAccessProvider onLogout={onLogout}>{element}</BillingAccessProvider>
+  </ProtectedRoute>
+);
 
 function App() {
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
@@ -147,108 +154,132 @@ function App() {
       <Route
         path="/onboarding"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <OnboardingPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <DashboardPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/settings"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <SettingsPage currentUser={currentUser} onLogout={handleLogout} onUpdateProfile={handleUpdateProfile} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/accounts"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <AccountsPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/transactions"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <TransactionsPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/budget"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <BudgetPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/goals"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <GoalsPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/recurring"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <RecurringPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/reports"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <ReportsPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/activity"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <ActivityPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/billing"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <BillingPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 
       <Route
         path="/help"
         element={
-          <ProtectedRoute currentUser={currentUser}>
+          withProtectedWorkspace(
+            currentUser,
+            handleLogout,
             <SupportPage currentUser={currentUser} onLogout={handleLogout} />
-          </ProtectedRoute>
+          )
         }
       />
 

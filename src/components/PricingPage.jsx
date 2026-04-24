@@ -4,11 +4,12 @@ import BrandLogo from './BrandLogo';
 import { billingPlans, billingStore } from '../utils/billingStore';
 
 const comparisonRows = [
-  { label: 'Manual accounts', free: true, premium: true },
-  { label: 'Transactions, budgets, and goals', free: true, premium: true },
-  { label: 'Recurring payments workspace', free: false, premium: true },
-  { label: 'Reports and insight surfaces', free: false, premium: true },
-  { label: 'Billing portal and invoice history', free: false, premium: true },
+  { label: 'Accounts', free: '2 active', premium: 'Unlimited' },
+  { label: 'Budgets', free: 'Up to 6', premium: 'Unlimited' },
+  { label: 'Goals', free: 'Up to 3', premium: 'Unlimited' },
+  { label: 'Recurring payments workspace', free: '-', premium: 'Included' },
+  { label: 'Reports and insight surfaces', free: '-', premium: 'Included' },
+  { label: 'Billing portal and invoice history', free: '-', premium: 'Included' },
 ];
 
 function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
@@ -159,8 +160,8 @@ function PricingPage({ currentUser }) {
           {comparisonRows.map((row) => (
             <div key={row.label}>
               <span>{row.label}</span>
-              <strong>{row.free ? 'Free' : '-'}</strong>
-              <strong>{row.premium ? 'Premium' : '-'}</strong>
+              <strong>{row.free}</strong>
+              <strong>{row.premium}</strong>
             </div>
           ))}
         </div>

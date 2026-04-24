@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
+import { FeatureGate } from './billing/FeatureGate';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
 import ReportsIcon from './reports/ReportsIcon';
 import {
@@ -11,9 +13,12 @@ import {
   summarizeReportTransactions,
 } from './reports/reportUtils';
 import { accountStore } from '../utils/accountStore';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { financeStore } from '../utils/financeStore';
 
 function ReportsPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const { hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [budgets, setBudgets] = useState([]);
@@ -27,6 +32,21 @@ function ReportsPage({ currentUser, onLogout }) {
     let isCancelled = false;
 
     const loadReports = async () => {
+      if (isBillingLoading) {
+        return;
+      }
+
+      if (!hasReportsAccess) {
+        setTransactions([]);
+        setAccounts([]);
+        setBudgets([]);
+        setGoals([]);
+        setRecurringPayments([]);
+        setLoadError('');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setLoadError('');
 
@@ -76,7 +96,7 @@ function ReportsPage({ currentUser, onLogout }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser.id, onLogout, refreshKey]);
+  }, [currentUser.id, hasReportsAccess, isBillingLoading, onLogout, refreshKey]);
 
   const summary = useMemo(() => summarizeReportTransactions(transactions), [transactions]);
   const categories = useMemo(() => buildCategoryBreakdown(transactions).slice(0, 5), [transactions]);
@@ -114,14 +134,35 @@ function ReportsPage({ currentUser, onLogout }) {
     </aside>
   );
 
+  const hasReportsAccess = hasFeature('reports');
+
   return (
     <FinanceLayout
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Insights"
       pageSubtitle="An analytics workspace that stays quiet until real activity exists."
+      primaryActionLabel={!isBillingLoading && !hasReportsAccess ? 'Upgrade' : undefined}
+      onPrimaryAction={!isBillingLoading && !hasReportsAccess ? () => navigate('/pricing') : undefined}
       rail={rail}
     >
+      {isBillingLoading ? (
+        <PremiumPanel eyebrow="Access" title="Checking plan access">
+          <PremiumSkeleton count={3} />
+        </PremiumPanel>
+      ) : null}
+
+      {!isBillingLoading && !hasReportsAccess ? (
+        <FeatureGate
+          eyebrow="Premium access"
+          features={['Spending breakdowns', 'Merchant analysis', 'Monthly cash-flow trends', 'Priority support']}
+          helper="Insights are part of Ledgr Premium. Upgrade to unlock category concentration, merchant breakdowns, and clean reporting views."
+          title="Unlock advanced reporting"
+        />
+      ) : null}
+
+      {!isBillingLoading && hasReportsAccess ? (
+        <>
       <section className="reports-analysis-console" aria-label="Reports analysis console">
         <div className="reports-analysis-copy">
           <span className="ref-section-chip">Insight lab</span>
@@ -222,6 +263,8 @@ function ReportsPage({ currentUser, onLogout }) {
               </div>
             </PremiumPanel>
           </section>
+        </>
+      ) : null}
         </>
       ) : null}
     </FinanceLayout>

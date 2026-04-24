@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ResourceLimitCard } from './billing/FeatureGate';
 import FinanceLayout from './FinanceLayout';
 import BudgetFormDialog from './budgets/BudgetFormDialog';
 import BudgetsIcon from './budgets/BudgetsIcon';
 import DeleteBudgetDialog from './budgets/DeleteBudgetDialog';
 import { formatBudgetCurrency, formatBudgetPeriod, getCurrentBudgetPeriod } from './budgets/budgetUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { financeStore } from '../utils/financeStore';
 
 const summarizeBudgets = (budgets) =>
@@ -20,6 +23,8 @@ const summarizeBudgets = (budgets) =>
   );
 
 function BudgetPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const [budgets, setBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [period] = useState(getCurrentBudgetPeriod);
@@ -90,8 +95,16 @@ function BudgetPage({ currentUser, onLogout }) {
   }, [currentBudgets, query]);
   const summary = useMemo(() => summarizeBudgets(visibleBudgets), [visibleBudgets]);
   const spendRatio = summary.totalBudgeted ? Math.min(999, Math.round((summary.totalSpent / summary.totalBudgeted) * 100)) : 0;
+  const budgetLimit = access.limits.budgets;
+  const budgetUsage = access.usage.budgets || 0;
+  const canCreateBudget = budgetLimit === null || budgetUsage < budgetLimit;
 
   const openCreate = () => {
+    if (!canCreateBudget) {
+      navigate('/pricing');
+      return;
+    }
+
     setEditingBudget(null);
     setSaveError('');
     setIsFormOpen(true);
@@ -103,6 +116,7 @@ function BudgetPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.saveBudget(currentUser.id, payload);
+      await refreshBillingAccess();
       setIsFormOpen(false);
       setEditingBudget(null);
       setRefreshKey((value) => value + 1);
@@ -113,6 +127,7 @@ function BudgetPage({ currentUser, onLogout }) {
       }
 
       setSaveError(error.message || 'Budget could not be saved.');
+      await refreshBillingAccess();
     } finally {
       setIsSaving(false);
     }
@@ -127,6 +142,7 @@ function BudgetPage({ currentUser, onLogout }) {
 
     try {
       await financeStore.deleteBudget(currentUser.id, deleteCandidate.id);
+      await refreshBillingAccess();
       setDeleteCandidate(null);
       setRefreshKey((value) => value + 1);
     } catch (error) {
@@ -166,8 +182,8 @@ function BudgetPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle="Budgets"
         pageSubtitle="A monthly planning board for category limits and pressure points."
-        primaryActionLabel="+ Create budget"
-        onPrimaryAction={openCreate}
+        primaryActionLabel={!isBillingLoading && !canCreateBudget ? 'Upgrade' : '+ Create budget'}
+        onPrimaryAction={!isBillingLoading && !canCreateBudget ? () => navigate('/pricing') : openCreate}
         rail={rail}
       >
         <section className="budget-cockpit" aria-label="Budget cockpit">
@@ -189,6 +205,15 @@ function BudgetPage({ currentUser, onLogout }) {
         </section>
 
         <section className="budget-cockpit-secondary" aria-label="Budget tools">
+          {!isBillingLoading && budgetLimit !== null ? (
+            <ResourceLimitCard
+              body="Free workspaces can keep a focused budget set. Upgrade when you want broader category coverage or more monthly plans."
+              limit={budgetLimit}
+              resourceLabel="budgets"
+              usage={budgetUsage}
+            />
+          ) : null}
+
           <div className="budget-cockpit-grid">
             <article className="budget-cockpit-meter">
               <span>Spend ratio</span>

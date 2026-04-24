@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ResourceLimitCard } from './billing/FeatureGate';
 import FinanceLayout from './FinanceLayout';
 import AccountFormDialog from './accounts/AccountFormDialog';
 import AccountsIcon from './accounts/AccountsIcon';
 import { formatAccountCurrency, getAccountTypeLabel } from './accounts/accountUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 
 const summarizeAccounts = (accounts) => {
@@ -91,6 +94,8 @@ function AccountPreviewCard({ account, depth = 0, placeholder = false, stacked =
 }
 
 function AccountsPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const [accounts, setAccounts] = useState([]);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
@@ -161,8 +166,16 @@ function AccountsPage({ currentUser, onLogout }) {
   const typeBreakdown = useMemo(() => summarizeAccountTypes(accounts), [accounts]);
   const activeAccounts = useMemo(() => accounts.filter((account) => account.status === 'active'), [accounts]);
   const previewAccounts = useMemo(() => activeAccounts.slice(0, 3).reverse(), [activeAccounts]);
+  const accountLimit = access.limits.accounts;
+  const accountUsage = access.usage.accounts || 0;
+  const canCreateAccount = accountLimit === null || accountUsage < accountLimit;
 
   const openAddDialog = () => {
+    if (!canCreateAccount) {
+      navigate('/pricing');
+      return;
+    }
+
     setEditingAccount(null);
     setSaveError('');
     setIsFormOpen(true);
@@ -180,6 +193,7 @@ function AccountsPage({ currentUser, onLogout }) {
 
     try {
       await accountStore.saveAccount(currentUser.id, payload);
+      await refreshBillingAccess();
       setIsFormOpen(false);
       setEditingAccount(null);
       setRefreshKey((value) => value + 1);
@@ -190,6 +204,7 @@ function AccountsPage({ currentUser, onLogout }) {
       }
 
       setSaveError(error.message || 'Account could not be saved.');
+      await refreshBillingAccess();
     } finally {
       setIsSaving(false);
     }
@@ -204,6 +219,7 @@ function AccountsPage({ currentUser, onLogout }) {
 
     try {
       await accountStore.archiveAccount(currentUser.id, account.id);
+      await refreshBillingAccess();
       setRefreshKey((value) => value + 1);
     } catch (error) {
       setLoadError(error.message || 'Account could not be archived.');
@@ -244,8 +260,8 @@ function AccountsPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle="Wallets"
         pageSubtitle="A private vault for every place your money lives."
-        primaryActionLabel="+ Add account"
-        onPrimaryAction={openAddDialog}
+        primaryActionLabel={!isBillingLoading && !canCreateAccount ? 'Upgrade' : '+ Add account'}
+        onPrimaryAction={!isBillingLoading && !canCreateAccount ? () => navigate('/pricing') : openAddDialog}
         rail={rail}
       >
         <section className="accounts-command-board accounts-wallet-board" aria-label="Account workspace">
@@ -284,6 +300,15 @@ function AccountsPage({ currentUser, onLogout }) {
         </section>
 
         <section className="accounts-wallet-secondary" aria-label="Account workspace tools">
+          {!isBillingLoading && accountLimit !== null ? (
+            <ResourceLimitCard
+              body="Free workspaces can keep a small vault. Upgrade when you need more accounts for separate cash, cards, savings, or investments."
+              limit={accountLimit}
+              resourceLabel="active accounts"
+              usage={accountUsage}
+            />
+          ) : null}
+
           <div className="accounts-command-stats" aria-label="Account summary">
             <article><span>Total balance</span><strong>{formatAccountCurrency(summary.totalBalance)}</strong></article>
             <article><span>Active</span><strong>{summary.activeCount}</strong></article>
