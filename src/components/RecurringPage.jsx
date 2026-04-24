@@ -28,6 +28,7 @@ const summarizePayments = (payments) =>
 function RecurringPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { hasFeature, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
+  const hasRecurringAccess = hasFeature('recurringPayments');
   const [payments, setPayments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -182,8 +183,6 @@ function RecurringPage({ currentUser, onLogout }) {
       </article>
     </aside>
   );
-
-  const hasRecurringAccess = hasFeature('recurringPayments');
 
   return (
     <>

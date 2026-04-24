@@ -265,7 +265,7 @@ function FinanceLayout({
                     <span className="ref-nav-icon">
                       <SidebarIcon type={item.icon} />
                     </span>
-                    <span>{item.label}</span>
+                    <span className="ref-nav-label">{item.label}</span>
                     {item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? (
                       <small className="ref-nav-badge">Premium</small>
                     ) : null}
