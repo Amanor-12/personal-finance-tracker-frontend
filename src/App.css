@@ -14561,3 +14561,139 @@ textarea:focus-visible,
     font-size: 1rem;
   }
 }
+
+.transactions-ops-context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.46fr);
+  gap: 16px;
+}
+
+.transactions-ops-context-copy,
+.transactions-ops-context-meta,
+.budget-cockpit-filter,
+.budget-cockpit-pressure,
+.goals-portfolio-filter,
+.goals-portfolio-focus {
+  min-height: 100px;
+  padding: 16px 18px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 22px;
+  border: 1px solid rgba(202, 210, 216, 0.72);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.96));
+  box-shadow: 0 22px 42px rgba(17, 27, 66, 0.05);
+}
+
+.transactions-ops-context-copy strong,
+.transactions-ops-context-meta strong,
+.budget-cockpit-pressure strong,
+.goals-portfolio-focus strong {
+  color: var(--ref-navy);
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.transactions-ops-context-copy p,
+.transactions-ops-context-meta small,
+.budget-cockpit-pressure p,
+.goals-portfolio-focus p {
+  margin: 0;
+  color: #6f7a90;
+  line-height: 1.6;
+}
+
+.transactions-ops-context-meta span,
+.budget-cockpit-filter span,
+.budget-cockpit-pressure span,
+.goals-portfolio-filter span,
+.goals-portfolio-focus span {
+  color: #6f7a90;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.budget-cockpit-filter,
+.goals-portfolio-filter {
+  gap: 10px;
+}
+
+.budget-cockpit-filter select,
+.goals-portfolio-filter select {
+  min-height: 50px;
+  width: 100%;
+  border: 1px solid rgba(202, 210, 216, 0.78);
+  border-radius: 16px;
+  background: rgba(248, 250, 253, 0.92);
+  color: var(--ref-navy);
+  font: inherit;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.budget-cockpit-filter select:focus,
+.goals-portfolio-filter select:focus {
+  border-color: rgba(90, 99, 247, 0.42);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(90, 99, 247, 0.1);
+}
+
+.budget-cockpit-pressure {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(245, 156, 19, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 244, 0.96));
+}
+
+.budget-board-health,
+.goals-card-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.budget-board-health-on_track,
+.goals-card-state-active {
+  color: #1e7f73;
+  background: rgba(43, 193, 176, 0.14);
+}
+
+.budget-board-health-watch,
+.goals-card-state-due_soon {
+  color: #bb6d07;
+  background: rgba(245, 156, 19, 0.16);
+}
+
+.budget-board-health-over,
+.goals-card-state-completed {
+  color: #5756f0;
+  background: rgba(90, 94, 246, 0.15);
+}
+
+.budget-board-health-not_started {
+  color: #6f7a90;
+  background: rgba(202, 210, 216, 0.24);
+}
+
+.goals-portfolio-focus {
+  grid-column: 1 / -1;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(37, 192, 176, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 252, 250, 0.96));
+}
+
+@media (max-width: 1100px) {
+  .transactions-ops-context {
+    grid-template-columns: 1fr;
+  }
+}

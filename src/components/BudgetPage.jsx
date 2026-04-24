@@ -22,6 +22,24 @@ const summarizeBudgets = (budgets) =>
     { overspent: 0, remaining: 0, totalBudgeted: 0, totalSpent: 0 }
   );
 
+const getBudgetHealth = (budget) => {
+  if (budget.remainingAmount < 0) {
+    return 'over';
+  }
+
+  const utilization = budget.amountLimit ? (budget.spentAmount / budget.amountLimit) * 100 : 0;
+
+  if (!budget.spentAmount) {
+    return 'not_started';
+  }
+
+  if (utilization >= 80) {
+    return 'watch';
+  }
+
+  return 'on_track';
+};
+
 function BudgetPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
@@ -29,6 +47,7 @@ function BudgetPage({ currentUser, onLogout }) {
   const [categories, setCategories] = useState([]);
   const [period] = useState(getCurrentBudgetPeriod);
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -91,13 +110,24 @@ function BudgetPage({ currentUser, onLogout }) {
   );
   const visibleBudgets = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return currentBudgets.filter((budget) => !normalizedQuery || budget.categoryName.toLowerCase().includes(normalizedQuery));
-  }, [currentBudgets, query]);
+    return currentBudgets
+      .filter((budget) => (statusFilter === 'all' ? true : getBudgetHealth(budget) === statusFilter))
+      .filter((budget) => !normalizedQuery || budget.categoryName.toLowerCase().includes(normalizedQuery));
+  }, [currentBudgets, query, statusFilter]);
   const summary = useMemo(() => summarizeBudgets(visibleBudgets), [visibleBudgets]);
   const spendRatio = summary.totalBudgeted ? Math.min(999, Math.round((summary.totalSpent / summary.totalBudgeted) * 100)) : 0;
   const budgetLimit = access.limits.budgets;
   const budgetUsage = access.usage.budgets || 0;
   const canCreateBudget = budgetLimit === null || budgetUsage < budgetLimit;
+  const topPressureBudget = useMemo(
+    () =>
+      [...visibleBudgets].sort((left, right) => {
+        const leftRatio = left.amountLimit ? left.spentAmount / left.amountLimit : 0;
+        const rightRatio = right.amountLimit ? right.spentAmount / right.amountLimit : 0;
+        return rightRatio - leftRatio;
+      })[0] || null,
+    [visibleBudgets]
+  );
 
   const openCreate = () => {
     if (!canCreateBudget) {
@@ -239,6 +269,27 @@ function BudgetPage({ currentUser, onLogout }) {
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
+
+            <label className="budget-cockpit-filter">
+              <span>Health</span>
+              <select aria-label="Budget health" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="all">All budgets</option>
+                <option value="on_track">On track</option>
+                <option value="watch">Needs attention</option>
+                <option value="over">Over limit</option>
+                <option value="not_started">Not started</option>
+              </select>
+            </label>
+
+            <article className="budget-cockpit-pressure">
+              <span>Pressure point</span>
+              <strong>{topPressureBudget?.categoryName || 'No category pressure yet'}</strong>
+              <p>
+                {topPressureBudget
+                  ? `${formatBudgetCurrency(topPressureBudget.spentAmount)} spent against ${formatBudgetCurrency(topPressureBudget.amountLimit)}.`
+                  : 'Create a budget to see which category needs the most attention.'}
+              </p>
+            </article>
           </div>
         </section>
 
@@ -263,6 +314,15 @@ function BudgetPage({ currentUser, onLogout }) {
                   <div className="budget-board-values">
                     <span>{formatBudgetCurrency(budget.spentAmount)} spent</span>
                     <strong>{formatBudgetCurrency(budget.remainingAmount)} left</strong>
+                    <small className={`budget-board-health budget-board-health-${getBudgetHealth(budget)}`}>
+                      {getBudgetHealth(budget) === 'over'
+                        ? 'Over limit'
+                        : getBudgetHealth(budget) === 'watch'
+                          ? 'Needs attention'
+                          : getBudgetHealth(budget) === 'not_started'
+                            ? 'Not started'
+                            : 'On track'}
+                    </small>
                   </div>
                   <div className="budget-board-actions">
                     <button type="button" onClick={() => {
@@ -287,7 +347,15 @@ function BudgetPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && currentBudgets.length > 0 && !visibleBudgets.length ? (
-            <PremiumEmpty title="No budgets match this search" body="Clear the search to return to the full planning board." actionLabel="Clear search" onAction={() => setQuery('')} />
+            <PremiumEmpty
+              title="No budgets match this view"
+              body="Clear the search or reset health filtering to return to the full planning board."
+              actionLabel="Reset view"
+              onAction={() => {
+                setQuery('');
+                setStatusFilter('all');
+              }}
+            />
           ) : null}
         </PremiumPanel>
       </FinanceLayout>

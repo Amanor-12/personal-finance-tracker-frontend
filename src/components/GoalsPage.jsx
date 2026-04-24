@@ -22,11 +22,31 @@ const summarizeGoals = (goals) =>
     { completed: 0, current: 0, remaining: 0, target: 0 }
   );
 
+const getGoalState = (goal) => {
+  if (goal.status === 'Completed') {
+    return 'completed';
+  }
+
+  if (goal.targetDate) {
+    const dueDate = new Date(goal.targetDate).getTime();
+    const now = Date.now();
+    const daysUntil = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil <= 30) {
+      return 'due_soon';
+    }
+  }
+
+  return 'active';
+};
+
 function GoalsPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const [goals, setGoals] = useState([]);
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('progress');
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -77,13 +97,37 @@ function GoalsPage({ currentUser, onLogout }) {
 
   const visibleGoals = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return goals.filter((goal) => !normalizedQuery || [goal.title, goal.status, goal.goalType].some((value) => String(value).toLowerCase().includes(normalizedQuery)));
-  }, [goals, query]);
+    return [...goals]
+      .filter((goal) => (statusFilter === 'all' ? true : getGoalState(goal) === statusFilter))
+      .filter((goal) => !normalizedQuery || [goal.title, goal.status, goal.goalType].some((value) => String(value).toLowerCase().includes(normalizedQuery)))
+      .sort((left, right) => {
+        if (sortBy === 'deadline') {
+          const leftDate = left.targetDate ? new Date(left.targetDate).getTime() : Number.POSITIVE_INFINITY;
+          const rightDate = right.targetDate ? new Date(right.targetDate).getTime() : Number.POSITIVE_INFINITY;
+          return leftDate - rightDate;
+        }
+
+        if (sortBy === 'value') {
+          return right.targetAmount - left.targetAmount;
+        }
+
+        return getGoalProgressPercent(right) - getGoalProgressPercent(left);
+      });
+  }, [goals, query, sortBy, statusFilter]);
   const summary = useMemo(() => summarizeGoals(visibleGoals), [visibleGoals]);
   const progress = summary.target ? Math.round((summary.current / summary.target) * 100) : 0;
   const goalLimit = access.limits.goals;
   const goalUsage = access.usage.goals || 0;
   const canCreateGoal = goalLimit === null || goalUsage < goalLimit;
+  const nextGoalFocus = useMemo(
+    () =>
+      [...visibleGoals].sort((left, right) => {
+        const leftDate = left.targetDate ? new Date(left.targetDate).getTime() : Number.POSITIVE_INFINITY;
+        const rightDate = right.targetDate ? new Date(right.targetDate).getTime() : Number.POSITIVE_INFINITY;
+        return leftDate - rightDate;
+      })[0] || null,
+    [visibleGoals]
+  );
 
   const openCreate = () => {
     if (!canCreateGoal) {
@@ -208,6 +252,35 @@ function GoalsPage({ currentUser, onLogout }) {
             <span>Find a goal</span>
             <input aria-label="Search goals" placeholder="Search title, status, or type" type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
           </label>
+
+          <label className="goals-portfolio-filter">
+            <span>Status</span>
+            <select aria-label="Goal status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="all">All goals</option>
+              <option value="active">Active</option>
+              <option value="due_soon">Due soon</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+
+          <label className="goals-portfolio-filter">
+            <span>Sort</span>
+            <select aria-label="Goal sort order" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+              <option value="progress">Highest progress</option>
+              <option value="deadline">Nearest deadline</option>
+              <option value="value">Largest target</option>
+            </select>
+          </label>
+
+          <article className="goals-portfolio-focus">
+            <span>Next focus</span>
+            <strong>{nextGoalFocus?.title || 'No active milestone yet'}</strong>
+            <p>
+              {nextGoalFocus
+                ? `${formatGoalCurrency(nextGoalFocus.remainingAmount)} left${nextGoalFocus.targetDate ? ` by ${formatGoalDate(nextGoalFocus.targetDate)}` : ''}.`
+                : 'Create a goal to see the next milestone needing attention.'}
+            </p>
+          </article>
         </section>
 
         <PremiumPanel eyebrow="Targets" title="Goal portfolio">
@@ -233,6 +306,13 @@ function GoalsPage({ currentUser, onLogout }) {
                   <div className="goals-card-values">
                     <span>{formatGoalCurrency(goal.currentAmount)} saved</span>
                     <strong>{formatGoalCurrency(goal.remainingAmount)} left</strong>
+                    <small className={`goals-card-state goals-card-state-${getGoalState(goal)}`}>
+                      {getGoalState(goal) === 'completed'
+                        ? 'Completed'
+                        : getGoalState(goal) === 'due_soon'
+                          ? 'Due soon'
+                          : 'Active'}
+                    </small>
                   </div>
                   <div className="goals-card-actions">
                     <button type="button" onClick={() => {
@@ -257,7 +337,16 @@ function GoalsPage({ currentUser, onLogout }) {
           ) : null}
 
           {!isLoading && !loadError && goals.length > 0 && !visibleGoals.length ? (
-            <PremiumEmpty title="No goals match this search" body="Clear the search to return to the full goal portfolio." actionLabel="Clear search" onAction={() => setQuery('')} />
+            <PremiumEmpty
+              title="No goals match this view"
+              body="Clear the search or reset status and sort controls to return to the full goal portfolio."
+              actionLabel="Reset view"
+              onAction={() => {
+                setQuery('');
+                setStatusFilter('all');
+                setSortBy('progress');
+              }}
+            />
           ) : null}
         </PremiumPanel>
       </FinanceLayout>

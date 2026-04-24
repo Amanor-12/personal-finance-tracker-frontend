@@ -38,12 +38,28 @@ const summarize = (transactions) =>
     { count: 0, expenses: 0, income: 0, net: 0 }
   );
 
+const getAmountBand = (amount) => {
+  if (amount >= 1000) {
+    return 'high';
+  }
+
+  if (amount >= 100) {
+    return 'medium';
+  }
+
+  return 'low';
+};
+
 function TransactionsPage({ currentUser, onLogout }) {
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [accountFilter, setAccountFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [amountFilter, setAmountFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [formMode, setFormMode] = useState('');
@@ -109,6 +125,10 @@ function TransactionsPage({ currentUser, onLogout }) {
 
     return transactions
       .filter((transaction) => (typeFilter === 'all' ? true : transaction.type === typeFilter))
+      .filter((transaction) => (accountFilter === 'all' ? true : String(transaction.accountId || '') === accountFilter))
+      .filter((transaction) => (categoryFilter === 'all' ? true : String(transaction.categoryId || '') === categoryFilter))
+      .filter((transaction) => (statusFilter === 'all' ? true : transaction.status === statusFilter))
+      .filter((transaction) => (amountFilter === 'all' ? true : getAmountBand(transaction.amount) === amountFilter))
       .filter((transaction) => {
         if (!normalizedQuery) {
           return true;
@@ -119,11 +139,29 @@ function TransactionsPage({ currentUser, onLogout }) {
           .some((value) => value.toLowerCase().includes(normalizedQuery));
       })
       .sort((left, right) => new Date(right.transactionDate).getTime() - new Date(left.transactionDate).getTime());
-  }, [query, transactions, typeFilter]);
+  }, [accountFilter, amountFilter, categoryFilter, query, statusFilter, transactions, typeFilter]);
 
   const summary = useMemo(() => summarize(visibleTransactions), [visibleTransactions]);
   const totalSummary = useMemo(() => summarize(transactions), [transactions]);
   const accountOptions = accounts.map((account) => ({ id: account.id, name: account.name }));
+  const statusOptions = useMemo(
+    () => Array.from(new Set(transactions.map((transaction) => transaction.status).filter(Boolean))),
+    [transactions]
+  );
+  const categoryOptions = useMemo(
+    () => categories.filter((category) => ['income', 'expense'].includes(category.type)),
+    [categories]
+  );
+  const activeFilterCount = [query, typeFilter !== 'all', accountFilter !== 'all', categoryFilter !== 'all', statusFilter !== 'all', amountFilter !== 'all'].filter(Boolean).length;
+  const latestVisibleTransaction = visibleTransactions[0] || null;
+  const clearFilters = () => {
+    setQuery('');
+    setTypeFilter('all');
+    setAccountFilter('all');
+    setCategoryFilter('all');
+    setStatusFilter('all');
+    setAmountFilter('all');
+  };
 
   const openAddDialog = () => {
     setEditingTransaction(null);
@@ -276,7 +314,7 @@ function TransactionsPage({ currentUser, onLogout }) {
             <div><span>Inflow</span><strong>{formatMoney(summary.income)}</strong></div>
             <div><span>Outflow</span><strong>{formatMoney(summary.expenses)}</strong></div>
             <div><span>Net</span><strong>{formatMoney(summary.net)}</strong></div>
-            <div><span>Records</span><strong>{totalSummary.count}</strong></div>
+            <div><span>Records</span><strong>{summary.count}</strong></div>
           </div>
 
           <div className="transactions-ops-controls">
@@ -298,12 +336,70 @@ function TransactionsPage({ currentUser, onLogout }) {
                 <option value="expense">Expense</option>
               </select>
             </label>
+            <label>
+              <span>Account</span>
+              <select aria-label="Transaction account" value={accountFilter} onChange={(event) => setAccountFilter(event.target.value)}>
+                <option value="all">All accounts</option>
+                {accountOptions.map((account) => (
+                  <option key={account.id} value={String(account.id)}>
+                    {account.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Category</span>
+              <select aria-label="Transaction category" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+                <option value="all">All categories</option>
+                {categoryOptions.map((category) => (
+                  <option key={category.id} value={String(category.id)}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Status</span>
+              <select aria-label="Transaction status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="all">All statuses</option>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Amount</span>
+              <select aria-label="Transaction amount band" value={amountFilter} onChange={(event) => setAmountFilter(event.target.value)}>
+                <option value="all">Any amount</option>
+                <option value="low">Under $100</option>
+                <option value="medium">$100 - $999</option>
+                <option value="high">$1,000+</option>
+              </select>
+            </label>
             <div className="transactions-ops-actions">
               <button type="button" onClick={openAddDialog}>Add transaction</button>
-              <button type="button" onClick={() => {
-                setQuery('');
-                setTypeFilter('all');
-              }}>Clear</button>
+              <button type="button" onClick={clearFilters}>Clear</button>
+            </div>
+          </div>
+
+          <div className="transactions-ops-context" aria-label="Transaction view context">
+            <div className="transactions-ops-context-copy">
+              <strong>
+                Showing {summary.count} of {totalSummary.count} records
+              </strong>
+              <p>
+                {activeFilterCount
+                  ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} applied across the ledger view.`
+                  : 'Full ledger view with no filters applied.'}
+              </p>
+            </div>
+
+            <div className="transactions-ops-context-meta">
+              <span>Latest visible</span>
+              <strong>{latestVisibleTransaction ? latestVisibleTransaction.description || latestVisibleTransaction.categoryName : 'No match'}</strong>
+              <small>{latestVisibleTransaction ? formatDate(latestVisibleTransaction.transactionDate) : 'Adjust filters or add a transaction.'}</small>
             </div>
           </div>
         </section>
