@@ -172,6 +172,21 @@ export const financeStore = {
     const response = await apiClient.get('/api/goals');
     return response.goals.map((goal) => normalizeGoal(goal));
   },
+  async getReportsOverview(range = {}) {
+    const searchParams = new URLSearchParams();
+
+    if (range.startDate) {
+      searchParams.set('start_date', range.startDate);
+    }
+
+    if (range.endDate) {
+      searchParams.set('end_date', range.endDate);
+    }
+
+    const query = searchParams.toString();
+    const response = await apiClient.get(`/api/reports/overview${query ? `?${query}` : ''}`);
+    return response.reports;
+  },
   async getRecurringPaymentsForUser() {
     const response = await apiClient.get('/api/recurring-payments');
     return response.recurringPayments.map((payment) => normalizeRecurringPayment(payment));
