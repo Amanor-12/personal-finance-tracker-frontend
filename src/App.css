@@ -13693,7 +13693,8 @@ textarea:focus-visible,
 }
 
 .accounts-wallet-secondary,
-.goals-portfolio-secondary {
+.goals-portfolio-secondary,
+.recurring-queue-secondary {
   margin-top: 18px;
 }
 
@@ -13727,6 +13728,13 @@ textarea:focus-visible,
 .recurring-queue-secondary .recurring-queue-stats,
 .reports-analysis-secondary .reports-analysis-kpis {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recurring-queue-secondary .recurring-queue-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(320px, 0.86fr);
+  gap: 18px;
+  align-items: stretch;
 }
 
 .reports-analysis-secondary .reports-analysis-kpis {
@@ -13833,6 +13841,11 @@ textarea:focus-visible,
 
 .recurring-queue-secondary .recurring-queue-search {
   position: relative;
+  min-height: 132px;
+  padding: 22px 24px;
+  display: grid;
+  align-content: center;
+  gap: 10px;
   overflow: hidden;
   background:
     radial-gradient(circle at 88% 18%, rgba(76, 108, 244, 0.12), transparent 26%),
@@ -14000,6 +14013,10 @@ textarea:focus-visible,
   .recurring-queue-secondary .recurring-queue-stats,
   .reports-analysis-secondary .reports-analysis-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recurring-queue-secondary .recurring-queue-body {
+    grid-template-columns: 1fr;
   }
 }
 
