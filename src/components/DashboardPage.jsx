@@ -6,11 +6,11 @@ import { accountStore } from '../utils/accountStore';
 import { cardStore } from '../utils/cardStore';
 import { financeStore } from '../utils/financeStore';
 
-const quickActions = [
-  { label: 'Pay', icon: 'send', tone: 'violet', action: 'payment' },
-  { label: 'Receive', icon: 'receive', tone: 'mint', to: '/accounts' },
-  { label: 'Invoice', icon: 'invoice', tone: 'amber', action: 'payment' },
-  { label: 'Add Card', icon: 'plus', tone: 'sky', action: 'card' },
+const overviewActions = [
+  { label: 'Wallets', icon: 'wallet', tone: 'mint', to: '/accounts' },
+  { label: 'Transactions', icon: 'ledger', tone: 'violet', to: '/transactions' },
+  { label: 'Budgets', icon: 'budget', tone: 'amber', to: '/budget' },
+  { label: 'Goals', icon: 'goal', tone: 'sky', to: '/goals' },
 ];
 
 const chartTabs = [
@@ -19,11 +19,6 @@ const chartTabs = [
   { label: 'Transactions', to: '/transactions' },
 ];
 const chartMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const cardThemeOptions = [
-  { label: 'Indigo', value: 'indigo' },
-  { label: 'Emerald', value: 'emerald' },
-  { label: 'Sunset', value: 'sunset' },
-];
 const expenseLegendTones = ['violet', 'blue', 'teal', 'orange'];
 const expenseFallbackLabels = ['Housing', 'Groceries', 'Transport', 'Savings'];
 const defaultSnapshot = {
@@ -59,24 +54,6 @@ const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
 const formatCurrency = (value) => currencyFormatter.format(value || 0);
 const formatShortDate = (value) => shortDateFormatter.format(new Date(value));
 
-const createCardForm = (fullName = '') => ({
-  nickname: '',
-  holderName: fullName,
-  brand: 'Mastercard',
-  last4: '',
-  expiry: '',
-  theme: 'indigo',
-});
-
-const createPaymentForm = ({ cardId = '', categoryId = '' } = {}) => ({
-  title: '',
-  amount: '',
-  categoryId,
-  paymentSource: cardId,
-  note: '',
-  date: new Date().toISOString().slice(0, 10),
-});
-
 const getCardTitle = (card) => card?.nickname?.trim() || `${card?.brand || 'Ledgr'} Card`;
 const matchesCardQuery = (card, query) =>
   !query ||
@@ -86,22 +63,29 @@ const matchesCardQuery = (card, query) =>
 
 function WalletActionIcon({ type }) {
   const icons = {
-    send: <path d="m4 10.4 8-5-2 7.6-2.2-2.4L4 10.4Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.5" />,
-    receive: (
+    wallet: (
       <>
-        <path d="M8 4v7.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-        <path d="m5.6 9.6 2.4 2.5 2.4-2.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+        <rect x="2.8" y="4.2" width="10.4" height="7.6" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.45" />
+        <path d="M3.7 6.8h8.6M5.4 9.4h2.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
       </>
     ),
-    invoice: (
+    ledger: (
       <>
-        <rect x="4.1" y="3.8" width="7.8" height="9.4" rx="1.8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M6 6.6h4M6 8.8h4M6 11h2.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+        <path d="M4.2 5.2h7.6M4.2 8h7.6M4.2 10.8h5.1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <circle cx="3.1" cy="5.2" r=".7" fill="currentColor" />
+        <circle cx="3.1" cy="8" r=".7" fill="currentColor" />
+        <circle cx="3.1" cy="10.8" r=".7" fill="currentColor" />
       </>
     ),
-    plus: (
+    budget: (
       <>
-        <path d="M8 4.2v7.6M4.2 8h7.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+        <path d="M3.6 11.4h8.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.45" />
+        <path d="M4.6 9.6 6.3 7.8 7.9 9l3-3.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.45" />
+      </>
+    ),
+    goal: (
+      <>
+        <path d="m8 3.4 1.4 2.8 3.1.5-2.2 2.2.5 3.1L8 10.5 5.2 12l.5-3.1-2.2-2.2 3.1-.5Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.35" />
       </>
     ),
   };
@@ -177,11 +161,8 @@ function WalletStackCard({ card, depth = 0, placeholder = false, isActive = fals
 }
 
 function DashboardPage({ currentUser, onLogout }) {
-  const { access: billingAccess, billing, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { hasFeature } = useBillingAccess();
   const [isLoading, setIsLoading] = useState(true);
-  const [isCardComposerOpen, setIsCardComposerOpen] = useState(false);
-  const [isPaymentComposerOpen, setIsPaymentComposerOpen] = useState(false);
   const [activeCardId, setActiveCardId] = useState('');
   const [cardSearch, setCardSearch] = useState('');
   const [cards, setCards] = useState([]);
@@ -189,15 +170,9 @@ function DashboardPage({ currentUser, onLogout }) {
   const [snapshot, setSnapshot] = useState(defaultSnapshot);
   const [workspaceSignals, setWorkspaceSignals] = useState(defaultWorkspaceSignals);
   const [dataMessage, setDataMessage] = useState('');
-  const [cardForm, setCardForm] = useState(() => createCardForm(currentUser?.fullName));
-  const [paymentForm, setPaymentForm] = useState(() => createPaymentForm());
-  const [cardMessage, setCardMessage] = useState('');
-  const [paymentMessage, setPaymentMessage] = useState('');
 
   const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
-  const isPremium = billingAccess.isPremium;
   const hasRecurringAccess = hasFeature('recurringPayments');
-  const planLabel = billing?.currentPlan?.name || (isPremium ? 'Premium' : 'Free');
 
   useEffect(() => {
     let isCancelled = false;
@@ -280,7 +255,7 @@ function DashboardPage({ currentUser, onLogout }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser?.id, onLogout, refreshKey]);
+  }, [currentUser?.id, onLogout]);
 
   const expenseItems = useMemo(() => {
     const totals = new Map(snapshot.categorySpend.map((item) => [item.category, item.total]));
@@ -376,218 +351,40 @@ function DashboardPage({ currentUser, onLogout }) {
     ? {
         kicker: 'Workspace connected',
         title: 'Overview is linked to every core finance area.',
-        copy: 'Use this page as the decision layer, then jump into any module when you need details.',
-        actionLabel: 'Open insights',
-        actionRoute: '/reports',
+        copy: 'Use this page to check the whole workspace, then move into the right page when you need detail or action.',
+        actionLabel: 'Open transactions',
+        actionRoute: '/transactions',
       }
     : {
-        kicker: `${connectedModules}/${workspaceModules.length} areas ready`,
+        kicker: `${connectedModules}/${accessibleModules.length} areas ready`,
         title: `Next priority: ${nextWorkspaceModule.label.toLowerCase()}.`,
         copy: nextWorkspaceModule.emptyCopy,
         actionLabel: `Open ${nextWorkspaceModule.label.toLowerCase()}`,
         actionRoute: nextWorkspaceModule.route,
       };
-  const premiumWorkspace = isBillingLoading
-    ? {
-        kicker: 'Plan access',
-        title: 'Checking premium workspace controls.',
-        copy: 'Loading recurring, reporting, and billing access for this account.',
-        actionLabel: 'Billing',
-        actionRoute: '/billing',
-        pills: ['Recurring', 'Reports', 'Support'],
-      }
-    : isPremium
-      ? {
-          kicker: `${planLabel} active`,
-          title: 'Recurring control and advanced insights are live.',
-          copy: 'Use subscriptions, reports, and billing as part of the same finance workspace without switching products.',
-          actionLabel: 'Manage billing',
-          actionRoute: '/billing',
-          pills: ['Recurring queue', 'Insight lab', 'Priority support'],
-        }
-      : {
-          kicker: `${planLabel} workspace`,
-          title: 'Premium unlocks renewals, deeper analysis, and more planning room.',
-          copy: 'Stay on Free for manual tracking, then upgrade when you need recurring bills, backend-powered reports, and unlimited planning capacity.',
-          actionLabel: 'View premium',
-          actionRoute: '/pricing',
-          pills: ['Recurring bills', 'Reports', 'Unlimited planning'],
-        };
 
   const flowState = recentPayments.length
     ? {
-        title: `${recentPayments.length} payment${recentPayments.length > 1 ? 's' : ''} saved`,
-        copy: 'Stored in your finance workspace.',
+      title: `${recentPayments.length} payment${recentPayments.length > 1 ? 's' : ''} saved`,
+      copy: 'Stored in your finance workspace.',
       }
     : {
-        title: 'No payments yet',
-        copy: 'Add one payment to start tracking.',
+      title: 'No payments yet',
+      copy: 'Payments you record in Transactions will show here.',
       };
-
-  const openCardComposer = () => {
-    setCardForm(createCardForm(currentUser?.fullName));
-    setCardMessage('');
-    setIsCardComposerOpen(true);
-  };
-
-  const openPaymentComposer = () => {
-    setPaymentForm(
-      createPaymentForm({
-        cardId: activeCard?.id || cards[0]?.id || '',
-        categoryId: expenseCategories[0]?.id || '',
-      })
-    );
-    setPaymentMessage('');
-    setIsPaymentComposerOpen(true);
-  };
-
-  const closeComposers = () => {
-    setIsCardComposerOpen(false);
-    setIsPaymentComposerOpen(false);
-    setCardMessage('');
-    setPaymentMessage('');
-  };
-
-  const handleCardChange = (event) => {
-    const { name, value } = event.target;
-    setCardForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-    setCardMessage('');
-  };
-
-  const handlePaymentChange = (event) => {
-    const { name, value } = event.target;
-    setPaymentForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-    setPaymentMessage('');
-  };
-
-  const handleCardSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!cardForm.nickname.trim()) {
-      setCardMessage('Give the card a short name.');
-      return;
-    }
-
-    if (!cardForm.holderName.trim()) {
-      setCardMessage('Card holder name is required.');
-      return;
-    }
-
-    if (!/^\d{4}$/.test(cardForm.last4)) {
-      setCardMessage('Use exactly 4 digits for the last four.');
-      return;
-    }
-
-    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardForm.expiry)) {
-      setCardMessage('Expiry must use MM/YY.');
-      return;
-    }
-
-    try {
-      const nextCard = await cardStore.addCard(currentUser.id, {
-        ...cardForm,
-        holderName: cardForm.holderName.trim(),
-        nickname: cardForm.nickname.trim(),
-      });
-
-      setActiveCardId(nextCard.id);
-      setCardSearch('');
-      setRefreshKey((value) => value + 1);
-      closeComposers();
-    } catch (error) {
-      setCardMessage(error.message || 'Could not save that card.');
-    }
-  };
-
-  const handlePaymentSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!paymentForm.title.trim()) {
-      setPaymentMessage('Who is this payment for?');
-      return;
-    }
-
-    if (!Number(paymentForm.amount) || Number(paymentForm.amount) <= 0) {
-      setPaymentMessage('Enter a valid amount.');
-      return;
-    }
-
-    if (!paymentForm.categoryId) {
-      setPaymentMessage('Choose a category first.');
-      return;
-    }
-
-    try {
-      await financeStore.addTransaction(currentUser.id, {
-        type: 'expense',
-        description: paymentForm.note.trim()
-          ? `${paymentForm.title.trim()} - ${paymentForm.note.trim()}`
-          : paymentForm.title.trim(),
-        categoryId: paymentForm.categoryId,
-        amount: Number(paymentForm.amount),
-        transactionDate: paymentForm.date,
-      });
-
-      setRefreshKey((value) => value + 1);
-      closeComposers();
-    } catch (error) {
-      setPaymentMessage(error.message || 'Could not save that payment.');
-    }
-  };
-
-  const handleQuickAction = (action) => {
-    if (action === 'card') {
-      openCardComposer();
-    }
-
-    if (action === 'payment') {
-      openPaymentComposer();
-    }
-  };
-
-  const handleDeleteActiveCard = async () => {
-    if (!currentUser?.id || !activeCard) {
-      return;
-    }
-
-    const shouldDelete = window.confirm(`Delete ${getCardTitle(activeCard)}?`);
-
-    if (!shouldDelete) {
-      return;
-    }
-
-    try {
-      const remainingCards = await cardStore.deleteCard(currentUser.id, activeCard.id);
-      const matchingCards = remainingCards.filter((card) => matchesCardQuery(card, cardSearchQuery));
-
-      setActiveCardId(matchingCards[0]?.id || remainingCards[0]?.id || '');
-      setRefreshKey((value) => value + 1);
-    } catch (error) {
-      setDataMessage(error.message || 'Could not delete that card.');
-    }
-  };
 
   const rail = (
     <>
       <article className="ref-panel ref-wallet-panel">
         <div className="ref-panel-head">
           <div>
-            <h3>Your Card</h3>
+            <h3>Wallet Preview</h3>
           </div>
 
           <div className="ref-panel-actions">
-            <button className="ref-mini-action" type="button" onClick={openCardComposer}>
-              + Add Card
-            </button>
-            <button className="ref-dots-button" type="button" aria-label="Card options">
-              ...
-            </button>
+            <Link className="ref-mini-action" to="/accounts">
+              Open wallets
+            </Link>
           </div>
         </div>
 
@@ -641,39 +438,19 @@ function DashboardPage({ currentUser, onLogout }) {
               ? 'No card found.'
               : totalCards
                 ? `${totalCards} saved to your workspace`
-                : 'Add your first card.'}
+                : 'Your wallet setup in Accounts will show here.'}
           </p>
-
-          {activeCard ? (
-            <button className="ref-inline-delete" type="button" onClick={handleDeleteActiveCard}>
-              Delete
-            </button>
-          ) : null}
         </div>
 
         <div className="ref-wallet-actions">
-          {quickActions.map((action) =>
-            action.to ? (
-              <Link key={action.label} className="ref-wallet-action" to={action.to}>
-                <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
-                  <WalletActionIcon type={action.icon} />
-                </span>
-                <span>{action.label}</span>
-              </Link>
-            ) : (
-              <button
-                key={action.label}
-                className="ref-wallet-action"
-                type="button"
-                onClick={() => handleQuickAction(action.action)}
-              >
-                <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
-                  <WalletActionIcon type={action.icon} />
-                </span>
-                <span>{action.label}</span>
-              </button>
-            )
-          )}
+          {overviewActions.map((action) => (
+            <Link key={action.label} className="ref-wallet-action" to={action.to}>
+              <span className={`ref-wallet-action-icon ref-wallet-action-icon-${action.tone}`}>
+                <WalletActionIcon type={action.icon} />
+              </span>
+              <span>{action.label}</span>
+            </Link>
+          ))}
         </div>
       </article>
 
@@ -730,15 +507,13 @@ function DashboardPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle={`Welcome back, ${firstName}`}
         pageSubtitle="Your connected finance workspace."
-        primaryActionLabel="+ New Payment"
-        onPrimaryAction={openPaymentComposer}
         rail={rail}
       >
         <article className="ref-hero-card">
           <div className="ref-hero-copy">
             <span className="ref-section-chip">Workspace</span>
             <h2>Your wallet, ready.</h2>
-            <p>Add cards and track payments from your API.</p>
+            <p>Review cards, payments, and setup progress from one clear control center.</p>
 
             <div className="ref-hero-pill-row">
               {heroPills.map((item) => (
@@ -749,11 +524,11 @@ function DashboardPage({ currentUser, onLogout }) {
             </div>
 
             <div className="ref-hero-actions">
-              <button className="ref-secondary-button" type="button" onClick={openCardComposer}>
-                + Add Card
-              </button>
               <Link className="ref-secondary-link" to="/accounts">
                 Open wallets
+              </Link>
+              <Link className="ref-secondary-link" to="/transactions">
+                Open transactions
               </Link>
             </div>
           </div>
@@ -824,9 +599,9 @@ function DashboardPage({ currentUser, onLogout }) {
               </div>
               <div className="ref-panel-head-actions">
                 <Link className="ref-view-link" to="/transactions">Ledger</Link>
-                <button className="ref-inline-filter" type="button" onClick={openPaymentComposer}>
-                  + New
-                </button>
+                <Link className="ref-inline-filter" to="/transactions">
+                  Open
+                </Link>
               </div>
             </div>
 
@@ -874,27 +649,6 @@ function DashboardPage({ currentUser, onLogout }) {
               </Link>
             </div>
 
-            <div className="ref-workspace-plan-strip">
-              <div className="ref-workspace-plan-copy">
-                <span className="ref-workspace-plan-kicker">{premiumWorkspace.kicker}</span>
-                <strong>{premiumWorkspace.title}</strong>
-                <p>{premiumWorkspace.copy}</p>
-              </div>
-
-              <div className="ref-workspace-plan-meta">
-                <div className="ref-workspace-plan-pills" aria-label="Plan capabilities">
-                  {premiumWorkspace.pills.map((pill) => (
-                    <span key={pill} className="ref-workspace-plan-pill">
-                      {pill}
-                    </span>
-                  ))}
-                </div>
-                <Link className="ref-workspace-plan-link" to={premiumWorkspace.actionRoute}>
-                  {premiumWorkspace.actionLabel}
-                </Link>
-              </div>
-            </div>
-
             <div className="ref-workspace-route-list">
               {workspaceModules.map((item) => (
                 <article key={item.label} className={`ref-workspace-route${item.locked ? ' is-locked' : ''}`}>
@@ -907,7 +661,7 @@ function DashboardPage({ currentUser, onLogout }) {
                   </div>
                   <div className="ref-workspace-route-meta">
                     <strong>{item.locked ? 'Pro' : String(item.value).padStart(2, '0')}</strong>
-                    <Link to={item.route}>{item.actionLabel || (item.value ? 'Open' : 'Create')}</Link>
+                    <Link to={item.route}>{item.actionLabel || (item.value ? 'Open' : 'Set up')}</Link>
                   </div>
                 </article>
               ))}
@@ -915,181 +669,6 @@ function DashboardPage({ currentUser, onLogout }) {
           </article>
         </div>
       </FinanceLayout>
-
-      {isCardComposerOpen ? (
-        <div className="ref-modal-backdrop" role="presentation" onClick={closeComposers}>
-          <section
-            className="ref-modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-card-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="ref-modal-head">
-              <div>
-                <span className="ref-modal-kicker">Cards</span>
-                <h3 id="add-card-title">Add a new card</h3>
-              </div>
-              <button className="ref-modal-close" type="button" onClick={closeComposers} aria-label="Close add card">
-                x
-              </button>
-            </div>
-
-            <form className="ref-modal-form" onSubmit={handleCardSubmit}>
-              {cardMessage ? <p className="ref-form-message">{cardMessage}</p> : null}
-
-              <div className="ref-field-grid">
-                <label className="ref-field">
-                  <span>Card name</span>
-                  <input name="nickname" type="text" value={cardForm.nickname} onChange={handleCardChange} placeholder="Daily Card" />
-                </label>
-
-                <label className="ref-field">
-                  <span>Card holder</span>
-                  <input name="holderName" type="text" value={cardForm.holderName} onChange={handleCardChange} placeholder="Card holder name" />
-                </label>
-
-                <label className="ref-field">
-                  <span>Brand</span>
-                  <select name="brand" value={cardForm.brand} onChange={handleCardChange}>
-                    <option>Mastercard</option>
-                    <option>Visa</option>
-                    <option>Amex</option>
-                    <option>Debit</option>
-                  </select>
-                </label>
-
-                <label className="ref-field">
-                  <span>Theme</span>
-                  <select name="theme" value={cardForm.theme} onChange={handleCardChange}>
-                    {cardThemeOptions.map((theme) => (
-                      <option key={theme.value} value={theme.value}>
-                        {theme.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="ref-field">
-                  <span>Last 4</span>
-                  <input
-                    name="last4"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength="4"
-                    value={cardForm.last4}
-                    onChange={handleCardChange}
-                    placeholder="5432"
-                  />
-                </label>
-
-                <label className="ref-field">
-                  <span>Expiry</span>
-                  <input name="expiry" type="text" maxLength="5" value={cardForm.expiry} onChange={handleCardChange} placeholder="01/27" />
-                </label>
-              </div>
-
-              <div className="ref-modal-actions">
-                <button className="ref-modal-secondary" type="button" onClick={closeComposers}>
-                  Cancel
-                </button>
-                <button className="ref-modal-primary" type="submit">
-                  Save Card
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
-
-      {isPaymentComposerOpen ? (
-        <div className="ref-modal-backdrop" role="presentation" onClick={closeComposers}>
-          <section
-            className="ref-modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="new-payment-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="ref-modal-head">
-              <div>
-                <span className="ref-modal-kicker">Payments</span>
-                <h3 id="new-payment-title">Create a payment</h3>
-              </div>
-              <button className="ref-modal-close" type="button" onClick={closeComposers} aria-label="Close payment form">
-                x
-              </button>
-            </div>
-
-            <form className="ref-modal-form" onSubmit={handlePaymentSubmit}>
-              {paymentMessage ? <p className="ref-form-message">{paymentMessage}</p> : null}
-
-              <div className="ref-field-grid">
-                <label className="ref-field">
-                  <span>Payee</span>
-                  <input name="title" type="text" value={paymentForm.title} onChange={handlePaymentChange} placeholder="Apple Music" />
-                </label>
-
-                <label className="ref-field">
-                  <span>Amount</span>
-                  <input
-                    name="amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={paymentForm.amount}
-                    onChange={handlePaymentChange}
-                    placeholder="64.00"
-                  />
-                </label>
-
-                <label className="ref-field">
-                  <span>Category</span>
-                  <select name="categoryId" value={paymentForm.categoryId} onChange={handlePaymentChange}>
-                    <option value="">Choose category</option>
-                    {expenseCategories.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="ref-field">
-                  <span>Source</span>
-                  <select name="paymentSource" value={paymentForm.paymentSource} onChange={handlePaymentChange}>
-                    <option value="">Wallet</option>
-                    {cards.map((card) => (
-                      <option key={card.id} value={card.id}>
-                        {getCardTitle(card)} - {card.last4}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="ref-field">
-                  <span>Date</span>
-                  <input name="date" type="date" value={paymentForm.date} onChange={handlePaymentChange} />
-                </label>
-
-                <label className="ref-field ref-field-wide">
-                  <span>Note</span>
-                  <input name="note" type="text" value={paymentForm.note} onChange={handlePaymentChange} placeholder="Optional note" />
-                </label>
-              </div>
-
-              <div className="ref-modal-actions">
-                <button className="ref-modal-secondary" type="button" onClick={closeComposers}>
-                  Cancel
-                </button>
-                <button className="ref-modal-primary" type="submit">
-                  Save Payment
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
     </>
   );
 }

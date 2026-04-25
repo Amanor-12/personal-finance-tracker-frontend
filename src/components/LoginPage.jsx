@@ -159,8 +159,12 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
       navigate(isLogin ? '/dashboard' : '/onboarding');
     } catch (error) {
+      const normalizedMessage = String(error.message || '').trim().toLowerCase();
       const authMessage =
-        error.message === 'Request failed'
+        error.status === 0 ||
+        normalizedMessage === 'request failed' ||
+        normalizedMessage === 'request failed.' ||
+        normalizedMessage.includes('cannot reach the finance service')
           ? 'Ledgr cannot reach the finance service. Start the backend server, then try again.'
           : error.message;
 

@@ -43,9 +43,17 @@ const getAccountTheme = (accountType) => {
   return 'indigo';
 };
 
+const getAccountPreviewTitle = (account) => account?.institutionName?.trim() || 'Ledgr';
+const getAccountPreviewLabel = (account) =>
+  account ? `${getAccountTypeLabel(account.accountType)} account` : 'Choose a primary account';
+const getAccountPreviewNote = (account) =>
+  account
+    ? `${getAccountTypeLabel(account.accountType)} is ready to use across transactions, budgets, goals, and reports.`
+    : 'Add one account to power transactions, budgets, goals, and reports.';
+
 function AccountPreviewCard({ account, depth = 0, placeholder = false, stacked = true, compact = false }) {
   const accountType = placeholder ? 'Preview account' : getAccountTypeLabel(account.accountType);
-  const title = placeholder ? 'Ledgr' : account.name;
+  const title = placeholder ? 'Ledgr' : getAccountPreviewTitle(account);
   const balance = placeholder ? 'Add your first account' : formatAccountCurrency(account.currentBalance, account.currency);
   const identifier = placeholder ? '**** ----' : account.maskedIdentifier || account.institutionName || 'Manual account';
   const footer = placeholder ? 'preview' : account.isPrimary ? 'primary' : account.status;
@@ -289,12 +297,8 @@ function AccountsPage({ currentUser, onLogout }) {
             </div>
             <div className="accounts-wallet-preview-note">
               <small>{summary.primary ? 'Primary route' : 'Vault ready'}</small>
-              <strong>{summary.primary?.name || 'Choose a primary account'}</strong>
-              <span>
-                {summary.primary
-                  ? `${getAccountTypeLabel(summary.primary.accountType)} used first across Ledgr.`
-                  : 'Add one account to power transactions, budgets, goals, and reports.'}
-              </span>
+              <strong>{getAccountPreviewLabel(summary.primary)}</strong>
+              <span>{getAccountPreviewNote(summary.primary)}</span>
             </div>
           </div>
         </section>
