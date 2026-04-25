@@ -13,6 +13,39 @@ const comparisonRows = [
   { label: 'Priority support and billing portal', free: '-', premium: 'Included' },
 ];
 
+const premiumValueRows = [
+  {
+    eyebrow: 'Recurring control',
+    title: 'See bills before they hit',
+    body: 'Premium keeps subscriptions, rent, insurance, and other fixed charges in one renewal workspace with due-soon context.',
+  },
+  {
+    eyebrow: 'Advanced insights',
+    title: 'Understand what is changing',
+    body: 'Premium reports answer real questions about category concentration, merchant exposure, pace, and net cash flow.',
+  },
+  {
+    eyebrow: 'Power workflows',
+    title: 'Do less manual cleanup',
+    body: 'Premium adds saved ledger views, CSV export, and stronger planning intelligence across budgets and goals.',
+  },
+];
+
+const pricingFaq = [
+  {
+    question: 'Can I stay on the free plan long term?',
+    answer: 'Yes. Free is designed for manual tracking with starter limits, not as a forced trial.',
+  },
+  {
+    question: 'What makes Premium worth paying for?',
+    answer: 'Premium saves time and gives better control: recurring bill tracking, backend-powered insights, and more planning room.',
+  },
+  {
+    question: 'Do I lose data if I upgrade later?',
+    answer: 'No. Your accounts, transactions, budgets, and goals stay in the same workspace when you move between plans.',
+  },
+];
+
 function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
   const isFree = plan.id === 'free';
 
@@ -96,9 +129,10 @@ function PricingPage({ currentUser }) {
       <section className="pricing-market-hero">
         <div>
           <span className="pricing-eyebrow">Stripe-ready SaaS billing</span>
-          <h1>Free for clean tracking. Premium for recurring control and real analysis.</h1>
+          <h1>Start free. Upgrade when your money workflow needs more control.</h1>
           <p>
-            Start on Free for manual finance tracking. Upgrade when you want recurring payment management, deeper reporting, and more room to scale the workspace.
+            Ledgr Free stays useful for manual tracking. Premium becomes worth paying for when customers need recurring control,
+            deeper reporting, transaction power tools, and unlimited planning space.
           </p>
         </div>
         <div className="pricing-toggle" aria-label="Billing cadence">
@@ -135,39 +169,13 @@ function PricingPage({ currentUser }) {
       </section>
 
       <section className="pricing-proof-grid">
-        <article>
-          <span>Recurring control</span>
-          <strong>See bills before they hit</strong>
-          <p>Premium adds a dedicated renewal workspace for subscriptions, rent, insurance, and fixed commitments.</p>
-        </article>
-        <article>
-          <span>Analytics</span>
-          <strong>Move past raw transaction lists</strong>
-          <p>Premium reports answer real questions about concentration, merchants, and cash flow instead of showing decorative charts.</p>
-        </article>
-        <article>
-          <span>Scale</span>
-          <strong>Unlimited planning space</strong>
-          <p>Premium removes the starter limits on accounts, budgets, and goals so active customers do not outgrow the workspace.</p>
-        </article>
-      </section>
-
-      <section className="pricing-proof-grid">
-        <article>
-          <span>Checkout</span>
-          <strong>Stripe Checkout Sessions</strong>
-          <p>Paid plan buttons ask the backend to create subscription-mode Checkout Sessions.</p>
-        </article>
-        <article>
-          <span>Management</span>
-          <strong>Customer Portal</strong>
-          <p>Users manage payment methods, invoices, and cancellation through Stripe portal access.</p>
-        </article>
-        <article>
-          <span>State handling</span>
-          <strong>No fake success state</strong>
-          <p>Trialing, active, past due, incomplete, canceled, and none are handled as real statuses.</p>
-        </article>
+        {premiumValueRows.map((row) => (
+          <article key={row.title}>
+            <span>{row.eyebrow}</span>
+            <strong>{row.title}</strong>
+            <p>{row.body}</p>
+          </article>
+        ))}
       </section>
 
       <section className="pricing-comparison">
@@ -184,6 +192,16 @@ function PricingPage({ currentUser }) {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="pricing-proof-grid pricing-faq-grid" aria-label="Pricing questions">
+        {pricingFaq.map((item) => (
+          <article key={item.question}>
+            <span>FAQ</span>
+            <strong>{item.question}</strong>
+            <p>{item.answer}</p>
+          </article>
+        ))}
       </section>
     </main>
   );

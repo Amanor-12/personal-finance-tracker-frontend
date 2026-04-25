@@ -25,7 +25,7 @@ function BillingSkeleton() {
   );
 }
 
-function BillingPlanCard({ currentPlanId, isProcessing, onCheckout, plan }) {
+function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout, plan }) {
   const isCurrent = currentPlanId === plan.id;
   const isFree = plan.id === 'free';
 
@@ -51,8 +51,8 @@ function BillingPlanCard({ currentPlanId, isProcessing, onCheckout, plan }) {
           Keep free plan
         </Link>
       ) : (
-        <button className="billing-primary-action" type="button" disabled={isProcessing} onClick={() => onCheckout(plan.id)}>
-          {isProcessing ? 'Starting checkout...' : 'Start checkout'}
+        <button className="billing-primary-action" type="button" disabled={isProcessing || !isAvailable} onClick={() => onCheckout(plan.id)}>
+          {!isAvailable ? 'Billing unavailable' : isProcessing ? 'Starting checkout...' : 'Start checkout'}
         </button>
       )}
     </article>
@@ -101,7 +101,9 @@ function BillingPage({ currentUser, onLogout }) {
   const status = billing?.subscription?.status || 'none';
   const statusLabel = subscriptionStatusCopy[status] || status;
   const stripeConfigured = Boolean(billing?.provider?.configured);
-  const missingConfig = billing?.provider?.missing || [];
+  const premiumHighlights = billing?.access?.isPremium
+    ? ['Recurring renewals workspace', 'Advanced insights and reports', 'Unlimited planning capacity', 'Saved views and export tools']
+    : ['Keep free plan limits', 'Upgrade when you need deeper control', 'Manage payment details in one place', 'Invoices stay attached to the same account'];
 
   const handleCheckout = async (planId) => {
     setProcessingPlanId(planId);
@@ -146,22 +148,28 @@ function BillingPage({ currentUser, onLogout }) {
   const rail = (
     <aside className="billing-sidecar">
       <article className="billing-readiness-card">
-        <span>Stripe readiness</span>
-        <h3>{stripeConfigured ? 'Configured' : 'Configuration needed'}</h3>
-        <p>Paid plan actions call protected backend routes. The client does not fake subscription success.</p>
-        {missingConfig.length ? (
-          <div className="billing-config-list">
-            {missingConfig.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        ) : null}
+        <span>Plan value</span>
+        <h3>{billing?.access?.isPremium ? 'Premium is active' : 'Free plan is active'}</h3>
+        <p>
+          {billing?.access?.isPremium
+            ? 'Recurring control, deeper reporting, and unlimited planning are live in this workspace.'
+            : 'Free keeps manual tracking clean. Premium is there when the workspace needs more automation, analysis, and room to scale.'}
+        </p>
+        <div className="billing-config-list">
+          {premiumHighlights.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
       </article>
 
       <article className="billing-sidecar-dark">
-        <span>Billing separation</span>
-        <h3>App billing is not personal spending</h3>
-        <p>Ledgr subscription billing stays separate from the user's tracked recurring payments.</p>
+        <span>Confidence</span>
+        <h3>{stripeConfigured ? 'Manage changes in one billing hub' : 'Billing becomes available once payments are configured'}</h3>
+        <p>
+          {stripeConfigured
+            ? 'Update payment details, review invoices, and move between plans without touching the finance data inside the workspace.'
+            : 'Once billing is configured, customers can upgrade, review invoices, and manage payment methods from here.'}
+        </p>
       </article>
     </aside>
   );
@@ -171,14 +179,14 @@ function BillingPage({ currentUser, onLogout }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Billing"
-      pageSubtitle="Manage the Ledgr subscription with Stripe-ready checkout, portal, and invoice states."
+      pageSubtitle="Choose the right Ledgr plan, manage invoices, and keep premium access clear."
       rail={rail}
     >
       <section className="billing-studio-hero">
         <div>
           <span className="billing-eyebrow">Subscription workspace</span>
           <h2>{billing?.currentPlan?.name || 'Free'} plan</h2>
-          <p>Review status, choose a plan, open the customer portal, and keep invoices ready for real Stripe records.</p>
+          <p>See what the current plan unlocks, move to Premium when it adds real value, and keep billing changes simple.</p>
         </div>
         <div className="billing-status-card">
           <span>Status</span>
@@ -208,17 +216,17 @@ function BillingPage({ currentUser, onLogout }) {
             <article>
               <span>Current plan</span>
               <strong>{billing?.currentPlan?.name || 'Free'}</strong>
-              <p>{billing?.currentPlan?.priceLabel || '$0'} billed through Ledgr.</p>
+              <p>{billing?.currentPlan?.priceLabel || '$0'} for the finance workspace and its current feature set.</p>
             </article>
             <article>
               <span>Subscription status</span>
               <strong>{statusLabel}</strong>
-              <p>Supports trialing, active, past due, incomplete, canceled, and none.</p>
+              <p>Plan access responds to real subscription states instead of pretending a payment went through.</p>
             </article>
             <article>
               <span>Customer portal</span>
-              <strong>{stripeConfigured ? 'Available' : 'Awaiting config'}</strong>
-              <button className="billing-secondary-action" type="button" disabled={isOpeningPortal} onClick={handlePortal}>
+              <strong>{stripeConfigured ? 'Available' : 'Coming online'}</strong>
+              <button className="billing-secondary-action" type="button" disabled={isOpeningPortal || !stripeConfigured} onClick={handlePortal}>
                 {isOpeningPortal ? 'Opening...' : 'Manage billing'}
               </button>
             </article>
@@ -227,9 +235,27 @@ function BillingPage({ currentUser, onLogout }) {
               <strong>{billing?.access?.isPremium ? 'Premium unlocked' : 'Free limits active'}</strong>
               <p>
                 {billing?.access?.isPremium
-                  ? 'Recurring control, advanced reporting, and unlimited planning capacity are active.'
+                  ? 'Recurring control, advanced reporting, saved transaction workflows, and unlimited planning are active.'
                   : `Free includes ${billing?.access?.limits?.accounts ?? 0} accounts, ${billing?.access?.limits?.budgets ?? 0} budgets, and ${billing?.access?.limits?.goals ?? 0} goals.`}
               </p>
+            </article>
+          </section>
+
+          <section className="billing-value-grid" aria-label="Premium plan value">
+            <article>
+              <span>Premium unlocks</span>
+              <strong>Recurring command center</strong>
+              <p>Track subscriptions, bills, rent, and renewals before they hit the account.</p>
+            </article>
+            <article>
+              <span>Premium unlocks</span>
+              <strong>Deeper analysis</strong>
+              <p>Use server-backed insights to understand concentration, pace, and cash flow changes.</p>
+            </article>
+            <article>
+              <span>Premium unlocks</span>
+              <strong>Power workflows</strong>
+              <p>Save ledger views, export data, and use smarter planning signals across budgets and goals.</p>
             </article>
           </section>
 
@@ -238,6 +264,7 @@ function BillingPage({ currentUser, onLogout }) {
               <BillingPlanCard
                 key={plan.id}
                 currentPlanId={billing?.currentPlan?.id}
+                isAvailable={stripeConfigured}
                 isProcessing={processingPlanId === plan.id}
                 onCheckout={handleCheckout}
                 plan={plan}

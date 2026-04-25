@@ -7,8 +7,8 @@ export const billingPlans = [
     eyebrow: 'Start clean',
     interval: 'none',
     price: '$0',
-    description: 'Manual tracking for a private finance workspace.',
-    features: ['Up to 2 active accounts', 'Transactions', 'Up to 6 budgets', 'Up to 3 goals'],
+    description: 'Manual tracking for a calm finance workspace.',
+    features: ['Up to 2 active accounts', 'Manual transactions and categories', 'Up to 6 budgets', 'Up to 3 goals'],
   },
   {
     id: 'premium_monthly',
@@ -17,8 +17,13 @@ export const billingPlans = [
     interval: 'monthly',
     price: '$8',
     suffix: '/ month',
-    description: 'Advanced tracking, recurring payments, and reporting.',
-    features: ['Recurring payments', 'Reports', 'Unlimited planning spaces', 'Priority support'],
+    description: 'Recurring control, deeper analysis, and more room to plan.',
+    features: [
+      'Recurring renewals workspace',
+      'Server-backed reports and insights',
+      'Unlimited accounts, budgets, and goals',
+      'CSV export, saved views, and planning intelligence',
+    ],
   },
   {
     id: 'premium_annual',
@@ -27,7 +32,7 @@ export const billingPlans = [
     interval: 'annual',
     price: '$72',
     suffix: '/ year',
-    description: 'Premium access with annual billing.',
+    description: 'Premium access with a lower annual price.',
     features: ['Everything in Premium', 'Annual savings', 'Invoice history', 'Plan management'],
   },
 ];

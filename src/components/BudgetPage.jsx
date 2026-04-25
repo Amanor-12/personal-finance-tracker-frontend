@@ -13,13 +13,16 @@ import { financeStore } from '../utils/financeStore';
 const summarizeBudgets = (budgets) =>
   budgets.reduce(
     (summary, budget) => {
+      const health = getBudgetHealth(budget);
       summary.totalBudgeted += budget.amountLimit;
       summary.totalSpent += budget.spentAmount;
       summary.remaining += budget.remainingAmount;
-      summary.overspent += budget.remainingAmount < 0 ? 1 : 0;
+      summary.overspent += health === 'over' ? 1 : 0;
+      summary.watch += health === 'watch' ? 1 : 0;
+      summary.notStarted += health === 'not_started' ? 1 : 0;
       return summary;
     },
-    { overspent: 0, remaining: 0, totalBudgeted: 0, totalSpent: 0 }
+    { overspent: 0, remaining: 0, totalBudgeted: 0, totalSpent: 0, watch: 0, notStarted: 0 }
   );
 
 const getBudgetHealth = (budget) => {
@@ -128,6 +131,56 @@ function BudgetPage({ currentUser, onLogout }) {
       })[0] || null,
     [visibleBudgets]
   );
+  const unbudgetedCategories = useMemo(
+    () => categories.filter((category) => !currentBudgets.some((budget) => Number(budget.categoryId) === Number(category.id))),
+    [categories, currentBudgets]
+  );
+  const budgetSignals = useMemo(() => {
+    const signals = [];
+
+    if (summary.overspent) {
+      signals.push({
+        body: `${summary.overspent} ${summary.overspent === 1 ? 'category is' : 'categories are'} already over limit.`,
+        tone: 'over',
+        title: 'Overspend pressure',
+      });
+    }
+
+    if (summary.watch) {
+      signals.push({
+        body: `${summary.watch} ${summary.watch === 1 ? 'category is' : 'categories are'} close to the limit and should be watched this month.`,
+        tone: 'watch',
+        title: 'Approaching limit',
+      });
+    }
+
+    if (unbudgetedCategories.length) {
+      signals.push({
+        body: `${unbudgetedCategories.length} expense ${unbudgetedCategories.length === 1 ? 'category is' : 'categories are'} available but not budgeted yet.`,
+        tone: 'neutral',
+        title: 'Coverage gap',
+      });
+    }
+
+    if (topPressureBudget) {
+      signals.push({
+        body: `${topPressureBudget.categoryName} is using ${formatBudgetCurrency(topPressureBudget.spentAmount)} against ${formatBudgetCurrency(topPressureBudget.amountLimit)}.`,
+        tone: getBudgetHealth(topPressureBudget),
+        title: 'Highest pressure category',
+      });
+    }
+
+    if (!signals.length) {
+      signals.push({
+        body: 'No categories are showing meaningful pressure in the current view.',
+        tone: 'healthy',
+        title: 'Planning is calm',
+      });
+    }
+
+    return signals.slice(0, 4);
+  }, [summary.overspent, summary.watch, topPressureBudget, unbudgetedCategories.length]);
+  const premiumBudgetAutomation = access.isPremium;
 
   const openCreate = () => {
     if (!canCreateBudget) {
@@ -291,6 +344,55 @@ function BudgetPage({ currentUser, onLogout }) {
               </p>
             </article>
           </div>
+        </section>
+
+        <section className="finance-intelligence-grid" aria-label="Budget planning intelligence">
+          <article className="finance-intelligence-card">
+            <div className="finance-intelligence-head">
+              <div>
+                <span className="finance-intelligence-kicker">Budget intelligence</span>
+                <h3>{premiumBudgetAutomation ? 'Pressure watchlist is live' : 'Premium adds pressure watchlists'}</h3>
+              </div>
+              {!premiumBudgetAutomation ? (
+                <button className="finance-upgrade-action" type="button" onClick={() => navigate('/pricing')}>
+                  Unlock alerts
+                </button>
+              ) : null}
+            </div>
+            <p className="finance-intelligence-copy">
+              {premiumBudgetAutomation
+                ? 'Ledgr keeps the highest-risk categories visible first so you do not need to scan the full board to find pressure.'
+                : 'Free keeps budgeting clean. Premium adds a smarter watchlist for overspend pressure, near-limit categories, and coverage gaps.'}
+            </p>
+            <div className="finance-intelligence-list">
+              {(premiumBudgetAutomation ? budgetSignals : budgetSignals.slice(0, 2)).map((signal) => (
+                <article className={`finance-intelligence-row tone-${signal.tone}`} key={signal.title}>
+                  <strong>{signal.title}</strong>
+                  <p>{signal.body}</p>
+                </article>
+              ))}
+            </div>
+          </article>
+
+          <article className="finance-intelligence-card finance-intelligence-card-accent">
+            <span className="finance-intelligence-kicker">Coverage</span>
+            <h3>{unbudgetedCategories.length ? `${unbudgetedCategories.length} categories still open` : 'Every current expense category is covered'}</h3>
+            <p>
+              {unbudgetedCategories.length
+                ? 'These categories can still be added to the monthly plan when you need tighter control.'
+                : 'The current month already has budget coverage for every expense category in the workspace.'}
+            </p>
+            <div className="finance-pill-row">
+              {unbudgetedCategories.length ? (
+                unbudgetedCategories.slice(0, 4).map((category) => (
+                  <span className="finance-pill" key={category.id}>{category.name}</span>
+                ))
+              ) : (
+                <span className="finance-pill">Coverage complete</span>
+              )}
+              {unbudgetedCategories.length > 4 ? <span className="finance-pill">+{unbudgetedCategories.length - 4} more</span> : null}
+            </div>
+          </article>
         </section>
 
         <PremiumPanel eyebrow="Budget board" title="Category limits">

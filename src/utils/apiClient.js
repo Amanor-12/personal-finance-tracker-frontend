@@ -1,6 +1,15 @@
 import { sessionStore } from './sessionStore';
 
 const API_OFFLINE_MESSAGE = 'Ledgr cannot reach the finance service. Start the backend server, then try again.';
+const API_BASE_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+
+const resolveRequestUrl = (path) => {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
+};
 
 const getErrorMessage = (payload) =>
   typeof payload === 'string'
@@ -50,7 +59,9 @@ const request = async (path, { method = 'GET', body, headers = {}, auth = true }
   let response;
 
   try {
-    response = await fetch(path, {
+    const requestUrl = resolveRequestUrl(path);
+
+    response = await fetch(requestUrl, {
       method,
       headers: nextHeaders,
       body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,

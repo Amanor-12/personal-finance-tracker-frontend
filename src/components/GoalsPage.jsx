@@ -40,6 +40,20 @@ const getGoalState = (goal) => {
   return 'active';
 };
 
+const getGoalMonthlyPace = (goal) => {
+  if (!goal?.targetDate || goal?.status === 'Completed' || Number(goal?.remainingAmount) <= 0) {
+    return null;
+  }
+
+  const daysRemaining = Math.max(
+    1,
+    Math.ceil((new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  );
+  const monthsRemaining = Math.max(1, Math.ceil(daysRemaining / 30));
+
+  return goal.remainingAmount / monthsRemaining;
+};
+
 function GoalsPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { access, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
@@ -128,6 +142,87 @@ function GoalsPage({ currentUser, onLogout }) {
       })[0] || null,
     [visibleGoals]
   );
+  const activeGoals = useMemo(() => visibleGoals.filter((goal) => goal.status !== 'Completed'), [visibleGoals]);
+  const dueSoonGoals = useMemo(
+    () =>
+      activeGoals.filter((goal) => {
+        if (!goal.targetDate) {
+          return false;
+        }
+
+        const daysRemaining = Math.ceil((new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        return daysRemaining >= 0 && daysRemaining <= 30;
+      }),
+    [activeGoals]
+  );
+  const paceFocus = useMemo(
+    () =>
+      activeGoals
+        .map((goal) => ({
+          goal,
+          monthlyPace: getGoalMonthlyPace(goal),
+        }))
+        .filter((item) => item.monthlyPace)
+        .sort((left, right) => right.monthlyPace - left.monthlyPace)[0] || null,
+    [activeGoals]
+  );
+  const largestRemainingGoal = useMemo(
+    () => [...activeGoals].sort((left, right) => right.remainingAmount - left.remainingAmount)[0] || null,
+    [activeGoals]
+  );
+  const milestoneSignals = useMemo(() => {
+    const signals = [];
+
+    if (dueSoonGoals.length) {
+      signals.push({
+        body: `${dueSoonGoals.length} ${dueSoonGoals.length === 1 ? 'goal needs' : 'goals need'} attention inside the next 30 days.`,
+        tone: 'watch',
+        title: 'Due soon',
+      });
+    }
+
+    if (paceFocus) {
+      signals.push({
+        body: `${paceFocus.goal.title} needs about ${formatGoalCurrency(paceFocus.monthlyPace)} per month to stay on pace.`,
+        tone: 'healthy',
+        title: 'Monthly pace needed',
+      });
+    }
+
+    if (largestRemainingGoal) {
+      signals.push({
+        body: `${largestRemainingGoal.title} still has ${formatGoalCurrency(largestRemainingGoal.remainingAmount)} left to fund.`,
+        tone: 'neutral',
+        title: 'Largest remaining target',
+      });
+    }
+
+    if (!signals.length) {
+      signals.push({
+        body: 'Create a target to see milestone pacing, due-soon signals, and contribution guidance.',
+        tone: 'healthy',
+        title: 'Milestones are ready',
+      });
+    }
+
+    return signals.slice(0, 4);
+  }, [dueSoonGoals.length, largestRemainingGoal, paceFocus]);
+  const milestoneQueue = useMemo(
+    () =>
+      activeGoals
+        .map((goal) => ({
+          goal,
+          monthlyPace: getGoalMonthlyPace(goal),
+        }))
+        .sort((left, right) => {
+          const leftDate = left.goal.targetDate ? new Date(left.goal.targetDate).getTime() : Number.POSITIVE_INFINITY;
+          const rightDate = right.goal.targetDate ? new Date(right.goal.targetDate).getTime() : Number.POSITIVE_INFINITY;
+          return leftDate - rightDate;
+        })
+        .slice(0, 3),
+    [activeGoals]
+  );
+  const premiumGoalIntelligence = access.isPremium;
 
   const openCreate = () => {
     if (!canCreateGoal) {
@@ -280,6 +375,64 @@ function GoalsPage({ currentUser, onLogout }) {
                 ? `${formatGoalCurrency(nextGoalFocus.remainingAmount)} left${nextGoalFocus.targetDate ? ` by ${formatGoalDate(nextGoalFocus.targetDate)}` : ''}.`
                 : 'Create a goal to see the next milestone needing attention.'}
             </p>
+          </article>
+        </section>
+
+        <section className="finance-intelligence-grid" aria-label="Goal milestone intelligence">
+          <article className="finance-intelligence-card">
+            <div className="finance-intelligence-head">
+              <div>
+                <span className="finance-intelligence-kicker">Milestone intelligence</span>
+                <h3>{premiumGoalIntelligence ? 'Premium milestone guidance is live' : 'Premium adds milestone guidance'}</h3>
+              </div>
+              {!premiumGoalIntelligence ? (
+                <button className="finance-upgrade-action" type="button" onClick={() => navigate('/pricing')}>
+                  Unlock intelligence
+                </button>
+              ) : null}
+            </div>
+            <p className="finance-intelligence-copy">
+              {premiumGoalIntelligence
+                ? 'Ledgr highlights which target needs attention next, how quickly it needs funding, and which milestones are getting close.'
+                : 'Free keeps goals simple. Premium adds due-soon signals, contribution pacing, and milestone guidance so customers know where to act next.'}
+            </p>
+            <div className="finance-intelligence-list">
+              {(premiumGoalIntelligence ? milestoneSignals : milestoneSignals.slice(0, 2)).map((signal) => (
+                <article className={`finance-intelligence-row tone-${signal.tone}`} key={signal.title}>
+                  <strong>{signal.title}</strong>
+                  <p>{signal.body}</p>
+                </article>
+              ))}
+            </div>
+          </article>
+
+          <article className="finance-intelligence-card finance-intelligence-card-accent">
+            <span className="finance-intelligence-kicker">Contribution pace</span>
+            <h3>{paceFocus ? `${formatGoalCurrency(paceFocus.monthlyPace)} / month` : 'No pace pressure yet'}</h3>
+            <p>
+              {paceFocus
+                ? `${paceFocus.goal.title} is the next milestone that benefits most from a consistent contribution rhythm.`
+                : 'Once a dated goal exists, this section shows the monthly pace needed to stay on track.'}
+            </p>
+            <div className="finance-pill-row">
+              {premiumGoalIntelligence ? (
+                milestoneQueue.length ? (
+                  milestoneQueue.map((item) => (
+                    <span className="finance-pill" key={item.goal.id}>
+                      {item.goal.title}{item.monthlyPace ? ` · ${formatGoalCurrency(item.monthlyPace)}/mo` : ''}
+                    </span>
+                  ))
+                ) : (
+                  <span className="finance-pill">Milestones appear here</span>
+                )
+              ) : (
+                <>
+                  <span className="finance-pill">Due-soon goals</span>
+                  <span className="finance-pill">Monthly pace</span>
+                  <span className="finance-pill">Next milestone</span>
+                </>
+              )}
+            </div>
           </article>
         </section>
 
