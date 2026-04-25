@@ -65,20 +65,9 @@ function TransactionRow({ transaction, onDelete, onEdit, onSelect }) {
   const typeIcon = transaction.type === 'income' ? 'arrowDown' : 'arrowUp';
   const amountPrefix = transaction.type === 'income' ? '+' : '-';
   const accountName = getTransactionAccountName(transaction);
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onSelect(transaction);
-    }
-  };
 
   return (
-    <tr
-      className="ledger-table-row"
-      onClick={() => onSelect(transaction)}
-      onKeyDown={handleKeyDown}
-      tabIndex="0"
-    >
+    <>
       <td>
         <div className="ledger-merchant-cell">
           <span className={`ledger-direction-mark ledger-direction-${transaction.type}`}>
@@ -124,16 +113,31 @@ function TransactionRow({ transaction, onDelete, onEdit, onSelect }) {
           </button>
         </div>
       </td>
-    </tr>
+    </>
   );
 }
 
-function TransactionMobileCard({ transaction, onDelete, onEdit, onSelect }) {
+function TransactionSelectCheckbox({ checked, label, onChange }) {
+  return (
+    <label className="ledger-select-check">
+      <span className="ledger-visually-hidden">{label}</span>
+      <input
+        checked={checked}
+        type="checkbox"
+        onChange={onChange}
+        onClick={(event) => event.stopPropagation()}
+      />
+    </label>
+  );
+}
+
+function TransactionMobileCard({ selectionControl = null, transaction, onDelete, onEdit, onSelect }) {
   const amountPrefix = transaction.type === 'income' ? '+' : '-';
 
   return (
-    <article className="ledger-mobile-card" onClick={() => onSelect(transaction)}>
+    <>
       <div className="ledger-mobile-card-top">
+        {selectionControl ? <div className="ledger-mobile-select">{selectionControl}</div> : null}
         <div className="ledger-merchant-cell">
           <span className={`ledger-direction-mark ledger-direction-${transaction.type}`}>
             <TransactionsIcon type={transaction.type === 'income' ? 'arrowDown' : 'arrowUp'} />
@@ -161,7 +165,7 @@ function TransactionMobileCard({ transaction, onDelete, onEdit, onSelect }) {
           Delete
         </button>
       </div>
-    </article>
+    </>
   );
 }
 
@@ -173,6 +177,9 @@ function TransactionLedger({
   onEdit,
   onRetry,
   onSelect,
+  onToggleSelect,
+  onToggleSelectAll,
+  selectedIds = [],
   transactions,
   totalTransactions,
 }) {
@@ -223,6 +230,13 @@ function TransactionLedger({
         <table className="ledger-table">
           <thead>
             <tr>
+              <th className="ledger-select-column">
+                <TransactionSelectCheckbox
+                  checked={Boolean(transactions.length) && transactions.every((transaction) => selectedIds.includes(transaction.id))}
+                  label="Select all visible transactions"
+                  onChange={() => onToggleSelectAll?.(transactions)}
+                />
+              </th>
               <th>Merchant / title</th>
               <th>Category</th>
               <th>Account</th>
@@ -235,13 +249,32 @@ function TransactionLedger({
           </thead>
           <tbody>
             {transactions.map((transaction) => (
-              <TransactionRow
+              <tr
+                className={`ledger-table-row${selectedIds.includes(transaction.id) ? ' is-selected' : ''}`}
                 key={transaction.id}
-                transaction={transaction}
-                onDelete={onDelete}
-                onEdit={onEdit}
-                onSelect={onSelect}
-              />
+                onClick={() => onSelect(transaction)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onSelect(transaction);
+                  }
+                }}
+                tabIndex="0"
+              >
+                <td className="ledger-select-column">
+                  <TransactionSelectCheckbox
+                    checked={selectedIds.includes(transaction.id)}
+                    label={`Select ${getTransactionTitle(transaction)}`}
+                    onChange={() => onToggleSelect?.(transaction.id)}
+                  />
+                </td>
+                <TransactionRow
+                  transaction={transaction}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onSelect={onSelect}
+                />
+              </tr>
             ))}
           </tbody>
         </table>
@@ -249,13 +282,25 @@ function TransactionLedger({
 
       <div className="ledger-mobile-list">
         {transactions.map((transaction) => (
-          <TransactionMobileCard
+          <article
+            className={`ledger-mobile-card${selectedIds.includes(transaction.id) ? ' is-selected' : ''}`}
             key={transaction.id}
-            transaction={transaction}
-            onDelete={onDelete}
-            onEdit={onEdit}
-            onSelect={onSelect}
-          />
+            onClick={() => onSelect(transaction)}
+          >
+            <TransactionMobileCard
+              selectionControl={
+                <TransactionSelectCheckbox
+                  checked={selectedIds.includes(transaction.id)}
+                  label={`Select ${getTransactionTitle(transaction)}`}
+                  onChange={() => onToggleSelect?.(transaction.id)}
+                />
+              }
+              transaction={transaction}
+              onDelete={onDelete}
+              onEdit={onEdit}
+              onSelect={onSelect}
+            />
+          </article>
         ))}
       </div>
     </section>

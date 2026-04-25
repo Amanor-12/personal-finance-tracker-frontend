@@ -1,65 +1,44 @@
 import { useEffect, useMemo, useState } from 'react';
 import FinanceLayout from './FinanceLayout';
-import { PremiumEmpty, PremiumPanel, PremiumSkeleton, formatMoney } from './premium/PremiumPage';
+import { FeatureGate } from './billing/FeatureGate';
+import { PremiumPanel } from './premium/PremiumPage';
 import DeleteTransactionDialog from './transactions/DeleteTransactionDialog';
 import TransactionDetailDrawer from './transactions/TransactionDetailDrawer';
+import TransactionFilters from './transactions/TransactionFilters';
 import TransactionFormDialog from './transactions/TransactionFormDialog';
+import TransactionLedger from './transactions/TransactionLedger';
+import TransactionSummary from './transactions/TransactionSummary';
 import TransactionsIcon from './transactions/TransactionsIcon';
+import {
+  EMPTY_TRANSACTION_FILTERS,
+  filterTransactions,
+  formatDate,
+  getTransactionTitle,
+  sortTransactions,
+  summarizeTransactions,
+} from './transactions/transactionUtils';
+import {
+  buildTransactionsCsv,
+  deleteTransactionView,
+  loadSavedTransactionViews,
+  saveTransactionView,
+} from './transactions/transactionWorkspaceUtils';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-const formatDate = (value) => {
-  if (!value) {
-    return 'No date';
-  }
-
-  return dateFormatter.format(new Date(value));
-};
-
-const summarize = (transactions) =>
-  transactions.reduce(
-    (summary, transaction) => {
-      if (transaction.type === 'income') {
-        summary.income += transaction.amount;
-      } else {
-        summary.expenses += transaction.amount;
-      }
-
-      summary.count += 1;
-      summary.net = summary.income - summary.expenses;
-      return summary;
-    },
-    { count: 0, expenses: 0, income: 0, net: 0 }
-  );
-
-const getAmountBand = (amount) => {
-  if (amount >= 1000) {
-    return 'high';
-  }
-
-  if (amount >= 100) {
-    return 'medium';
-  }
-
-  return 'low';
-};
-
 function TransactionsPage({ currentUser, onLogout }) {
+  const { access } = useBillingAccess();
+  const isPremium = access.isPremium;
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [query, setQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [accountFilter, setAccountFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [amountFilter, setAmountFilter] = useState('all');
+  const [filters, setFilters] = useState(EMPTY_TRANSACTION_FILTERS);
+  const [savedViews, setSavedViews] = useState([]);
+  const [savedViewName, setSavedViewName] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkCategoryId, setBulkCategoryId] = useState('');
+  const [toolMessage, setToolMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [formMode, setFormMode] = useState('');
@@ -68,6 +47,7 @@ function TransactionsPage({ currentUser, onLogout }) {
   const [deleteCandidate, setDeleteCandidate] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -120,47 +100,52 @@ function TransactionsPage({ currentUser, onLogout }) {
     };
   }, [currentUser.id, onLogout, refreshKey]);
 
-  const visibleTransactions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  useEffect(() => {
+    setSavedViews(loadSavedTransactionViews(currentUser.id));
+  }, [currentUser.id]);
 
-    return transactions
-      .filter((transaction) => (typeFilter === 'all' ? true : transaction.type === typeFilter))
-      .filter((transaction) => (accountFilter === 'all' ? true : String(transaction.accountId || '') === accountFilter))
-      .filter((transaction) => (categoryFilter === 'all' ? true : String(transaction.categoryId || '') === categoryFilter))
-      .filter((transaction) => (statusFilter === 'all' ? true : transaction.status === statusFilter))
-      .filter((transaction) => (amountFilter === 'all' ? true : getAmountBand(transaction.amount) === amountFilter))
-      .filter((transaction) => {
-        if (!normalizedQuery) {
-          return true;
-        }
-
-        return [transaction.description, transaction.categoryName, transaction.accountName, transaction.status]
-          .filter(Boolean)
-          .some((value) => value.toLowerCase().includes(normalizedQuery));
-      })
-      .sort((left, right) => new Date(right.transactionDate).getTime() - new Date(left.transactionDate).getTime());
-  }, [accountFilter, amountFilter, categoryFilter, query, statusFilter, transactions, typeFilter]);
-
-  const summary = useMemo(() => summarize(visibleTransactions), [visibleTransactions]);
-  const totalSummary = useMemo(() => summarize(transactions), [transactions]);
-  const accountOptions = accounts.map((account) => ({ id: account.id, name: account.name }));
-  const statusOptions = useMemo(
-    () => Array.from(new Set(transactions.map((transaction) => transaction.status).filter(Boolean))),
-    [transactions]
+  const visibleTransactions = useMemo(
+    () => sortTransactions(filterTransactions(transactions, filters), filters.sortBy),
+    [filters, transactions]
   );
-  const categoryOptions = useMemo(
-    () => categories.filter((category) => ['income', 'expense'].includes(category.type)),
-    [categories]
-  );
-  const activeFilterCount = [query, typeFilter !== 'all', accountFilter !== 'all', categoryFilter !== 'all', statusFilter !== 'all', amountFilter !== 'all'].filter(Boolean).length;
+  const summary = useMemo(() => summarizeTransactions(visibleTransactions), [visibleTransactions]);
+  const totalSummary = useMemo(() => summarizeTransactions(transactions), [transactions]);
   const latestVisibleTransaction = visibleTransactions[0] || null;
+  const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
+    if (key === 'sortBy') {
+      return value !== EMPTY_TRANSACTION_FILTERS.sortBy;
+    }
+
+    return value !== EMPTY_TRANSACTION_FILTERS[key] && value !== '';
+  }).length;
+
+  useEffect(() => {
+    setSelectedIds((currentSelection) =>
+      currentSelection.filter((id) => visibleTransactions.some((transaction) => transaction.id === id))
+    );
+  }, [visibleTransactions]);
+
+  const selectedTransactions = useMemo(
+    () => visibleTransactions.filter((transaction) => selectedIds.includes(transaction.id)),
+    [selectedIds, visibleTransactions]
+  );
+  const selectedTypes = Array.from(new Set(selectedTransactions.map((transaction) => transaction.type)));
+  const selectedType = selectedTypes.length === 1 ? selectedTypes[0] : '';
+  const bulkCategoryOptions = useMemo(
+    () =>
+      categories.filter((category) =>
+        ['income', 'expense'].includes(category.type) && (!selectedType || category.type === selectedType)
+      ),
+    [categories, selectedType]
+  );
+  const allVisibleSelected =
+    Boolean(visibleTransactions.length) &&
+    visibleTransactions.every((transaction) => selectedIds.includes(transaction.id));
+  const accountOptions = accounts.map((account) => ({ id: String(account.id), name: account.name }));
+
   const clearFilters = () => {
-    setQuery('');
-    setTypeFilter('all');
-    setAccountFilter('all');
-    setCategoryFilter('all');
-    setStatusFilter('all');
-    setAmountFilter('all');
+    setFilters(EMPTY_TRANSACTION_FILTERS);
+    setToolMessage('');
   };
 
   const openAddDialog = () => {
@@ -213,6 +198,7 @@ function TransactionsPage({ currentUser, onLogout }) {
       await financeStore.deleteTransaction(currentUser.id, deleteCandidate.id);
       setDeleteCandidate(null);
       setDetailTransaction(null);
+      setSelectedIds((currentSelection) => currentSelection.filter((id) => id !== deleteCandidate.id));
       setRefreshKey((value) => value + 1);
     } catch (error) {
       if (error.status === 401) {
@@ -226,12 +212,159 @@ function TransactionsPage({ currentUser, onLogout }) {
     }
   };
 
+  const toggleSelection = (transactionId) => {
+    setSelectedIds((currentSelection) =>
+      currentSelection.includes(transactionId)
+        ? currentSelection.filter((id) => id !== transactionId)
+        : [...currentSelection, transactionId]
+    );
+  };
+
+  const toggleSelectAllVisible = (visibleRows) => {
+    if (allVisibleSelected) {
+      setSelectedIds([]);
+      return;
+    }
+
+    setSelectedIds(visibleRows.map((transaction) => transaction.id));
+  };
+
+  const handleSaveView = () => {
+    if (!isPremium) {
+      return;
+    }
+
+    if (!savedViewName.trim()) {
+      setToolMessage('Name the view before saving it.');
+      return;
+    }
+
+    const nextViews = saveTransactionView(currentUser.id, {
+      createdAt: new Date().toISOString(),
+      filters,
+      id: `${Date.now()}`,
+      name: savedViewName.trim(),
+    });
+
+    setSavedViews(nextViews);
+    setSavedViewName('');
+    setToolMessage('Saved view added to your premium tools.');
+  };
+
+  const handleApplyView = (view) => {
+    setFilters({
+      ...EMPTY_TRANSACTION_FILTERS,
+      ...(view.filters || {}),
+    });
+    setSelectedIds([]);
+    setToolMessage(`Applied ${view.name}.`);
+  };
+
+  const handleDeleteView = (viewId) => {
+    const nextViews = deleteTransactionView(currentUser.id, viewId);
+    setSavedViews(nextViews);
+    setToolMessage('Saved view removed.');
+  };
+
+  const handleExport = () => {
+    if (!isPremium) {
+      return;
+    }
+
+    const exportRows = selectedTransactions.length ? selectedTransactions : visibleTransactions;
+
+    if (!exportRows.length) {
+      setToolMessage('There is nothing to export in the current view.');
+      return;
+    }
+
+    const csv = buildTransactionsCsv(exportRows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.download = `ledgr-transactions-${stamp}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    setToolMessage(
+      `Exported ${exportRows.length} transaction${exportRows.length === 1 ? '' : 's'} to CSV.`
+    );
+  };
+
+  const handleBulkCategorize = async () => {
+    if (!isPremium) {
+      return;
+    }
+
+    if (!selectedTransactions.length) {
+      setToolMessage('Select transactions first.');
+      return;
+    }
+
+    if (!selectedType) {
+      setToolMessage('Bulk categorization works when the selected transactions share the same type.');
+      return;
+    }
+
+    if (!bulkCategoryId) {
+      setToolMessage('Choose a category for the selected transactions.');
+      return;
+    }
+
+    const selectedCategory = categories.find((category) => String(category.id) === String(bulkCategoryId));
+
+    if (!selectedCategory || selectedCategory.type !== selectedType) {
+      setToolMessage('Choose a category that matches the selected transaction type.');
+      return;
+    }
+
+    setIsBulkSaving(true);
+    setToolMessage('');
+
+    try {
+      await Promise.all(
+        selectedTransactions.map((transaction) =>
+          financeStore.updateTransaction(currentUser.id, transaction.id, {
+            accountId: transaction.accountId || '',
+            amount: transaction.amount,
+            categoryId: selectedCategory.id,
+            description: transaction.description || '',
+            isRecurring: transaction.isRecurring,
+            notes: transaction.notes || '',
+            transactionDate: transaction.transactionDate,
+            type: transaction.type,
+          })
+        )
+      );
+
+      setBulkCategoryId('');
+      setSelectedIds([]);
+      setToolMessage(
+        `${selectedTransactions.length} transaction${selectedTransactions.length === 1 ? '' : 's'} moved to ${selectedCategory.name}.`
+      );
+      setRefreshKey((value) => value + 1);
+    } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
+      setToolMessage(error.message || 'Bulk categorization could not complete.');
+    } finally {
+      setIsBulkSaving(false);
+    }
+  };
+
   const rail = (
     <aside className="activity-rail">
       <article className="ref-panel activity-rail-card activity-rail-card-dark">
         <span>Ledger state</span>
         <h3>{transactions.length ? `${transactions.length} records` : 'Ready for records'}</h3>
-        <p>Search and filters affect the metrics without changing the underlying transaction history.</p>
+        <p>Core ledger tools stay free. Premium adds saved views, bulk actions, and CSV export for heavier workflows.</p>
       </article>
       <article className="ref-panel activity-rail-card">
         <span>Linked setup</span>
@@ -309,154 +442,186 @@ function TransactionsPage({ currentUser, onLogout }) {
           </div>
         </section>
 
-        <section className="transactions-ops-secondary" aria-label="Transaction tools">
-          <div className="transactions-ops-metrics" aria-label="Transaction summary">
-            <div><span>Inflow</span><strong>{formatMoney(summary.income)}</strong></div>
-            <div><span>Outflow</span><strong>{formatMoney(summary.expenses)}</strong></div>
-            <div><span>Net</span><strong>{formatMoney(summary.net)}</strong></div>
-            <div><span>Records</span><strong>{summary.count}</strong></div>
-          </div>
+        <TransactionSummary summary={summary} totalCount={totalSummary.count} />
 
-          <div className="transactions-ops-controls">
-            <label>
-              <span>Search ledger</span>
-              <input
-                aria-label="Search transactions"
-                placeholder="Merchant, category, account, status"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <label>
-              <span>Type</span>
-              <select aria-label="Transaction type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-                <option value="all">All types</option>
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-              </select>
-            </label>
-            <label>
-              <span>Account</span>
-              <select aria-label="Transaction account" value={accountFilter} onChange={(event) => setAccountFilter(event.target.value)}>
-                <option value="all">All accounts</option>
-                {accountOptions.map((account) => (
-                  <option key={account.id} value={String(account.id)}>
-                    {account.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Category</span>
-              <select aria-label="Transaction category" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                <option value="all">All categories</option>
-                {categoryOptions.map((category) => (
-                  <option key={category.id} value={String(category.id)}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Status</span>
-              <select aria-label="Transaction status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="all">All statuses</option>
-                {statusOptions.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Amount</span>
-              <select aria-label="Transaction amount band" value={amountFilter} onChange={(event) => setAmountFilter(event.target.value)}>
-                <option value="all">Any amount</option>
-                <option value="low">Under $100</option>
-                <option value="medium">$100 - $999</option>
-                <option value="high">$1,000+</option>
-              </select>
-            </label>
-            <div className="transactions-ops-actions">
-              <button type="button" onClick={openAddDialog}>Add transaction</button>
-              <button type="button" onClick={clearFilters}>Clear</button>
-            </div>
-          </div>
+        <TransactionFilters
+          accountOptions={accountOptions}
+          categories={categories}
+          filters={filters}
+          onChange={setFilters}
+          onClear={clearFilters}
+          resultCount={visibleTransactions.length}
+        />
 
-          <div className="transactions-ops-context" aria-label="Transaction view context">
-            <div className="transactions-ops-context-copy">
-              <strong>
-                Showing {summary.count} of {totalSummary.count} records
-              </strong>
-              <p>
-                {activeFilterCount
-                  ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} applied across the ledger view.`
-                  : 'Full ledger view with no filters applied.'}
-              </p>
-            </div>
-
-            <div className="transactions-ops-context-meta">
-              <span>Latest visible</span>
-              <strong>{latestVisibleTransaction ? latestVisibleTransaction.description || latestVisibleTransaction.categoryName : 'No match'}</strong>
-              <small>{latestVisibleTransaction ? formatDate(latestVisibleTransaction.transactionDate) : 'Adjust filters or add a transaction.'}</small>
-            </div>
-          </div>
-        </section>
-
-        <PremiumPanel eyebrow="Ledger" title="Transaction history">
-          {isLoading ? <PremiumSkeleton count={5} /> : null}
-
-          {!isLoading && loadError ? (
-            <PremiumEmpty
-              title="Transactions could not load"
-              body={loadError}
-              actionLabel="Retry"
-              onAction={() => setRefreshKey((value) => value + 1)}
-            />
-          ) : null}
-
-          {!isLoading && !loadError && visibleTransactions.length ? (
-            <div className="premium-list">
-              {visibleTransactions.map((transaction) => (
-                <article className="premium-row" key={transaction.id}>
-                  <button className="premium-row-main" type="button" onClick={() => setDetailTransaction(transaction)}>
-                    <strong>{transaction.description || transaction.categoryName}</strong>
-                    <small>{transaction.categoryName} - {transaction.accountName || 'No account linked'}</small>
-                  </button>
-                  <span>{formatDate(transaction.transactionDate)}</span>
-                  <strong>{transaction.type === 'income' ? '+' : '-'}{formatMoney(transaction.amount)}</strong>
-                  <div className="premium-row-actions">
-                    <button type="button" onClick={() => openEditDialog(transaction)}>Edit</button>
-                    <button className="is-danger" type="button" onClick={() => setDeleteCandidate(transaction)}>Delete</button>
+        {isPremium ? (
+          <PremiumPanel eyebrow="Premium tools" title="Faster ledger operations">
+            <section className="transactions-power-grid">
+              <article className="transactions-power-card">
+                <div className="transactions-power-head">
+                  <div>
+                    <span>Saved views</span>
+                    <strong>Return to the same ledger slice instantly.</strong>
                   </div>
-                </article>
-              ))}
+                  <small>{savedViews.length}/6 saved</small>
+                </div>
+
+                <div className="transactions-power-save">
+                  <input
+                    type="text"
+                    placeholder="Quarterly review"
+                    value={savedViewName}
+                    onChange={(event) => setSavedViewName(event.target.value)}
+                  />
+                  <button type="button" onClick={handleSaveView}>
+                    Save current view
+                  </button>
+                </div>
+
+                <div className="transactions-view-list">
+                  {savedViews.length ? (
+                    savedViews.map((view) => (
+                      <div className="transactions-view-chip" key={view.id}>
+                        <button type="button" onClick={() => handleApplyView(view)}>
+                          {view.name}
+                        </button>
+                        <button
+                          className="is-danger"
+                          type="button"
+                          onClick={() => handleDeleteView(view.id)}
+                          aria-label={`Delete ${view.name}`}
+                        >
+                          x
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="transactions-power-empty">Save a filtered ledger view for month-end review, tax prep, or category cleanup.</p>
+                  )}
+                </div>
+              </article>
+
+              <article className="transactions-power-card">
+                <div className="transactions-power-head">
+                  <div>
+                    <span>Bulk categorize</span>
+                    <strong>Clean up multiple records without opening each row.</strong>
+                  </div>
+                  <small>{selectedTransactions.length} selected</small>
+                </div>
+
+                <div className="transactions-bulk-status">
+                  <strong>
+                    {selectedTransactions.length
+                      ? selectedType
+                        ? `${selectedTransactions.length} ${selectedType} record${selectedTransactions.length === 1 ? '' : 's'} ready`
+                        : 'Selection mixes income and expense records'
+                      : 'Select rows in the ledger to start'}
+                  </strong>
+                  <p>
+                    {selectedTransactions.length
+                      ? selectedType
+                        ? 'Choose one matching category and apply it to the selected records.'
+                        : 'Use a single transaction type in one selection before applying a bulk category.'
+                      : 'Selection stays scoped to the current visible view.'}
+                  </p>
+                </div>
+
+                <div className="transactions-power-save">
+                  <select
+                    value={bulkCategoryId}
+                    onChange={(event) => setBulkCategoryId(event.target.value)}
+                    disabled={!selectedTransactions.length || !selectedType || isBulkSaving}
+                  >
+                    <option value="">
+                      {!selectedTransactions.length
+                        ? 'Select transactions first'
+                        : !selectedType
+                          ? 'Single transaction type required'
+                          : 'Choose category'}
+                    </option>
+                    {bulkCategoryOptions.map((category) => (
+                      <option key={category.id} value={String(category.id)}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button type="button" onClick={handleBulkCategorize} disabled={!selectedTransactions.length || !selectedType || !bulkCategoryId || isBulkSaving}>
+                    {isBulkSaving ? 'Applying...' : 'Apply category'}
+                  </button>
+                </div>
+
+                <button className="transactions-selection-clear" type="button" onClick={() => setSelectedIds([])} disabled={!selectedTransactions.length}>
+                  Clear selection
+                </button>
+              </article>
+
+              <article className="transactions-power-card">
+                <div className="transactions-power-head">
+                  <div>
+                    <span>Export</span>
+                    <strong>Take the current view or selection into CSV.</strong>
+                  </div>
+                  <small>{selectedTransactions.length ? 'Selected rows' : 'Current view'}</small>
+                </div>
+
+                <div className="transactions-export-card">
+                  <strong>
+                    {selectedTransactions.length
+                      ? `${selectedTransactions.length} selected row${selectedTransactions.length === 1 ? '' : 's'} ready`
+                      : `${visibleTransactions.length} visible row${visibleTransactions.length === 1 ? '' : 's'} ready`}
+                  </strong>
+                  <p>Exports include merchant, category, account, amount, date, status, recurrence, and notes.</p>
+                </div>
+
+                <button className="transactions-export-button" type="button" onClick={handleExport}>
+                  Export CSV
+                </button>
+              </article>
+            </section>
+
+            <div className="transactions-power-footer">
+              <div>
+                <strong>
+                  Showing {summary.count} of {totalSummary.count} records
+                </strong>
+                <p>
+                  {activeFilterCount
+                    ? `${activeFilterCount} active filter${activeFilterCount === 1 ? '' : 's'} are shaping this view.`
+                    : 'Full ledger view with no filters applied.'}
+                </p>
+              </div>
+              <div className="transactions-power-latest">
+                <span>Latest visible</span>
+                <strong>{latestVisibleTransaction ? getTransactionTitle(latestVisibleTransaction) : 'No match'}</strong>
+                <small>{latestVisibleTransaction ? formatDate(latestVisibleTransaction.transactionDate) : 'Adjust filters or add a transaction.'}</small>
+              </div>
             </div>
-          ) : null}
 
-          {!isLoading && !loadError && !transactions.length ? (
-            <PremiumEmpty
-              icon={<TransactionsIcon type="plus" />}
-              title="Start with your first transaction"
-              body="Record income or spending once you have the real details. Ledgr will keep the ledger scoped to this workspace."
-              actionLabel="Add transaction"
-              onAction={openAddDialog}
-            />
-          ) : null}
+            {toolMessage ? <p className="transactions-power-message">{toolMessage}</p> : null}
+          </PremiumPanel>
+        ) : (
+          <FeatureGate
+            eyebrow="Premium transaction tools"
+            title="Unlock faster ledger operations"
+            helper="Premium adds saved views for repeated analysis, CSV export for finance workflows, and bulk categorization for high-volume cleanup."
+            features={['Saved ledger views', 'CSV export of current view or selection', 'Bulk transaction categorization', 'Faster review workflows for heavy usage']}
+          />
+        )}
 
-          {!isLoading && !loadError && transactions.length > 0 && !visibleTransactions.length ? (
-            <PremiumEmpty
-              title="No transactions match this view"
-              body="Clear the search or switch the type filter to return to the full ledger."
-              actionLabel="Clear filters"
-              onAction={() => {
-                setQuery('');
-                setTypeFilter('all');
-              }}
-            />
-          ) : null}
-        </PremiumPanel>
+        <TransactionLedger
+          errorMessage={loadError}
+          isLoading={isLoading}
+          onAddTransaction={openAddDialog}
+          onDelete={setDeleteCandidate}
+          onEdit={openEditDialog}
+          onRetry={() => setRefreshKey((value) => value + 1)}
+          onSelect={setDetailTransaction}
+          onToggleSelect={toggleSelection}
+          onToggleSelectAll={toggleSelectAllVisible}
+          selectedIds={selectedIds}
+          totalTransactions={transactions.length}
+          transactions={visibleTransactions}
+        />
       </FinanceLayout>
 
       {detailTransaction ? (
