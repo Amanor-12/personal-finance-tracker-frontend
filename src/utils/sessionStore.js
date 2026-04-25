@@ -59,7 +59,19 @@ export const sessionStore = {
   hasToken() {
     return Boolean(this.getToken());
   },
-  setSession({ token, user }) {
+  setSession(session) {
+    const token =
+      session?.token ||
+      session?.accessToken ||
+      session?.access_token ||
+      session?.jwt ||
+      '';
+    const user = session?.user || session?.profile || session?.account || null;
+
+    if (!token || !user) {
+      throw new Error('Ledgr received an incomplete auth session from the API.');
+    }
+
     const nextSession = {
       token,
       user: normalizeUser(user),

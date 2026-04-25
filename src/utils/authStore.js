@@ -3,6 +3,33 @@ import { sessionStore } from './sessionStore';
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
+const resolveSessionPayload = (payload) => {
+  const candidates = [payload, payload?.session, payload?.data, payload?.auth, payload?.result];
+
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
+
+    const token =
+      candidate.token ||
+      candidate.accessToken ||
+      candidate.access_token ||
+      candidate.jwt ||
+      '';
+    const user = candidate.user || candidate.profile || candidate.account || null;
+
+    if (token && user) {
+      return {
+        token,
+        user,
+      };
+    }
+  }
+
+  return null;
+};
+
 export const authStore = {
   getSession() {
     return sessionStore.getSession()?.user || null;
@@ -39,7 +66,13 @@ export const authStore = {
       }
     );
 
-    return sessionStore.setSession(payload);
+    const session = resolveSessionPayload(payload);
+
+    if (!session) {
+      throw new Error('Ledgr could not start a session from the sign-in response.');
+    }
+
+    return sessionStore.setSession(session);
   },
   async logout() {
     try {
@@ -65,7 +98,16 @@ export const authStore = {
       }
     );
 
-    return sessionStore.setSession(payload);
+    const session = resolveSessionPayload(payload);
+
+    if (session) {
+      return sessionStore.setSession(session);
+    }
+
+    return this.login({
+      email,
+      password,
+    });
   },
   async updateProfile(userId, { fullName, email }) {
     const payload = await apiClient.put(`/api/auth/me`, {
