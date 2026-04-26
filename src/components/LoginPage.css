@@ -1214,7 +1214,11 @@
 
 /* Final presentation composition */
 .authx-page {
-  padding: clamp(18px, 2.6vw, 34px);
+  padding:
+    max(18px, env(safe-area-inset-top, 0px))
+    max(14px, env(safe-area-inset-right, 0px))
+    max(18px, env(safe-area-inset-bottom, 0px))
+    max(14px, env(safe-area-inset-left, 0px));
   place-items: center;
 }
 
@@ -1516,6 +1520,7 @@
 
 @media (max-width: 1120px) {
   .authx-shell {
+    min-height: auto;
     grid-template-columns: 1fr;
   }
 
@@ -1531,9 +1536,98 @@
 @media (max-width: 640px) {
   .authx-shell {
     width: 100%;
+    min-height: auto;
+    border-radius: 24px;
+  }
+
+  .authx-auth-column {
+    padding: 20px 16px 22px;
+  }
+
+  .authx-auth-card {
+    max-width: 100%;
   }
 
   .authx-card-copy h1 {
     font-size: clamp(2.6rem, 14vw, 3.5rem);
+  }
+
+  .authx-card-copy p {
+    max-width: 100%;
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+
+  .authx-mode-toggle a {
+    min-width: 0;
+    padding: 0.76rem 0.8rem;
+    font-size: 0.84rem;
+  }
+
+  .authx-feature-row {
+    gap: 8px;
+  }
+
+  .authx-feature-row span {
+    min-height: 30px;
+    padding: 0 12px;
+    font-size: 0.76rem;
+  }
+
+  .authx-field-shell {
+    min-height: 56px;
+    padding: 0 14px;
+    gap: 12px;
+  }
+
+  .authx-field-shell input {
+    font-size: 0.98rem;
+  }
+
+  .authx-primary {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 420px) {
+  .authx-page {
+    padding:
+      max(10px, env(safe-area-inset-top, 0px))
+      max(8px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px))
+      max(8px, env(safe-area-inset-left, 0px));
+  }
+
+  .authx-shell {
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .authx-auth-column {
+    padding: 18px 14px 20px;
+  }
+
+  .authx-card-copy h1 {
+    font-size: clamp(2.2rem, 13vw, 3rem);
+  }
+
+  .authx-panel-kicker {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+  }
+
+  .authx-form {
+    gap: 14px;
+  }
+
+  .authx-form-meta {
+    gap: 12px;
+  }
+
+  .authx-check,
+  .authx-text-link,
+  .authx-meta-note,
+  .authx-switch-copy {
+    font-size: 0.88rem;
   }
 }

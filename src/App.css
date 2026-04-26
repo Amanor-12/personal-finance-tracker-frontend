@@ -13,6 +13,19 @@
   letter-spacing: 0.01em;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .ref-shell {
   min-height: 100vh;
   width: min(1380px, calc(100% - 40px));
@@ -2356,12 +2369,45 @@
 @media (max-width: 640px) {
   .ref-shell {
     width: calc(100% - 12px);
+    gap: 14px;
+    padding: 12px 0 calc(18px + env(safe-area-inset-bottom, 0px));
   }
 
   .ref-sidebar,
   .ref-panel,
   .ref-hero-card {
     border-radius: 24px;
+  }
+
+  .ref-sidebar {
+    padding: 14px 12px;
+  }
+
+  .ref-sidebar-top {
+    gap: 14px;
+  }
+
+  .ref-brand-lockup {
+    padding-bottom: 14px;
+  }
+
+  .ref-nav-item {
+    min-height: 46px;
+  }
+
+  .ref-stage {
+    gap: 16px;
+  }
+
+  .ref-topbar {
+    gap: 12px;
+  }
+
+  .ref-search,
+  .ref-user-chip,
+  .ref-logout-button,
+  .ref-primary-button {
+    min-height: 52px;
   }
 
   .ref-wallet-actions {
@@ -2383,6 +2429,36 @@
 
   .settings-hero-badges {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .ref-shell {
+    width: calc(100% - 8px);
+    gap: 12px;
+    padding-top: max(10px, env(safe-area-inset-top, 0px));
+  }
+
+  .ref-sidebar,
+  .ref-panel,
+  .ref-hero-card,
+  .billing-plan-card,
+  .billing-invoices,
+  .settings-editor-card,
+  .activity-ledger {
+    border-radius: 20px;
+  }
+
+  .ref-heading-row h1,
+  .ref-hero-copy h1,
+  .settings-command-hero h2,
+  .billing-studio-hero h2,
+  .activity-ledger-hero h2 {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+  }
+
+  .ref-search input {
+    font-size: 0.94rem;
   }
 }
 
