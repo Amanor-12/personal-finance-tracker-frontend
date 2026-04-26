@@ -4,6 +4,7 @@ import './App.css';
 import { BillingAccessProvider } from './context/BillingAccessContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authStore } from './utils/authStore';
+import { API_UNAUTHORIZED_EVENT } from './utils/apiClient';
 
 const AccountsPage = lazy(() => import('./components/AccountsPage'));
 const ActivityPage = lazy(() => import('./components/ActivityPage'));
@@ -92,6 +93,20 @@ function App() {
 
     return () => {
       isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = async () => {
+      await authStore.logout();
+      setCurrentUser(null);
+      setIsAuthLoading(false);
+    };
+
+    globalThis.addEventListener?.(API_UNAUTHORIZED_EVENT, handleUnauthorized);
+
+    return () => {
+      globalThis.removeEventListener?.(API_UNAUTHORIZED_EVENT, handleUnauthorized);
     };
   }, []);
 

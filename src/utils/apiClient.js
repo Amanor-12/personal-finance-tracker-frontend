@@ -3,6 +3,7 @@ import { sessionStore } from './sessionStore';
 const API_OFFLINE_MESSAGE = 'Ledgr cannot reach the finance service. Start the backend server, then try again.';
 const API_BASE_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const API_TIMEOUT_MS = 15000;
+export const API_UNAUTHORIZED_EVENT = 'ledgr:api-unauthorized';
 
 const looksLikeHtml = (value) =>
   typeof value === 'string' &&
@@ -95,6 +96,16 @@ const request = async (path, { method = 'GET', body, headers = {}, auth = true }
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      globalThis.dispatchEvent?.(
+        new CustomEvent(API_UNAUTHORIZED_EVENT, {
+          detail: {
+            path,
+          },
+        })
+      );
+    }
+
     if (response.status === 404 && path.startsWith('/api')) {
       throw buildError(response.status, {
         message: API_OFFLINE_MESSAGE,
