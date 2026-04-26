@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import BrandLogo from './BrandLogo';
 import { accountStore } from '../utils/accountStore';
@@ -40,6 +40,8 @@ function OnboardingFieldError({ message }) {
 
 function OnboardingPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectPath = location.state?.from?.pathname || '/dashboard';
   const storedSettings = useMemo(
     () => settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName),
     [currentUser?.fullName, currentUser?.id]
@@ -85,7 +87,7 @@ function OnboardingPage({ currentUser, onLogout }) {
       },
       currentUser.fullName
     );
-    navigate('/dashboard');
+    navigate(redirectPath, { replace: true });
   };
 
   const handlePreferences = (values) => {
@@ -122,7 +124,7 @@ function OnboardingPage({ currentUser, onLogout }) {
       <header className="onboarding-topbar">
         <BrandLogo compact subtitle="" title="Ledgr" tone="dark" />
         <div>
-          <Link to="/dashboard">Skip setup</Link>
+          <Link to={redirectPath}>Skip setup</Link>
           <button type="button" onClick={onLogout}>
             Log out
           </button>

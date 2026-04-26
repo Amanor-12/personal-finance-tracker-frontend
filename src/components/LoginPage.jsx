@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
 import './LoginPage.css';
 
@@ -92,7 +92,9 @@ function AuthIcon({ type }) {
 
 function LoginPage({ mode = 'login', onLogin, onSignUp }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isLogin = mode === 'login';
+  const redirectPath = location.state?.from?.pathname || '/dashboard';
   const rememberedEmail =
     typeof window !== 'undefined'
       ? window.localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
@@ -157,7 +159,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         });
       }
 
-      navigate(isLogin ? '/dashboard' : '/onboarding');
+      navigate(isLogin ? redirectPath : '/onboarding', isLogin ? { replace: true } : { replace: true, state: { from: location.state?.from || null } });
     } catch (error) {
       const normalizedMessage = String(error.message || '').trim().toLowerCase();
       const authMessage =
@@ -184,10 +186,10 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
           <div className="authx-auth-card">
             <div className="authx-mode-toggle">
-              <Link className={isLogin ? 'active' : ''} to="/login">
+              <Link className={isLogin ? 'active' : ''} to="/login" state={location.state}>
                 Log in
               </Link>
-              <Link className={!isLogin ? 'active' : ''} to="/signup">
+              <Link className={!isLogin ? 'active' : ''} to="/signup" state={location.state}>
                 Sign up
               </Link>
             </div>
@@ -340,7 +342,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
             <p className="authx-switch-copy">
               {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <Link className="authx-inline-link" to={isLogin ? '/signup' : '/login'}>
+              <Link className="authx-inline-link" to={isLogin ? '/signup' : '/login'} state={location.state}>
                 {isLogin ? 'Sign up' : 'Log in'}
               </Link>
             </p>
