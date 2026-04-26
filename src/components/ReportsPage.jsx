@@ -33,7 +33,7 @@ const getRangeDays = (startDate, endDate) => {
 
 function ReportsPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
-  const { hasFeature, isLoading: isBillingLoading } = useBillingAccess();
+  const { access, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [range, setRange] = useState(() => getReportPresetRange('90'));
   const [reports, setReports] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,6 +41,7 @@ function ReportsPage({ currentUser, onLogout }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const hasReportsAccess = hasFeature('reports');
+  const isPro = access.tier === 'pro';
 
   useEffect(() => {
     let isCancelled = false;
@@ -252,7 +253,7 @@ function ReportsPage({ currentUser, onLogout }) {
       <article className="ref-panel reports-rail-card reports-rail-card-dark">
         <span className="reports-rail-kicker">Signal strength</span>
         <h3>{summary.transactionCount ? 'Analysis ready' : 'Waiting for activity'}</h3>
-        <p>Insights stay worth paying for when the page answers real questions instead of showing empty chart noise.</p>
+        <p>{isPro ? 'Pro turns reporting into a sharper decision workspace.' : 'Plus turns reporting into a clear decision workspace without empty chart noise.'}</p>
         <div className="reports-rail-meter">
           <span style={{ '--reports-meter': `${analyticsCoverage}%` }} />
         </div>
@@ -275,7 +276,7 @@ function ReportsPage({ currentUser, onLogout }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Insights"
-      pageSubtitle="Advanced reporting that stays quiet until real activity exists."
+      pageSubtitle={isPro ? 'Advanced reporting for customers who want deeper control and signal depth.' : 'Clear reporting for customers who want faster money answers.'}
       primaryActionLabel={!isBillingLoading && !hasReportsAccess ? 'Upgrade' : undefined}
       onPrimaryAction={!isBillingLoading && !hasReportsAccess ? () => navigate('/pricing') : undefined}
       rail={rail}
@@ -288,9 +289,9 @@ function ReportsPage({ currentUser, onLogout }) {
 
       {!isBillingLoading && !hasReportsAccess ? (
         <FeatureGate
-          eyebrow="Pro access"
+          eyebrow="Plus access"
           features={['Server-backed reporting', 'Date-range analytics', 'Merchant concentration analysis', 'Budget pressure and recurring-load insight']}
-          helper="Insights are part of Ledgr Pro because this is where customers move from recording money to understanding it. Upgrade to unlock backend-powered reporting across income, spending, merchants, and cash flow."
+          helper="Insights begin in Ledgr Plus because this is where customers move from recording money to understanding it. Pro adds deeper intelligence and richer forecasting on top."
           title="Unlock advanced reporting"
         />
       ) : null}
@@ -315,9 +316,9 @@ function ReportsPage({ currentUser, onLogout }) {
             <section className="reports-command-deck">
                 <div className="reports-command-head">
                   <div>
-                    <span className="reports-chip">Pro workflow</span>
-                    <h3>Change the range, compare pressure points, and let the page surface what matters.</h3>
-                    <p>The value of Pro is not more charts. It is faster answers: what is drifting, what is concentrated, and what deserves action next.</p>
+                    <span className="reports-chip">{isPro ? 'Pro workflow' : 'Plus workflow'}</span>
+                    <h3>{isPro ? 'Change the range, compare pressure points, and use the deeper signal layer.' : 'Change the range, compare pressure points, and keep the reporting surface clear.'}</h3>
+                    <p>{isPro ? 'The value of Pro is not more charts. It is faster answers, stronger pattern signals, and better forward-looking context.' : 'The value of Plus is clear reporting without guesswork: what is drifting, what is concentrated, and what deserves attention next.'}</p>
                   </div>
                 <span>{summary.transactionCount} transaction{summary.transactionCount === 1 ? '' : 's'} in view</span>
               </div>
@@ -392,7 +393,7 @@ function ReportsPage({ currentUser, onLogout }) {
             <>
               {decisionSupport.length ? (
                 <section className="reports-insight-strip" aria-label="Decision support">
-                  {decisionSupport.map((insight, index) => (
+                  {(isPro ? decisionSupport : decisionSupport.slice(0, 2)).map((insight, index) => (
                     <article className={`reports-insight-card reports-insight-card-${insight.tone || 'neutral'}`} key={`${insight.title}-${index}`}>
                       <span>{insight.label}</span>
                       <strong>{insight.title}</strong>
@@ -511,6 +512,24 @@ function ReportsPage({ currentUser, onLogout }) {
                   <strong>{metadata.completedGoals}</strong>
                 </article>
               </section>
+
+              {!isPro ? (
+                <section className="finance-intelligence-grid" aria-label="Pro insight intelligence">
+                  <article className="finance-intelligence-card finance-intelligence-card-accent">
+                    <span className="finance-intelligence-kicker">Pro intelligence</span>
+                    <h3>Go beyond reporting into stronger financial guidance</h3>
+                    <p>Pro adds deeper callouts, smarter budget signals, goal forecasting, and priority support for customers who want tighter control.</p>
+                    <div className="finance-pill-row">
+                      <span className="finance-pill">Advanced insight signals</span>
+                      <span className="finance-pill">Budget intelligence</span>
+                      <span className="finance-pill">Goal forecasting</span>
+                    </div>
+                    <button className="finance-upgrade-action" type="button" onClick={() => navigate('/pricing')}>
+                      Move to Pro
+                    </button>
+                  </article>
+                </section>
+              ) : null}
             </>
           ) : null}
         </>

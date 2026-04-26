@@ -25,10 +25,11 @@ const baseFaqItems = [
 function SupportPage({ currentUser, onLogout }) {
   const { access, billing, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [query, setQuery] = useState('');
-  const isPremium = access.isPremium;
+  const isPlus = access.tier === 'plus' || access.tier === 'pro';
+  const isPro = access.tier === 'pro';
   const hasRecurringAccess = hasFeature('recurringPayments');
   const hasReportsAccess = hasFeature('reports');
-  const planLabel = getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name || (isPremium ? 'Pro' : 'Free'));
+  const planLabel = getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name || (isPro ? 'Pro' : isPlus ? 'Plus' : 'Free'));
   const supportPaths = useMemo(
     () => [
       {
@@ -56,43 +57,47 @@ function SupportPage({ currentUser, onLogout }) {
         title: hasRecurringAccess ? 'Track recurring bills' : 'Unlock recurring payments',
         body: hasRecurringAccess
           ? 'Subscriptions, rent, insurance, and memberships stay in one renewal queue with due dates and annualized cost.'
-              : 'Recurring bills are part of Pro so active customers can see subscriptions and fixed costs before they hit.',
-        cta: hasRecurringAccess ? 'Open subscriptions' : 'View Pro',
-        keywords: 'subscriptions recurring bills rent insurance pro renewals',
+              : 'Recurring bills start in Plus so active customers can see subscriptions and fixed costs before they hit.',
+        cta: hasRecurringAccess ? 'Open subscriptions' : 'View Plus',
+        keywords: 'subscriptions recurring bills rent insurance plus pro renewals',
         to: hasRecurringAccess ? '/recurring' : '/pricing',
       },
       {
         title: hasReportsAccess ? 'Read advanced insights' : 'Unlock advanced reports',
         body: hasReportsAccess
           ? 'Backend-powered reporting answers real questions about merchants, categories, concentration, and cash flow.'
-          : 'Reports are part of Pro because they move the user from recording money to understanding it with real backend analysis.',
-        cta: hasReportsAccess ? 'Open insights' : 'View Pro',
-        keywords: 'reports insights analytics merchants concentration pro',
+          : 'Reports begin in Plus because they move the user from recording money to understanding it with real backend analysis.',
+        cta: hasReportsAccess ? 'Open insights' : 'View Plus',
+        keywords: 'reports insights analytics merchants concentration plus pro',
         to: hasReportsAccess ? '/reports' : '/pricing',
       },
       {
-        title: isPremium ? 'Manage your Pro plan' : 'Compare plans and billing',
-        body: isPremium
+        title: isPro ? 'Manage your Pro plan' : isPlus ? 'Manage your Plus plan' : 'Compare plans and billing',
+        body: isPro
           ? 'Open billing to manage invoices, payment methods, portal access, and subscription state.'
-          : 'See what Pro adds, what Free still includes, and how billing stays separate from personal spending.',
-        cta: isPremium ? 'Open billing' : 'View pricing',
+          : isPlus
+            ? 'Open billing to manage your paid workspace and compare whether Pro adds enough extra intelligence for you.'
+            : 'See what Plus adds, what Pro adds, what Free still includes, and how billing stays separate from personal spending.',
+        cta: isPlus ? 'Open billing' : 'View pricing',
         keywords: 'billing pricing plan invoices checkout stripe pro',
-        to: isPremium ? '/billing' : '/pricing',
+        to: isPlus ? '/billing' : '/pricing',
       },
     ],
-    [hasRecurringAccess, hasReportsAccess, isPremium]
+    [hasRecurringAccess, hasReportsAccess, isPlus, isPro]
   );
   const faqItems = useMemo(
     () => [
       ...baseFaqItems,
       {
-        question: 'What does Pro actually unlock?',
-        answer: isPremium
-          ? 'Your workspace currently includes recurring payment tracking, backend-powered reports, unlimited planning space, and priority support access.'
-          : 'Pro unlocks recurring payment tracking, backend-powered reports, unlimited planning capacity, and priority support without changing your core manual tracking workflow.',
+        question: 'What do Plus and Pro actually unlock?',
+        answer: isPro
+          ? 'Your workspace currently includes recurring payment tracking, backend-powered reports, unlimited planning, priority support, and the deeper Pro intelligence layer.'
+          : isPlus
+            ? 'Plus unlocks recurring payment tracking, backend-powered reports, unlimited planning, exports, and saved views. Pro adds stronger intelligence, forecasting, and priority support on top.'
+            : 'Plus unlocks recurring payment tracking, backend-powered reports, unlimited planning, exports, and saved views. Pro adds stronger intelligence, forecasting, and priority support on top.',
       },
     ],
-    [isPremium]
+    [isPlus, isPro]
   );
   const visiblePaths = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -110,13 +115,15 @@ function SupportPage({ currentUser, onLogout }) {
     <aside className="support-concierge-rail">
       <article className="support-rail-card support-rail-card-dark">
         <span>{isBillingLoading ? 'Plan access' : `${planLabel} support`}</span>
-        <h3>{isPremium ? 'Priority support is active' : 'Self-serve support on Free'}</h3>
+        <h3>{isPro ? 'Priority support is active' : isPlus ? 'Paid workspace support is active' : 'Self-serve support on Free'}</h3>
         <p>
-          {isPremium
+          {isPro
             ? 'Billing, Pro tools, and priority support live inside the same workspace.'
-            : 'Free customers get guided product help. Pro adds faster support and deeper finance tooling.'}
+            : isPlus
+              ? 'Plus customers get guided product help around recurring control, exports, and insights. Pro adds faster support and deeper finance intelligence.'
+              : 'Free customers get guided product help. Plus adds the first paid control layer, and Pro adds deeper finance tooling.'}
         </p>
-        <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage billing' : 'See Pro'}</Link>
+        <Link to={isPlus ? '/billing' : '/pricing'}>{isPlus ? 'Manage billing' : 'See plans'}</Link>
       </article>
       <article className="support-rail-card">
         <span>Account controls</span>
@@ -157,12 +164,14 @@ function SupportPage({ currentUser, onLogout }) {
             <div>
               <span>{isBillingLoading ? 'Loading access' : `${planLabel} workspace`}</span>
               <strong>
-                {isPremium
+                {isPro
                   ? 'Pro tools and priority support are already available.'
-                  : 'Pro adds renewals, deeper reports, and faster support.'}
+                  : isPlus
+                    ? 'Plus tools are active. Pro adds deeper intelligence and faster support.'
+                    : 'Plus adds renewals and reports. Pro adds deeper intelligence and faster support.'}
               </strong>
             </div>
-            <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage plan' : 'View Pro'}</Link>
+            <Link to={isPlus ? '/billing' : '/pricing'}>{isPlus ? 'Manage plan' : 'View plans'}</Link>
           </div>
         </div>
       </section>

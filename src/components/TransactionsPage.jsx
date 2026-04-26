@@ -29,7 +29,8 @@ import { financeStore } from '../utils/financeStore';
 
 function TransactionsPage({ currentUser, onLogout }) {
   const { access } = useBillingAccess();
-  const isPremium = access.isPremium;
+  const isPlus = access.tier === 'plus' || access.tier === 'pro';
+  const isPro = access.tier === 'pro';
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -230,7 +231,7 @@ function TransactionsPage({ currentUser, onLogout }) {
   };
 
   const handleSaveView = () => {
-    if (!isPremium) {
+    if (!isPlus) {
       return;
     }
 
@@ -267,7 +268,7 @@ function TransactionsPage({ currentUser, onLogout }) {
   };
 
   const handleExport = () => {
-    if (!isPremium) {
+    if (!isPlus) {
       return;
     }
 
@@ -296,7 +297,7 @@ function TransactionsPage({ currentUser, onLogout }) {
   };
 
   const handleBulkCategorize = async () => {
-    if (!isPremium) {
+    if (!isPro) {
       return;
     }
 
@@ -364,7 +365,7 @@ function TransactionsPage({ currentUser, onLogout }) {
       <article className="ref-panel activity-rail-card activity-rail-card-dark">
         <span>Ledger state</span>
         <h3>{transactions.length ? `${transactions.length} records` : 'Ready for records'}</h3>
-        <p>Core ledger tools stay free. Pro adds saved views, bulk actions, and CSV export for heavier workflows.</p>
+        <p>Core ledger tools stay free. Plus adds saved views and export. Pro adds the faster cleanup layer for heavier workflows.</p>
       </article>
       <article className="ref-panel activity-rail-card">
         <span>Linked setup</span>
@@ -453,8 +454,8 @@ function TransactionsPage({ currentUser, onLogout }) {
           resultCount={visibleTransactions.length}
         />
 
-        {isPremium ? (
-          <PremiumPanel eyebrow="Pro tools" title="Faster ledger operations">
+        {isPlus ? (
+          <PremiumPanel eyebrow={isPro ? 'Pro tools' : 'Plus tools'} title="Faster ledger operations">
             <section className="transactions-power-grid">
               <article className="transactions-power-card">
                 <div className="transactions-power-head">
@@ -462,7 +463,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                     <span>Saved views</span>
                     <strong>Return to the same ledger slice instantly.</strong>
                   </div>
-                  <small>{savedViews.length}/6 saved</small>
+                    <small>{savedViews.length}/6 saved</small>
                 </div>
 
                 <div className="transactions-power-save">
@@ -504,7 +505,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                 <div className="transactions-power-head">
                   <div>
                     <span>Bulk categorize</span>
-                    <strong>Clean up multiple records without opening each row.</strong>
+                    <strong>{isPro ? 'Clean up multiple records without opening each row.' : 'Bulk cleanup sits in Pro for higher-volume transaction work.'}</strong>
                   </div>
                   <small>{selectedTransactions.length} selected</small>
                 </div>
@@ -512,17 +513,21 @@ function TransactionsPage({ currentUser, onLogout }) {
                 <div className="transactions-bulk-status">
                   <strong>
                     {selectedTransactions.length
-                      ? selectedType
-                        ? `${selectedTransactions.length} ${selectedType} record${selectedTransactions.length === 1 ? '' : 's'} ready`
-                        : 'Selection mixes income and expense records'
+                      ? isPro
+                        ? selectedType
+                          ? `${selectedTransactions.length} ${selectedType} record${selectedTransactions.length === 1 ? '' : 's'} ready`
+                          : 'Selection mixes income and expense records'
+                        : 'Move to Pro for bulk categorization'
                       : 'Select rows in the ledger to start'}
                   </strong>
                   <p>
-                    {selectedTransactions.length
-                      ? selectedType
-                        ? 'Choose one matching category and apply it to the selected records.'
-                        : 'Use a single transaction type in one selection before applying a bulk category.'
-                      : 'Selection stays scoped to the current visible view.'}
+                    {isPro
+                      ? selectedTransactions.length
+                        ? selectedType
+                          ? 'Choose one matching category and apply it to the selected records.'
+                          : 'Use a single transaction type in one selection before applying a bulk category.'
+                        : 'Selection stays scoped to the current visible view.'
+                      : 'Plus keeps export and saved views available. Pro adds bulk categorization for faster cleanup across larger ledgers.'}
                   </p>
                 </div>
 
@@ -530,10 +535,12 @@ function TransactionsPage({ currentUser, onLogout }) {
                   <select
                     value={bulkCategoryId}
                     onChange={(event) => setBulkCategoryId(event.target.value)}
-                    disabled={!selectedTransactions.length || !selectedType || isBulkSaving}
+                    disabled={!isPro || !selectedTransactions.length || !selectedType || isBulkSaving}
                   >
                     <option value="">
-                      {!selectedTransactions.length
+                      {!isPro
+                        ? 'Move to Pro to unlock bulk categorize'
+                        : !selectedTransactions.length
                         ? 'Select transactions first'
                         : !selectedType
                           ? 'Single transaction type required'
@@ -545,14 +552,20 @@ function TransactionsPage({ currentUser, onLogout }) {
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={handleBulkCategorize} disabled={!selectedTransactions.length || !selectedType || !bulkCategoryId || isBulkSaving}>
-                    {isBulkSaving ? 'Applying...' : 'Apply category'}
+                  <button type="button" onClick={isPro ? handleBulkCategorize : () => {}} disabled={!isPro || !selectedTransactions.length || !selectedType || !bulkCategoryId || isBulkSaving}>
+                    {isPro ? (isBulkSaving ? 'Applying...' : 'Apply category') : 'Pro feature'}
                   </button>
                 </div>
 
-                <button className="transactions-selection-clear" type="button" onClick={() => setSelectedIds([])} disabled={!selectedTransactions.length}>
-                  Clear selection
-                </button>
+                {isPro ? (
+                  <button className="transactions-selection-clear" type="button" onClick={() => setSelectedIds([])} disabled={!selectedTransactions.length}>
+                    Clear selection
+                  </button>
+                ) : (
+                  <button className="transactions-selection-clear" type="button" onClick={() => window.location.assign('/pricing')}>
+                    See Pro
+                  </button>
+                )}
               </article>
 
               <article className="transactions-power-card">
@@ -601,10 +614,10 @@ function TransactionsPage({ currentUser, onLogout }) {
           </PremiumPanel>
         ) : (
           <FeatureGate
-            eyebrow="Pro transaction tools"
+            eyebrow="Plus transaction tools"
             title="Unlock faster ledger operations"
-            helper="Pro adds saved views for repeated analysis, CSV export for finance workflows, and bulk categorization for high-volume cleanup."
-            features={['Saved ledger views', 'CSV export of current view or selection', 'Bulk transaction categorization', 'Faster review workflows for heavy usage']}
+            helper="Plus adds saved views and CSV export for repeated finance workflows. Pro adds bulk categorization for heavier cleanup."
+            features={['Saved ledger views', 'CSV export of current view or selection', 'Cleaner repeated review workflows', 'Optional Pro bulk categorization']}
           />
         )}
 

@@ -48,7 +48,14 @@ export function BillingAccessProvider({ children, onLogout }) {
       billing,
       errorMessage,
       hasFeature: (featureKey) => Boolean(access.featureAccess?.[featureKey]),
+      hasTier: (tier) => {
+        const order = { free: 0, plus: 1, pro: 2 };
+        return (order[access.tier] || 0) >= (order[tier] || 0);
+      },
+      isPlus: access.tier === 'plus' || access.tier === 'pro',
+      isPro: access.tier === 'pro',
       isLoading,
+      tier: access.tier || 'free',
       refreshBillingAccess: loadBillingAccess,
     }),
     [access, billing, errorMessage, isLoading]

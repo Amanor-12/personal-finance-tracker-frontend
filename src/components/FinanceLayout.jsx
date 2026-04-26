@@ -10,8 +10,8 @@ const navItems = [
   { label: 'Transactions', to: '/transactions', icon: 'transactions' },
   { label: 'Budgets', to: '/budget', icon: 'budget' },
   { label: 'Goals', to: '/goals', icon: 'goals' },
-  { label: 'Subscriptions', to: '/recurring', icon: 'recurring', featureKey: 'recurringPayments' },
-  { label: 'Insights', to: '/reports', icon: 'reports', featureKey: 'reports' },
+  { label: 'Subscriptions', to: '/recurring', icon: 'recurring', featureKey: 'recurringPayments', requiredTier: 'Plus' },
+  { label: 'Insights', to: '/reports', icon: 'reports', featureKey: 'reports', requiredTier: 'Plus' },
 ];
 
 const otherItems = [
@@ -171,7 +171,7 @@ function FinanceLayout({
         label: item.label,
         note:
           item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading
-            ? 'Pro page'
+            ? `${item.requiredTier || 'Pro'} page`
             : 'Open page',
         section: 'Pages',
         to: item.to,
@@ -190,7 +190,7 @@ function FinanceLayout({
       {
         icon: 'recurring',
         label: 'Add recurring payment',
-        note: hasFeature('recurringPayments') ? 'Open subscriptions and track a fixed bill' : 'Pro feature',
+        note: hasFeature('recurringPayments') ? 'Open subscriptions and track a fixed bill' : 'Plus feature',
         section: 'Actions',
         to: '/recurring',
       },
@@ -267,7 +267,7 @@ function FinanceLayout({
                     </span>
                     <span className="ref-nav-label">{item.label}</span>
                     {item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? (
-                      <small className="ref-nav-badge">Pro</small>
+                      <small className="ref-nav-badge">{item.requiredTier || 'Pro'}</small>
                     ) : null}
                   </NavLink>
                 ) : (

@@ -122,7 +122,7 @@ const getFallbackAccess = (billing) => {
       featureAccess: {
         billingPortal: true,
         recurringPayments: true,
-        reports: isPro,
+        reports: true,
         smartBudgeting: isPro,
         forecasting: isPro,
         prioritySupport: isPro,
@@ -152,6 +152,29 @@ export const resolveBillingAccess = (billing) => {
           ? 'plus'
           : 'free');
 
+    const inferredFeatures =
+      normalizedTier === 'pro'
+        ? {
+            billingPortal: true,
+            recurringPayments: true,
+            reports: true,
+            smartBudgeting: true,
+            forecasting: true,
+            prioritySupport: true,
+            earlyAccess: true,
+          }
+        : normalizedTier === 'plus'
+          ? {
+              billingPortal: true,
+              recurringPayments: true,
+              reports: true,
+              smartBudgeting: false,
+              forecasting: false,
+              prioritySupport: false,
+              earlyAccess: false,
+            }
+          : defaultBillingAccess.featureAccess;
+
     return {
       ...defaultBillingAccess,
       ...billing.access,
@@ -159,6 +182,7 @@ export const resolveBillingAccess = (billing) => {
       tier: normalizedTier,
       featureAccess: {
         ...defaultBillingAccess.featureAccess,
+        ...inferredFeatures,
         ...(billing.access.featureAccess || {}),
       },
       limits: {

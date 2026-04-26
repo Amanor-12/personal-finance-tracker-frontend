@@ -222,7 +222,7 @@ function GoalsPage({ currentUser, onLogout }) {
         .slice(0, 3),
     [activeGoals]
   );
-  const premiumGoalIntelligence = access.isPremium;
+  const premiumGoalIntelligence = Boolean(access.featureAccess?.forecasting);
 
   const openCreate = () => {
     if (!canCreateGoal) {
@@ -329,7 +329,7 @@ function GoalsPage({ currentUser, onLogout }) {
         <section className="goals-portfolio-secondary" aria-label="Goal portfolio summary">
           {!isBillingLoading && goalLimit !== null ? (
             <ResourceLimitCard
-              body="Free workspaces can track a focused set of targets. Upgrade when you want more simultaneous savings or payoff goals."
+              body="Free workspaces can track a focused set of targets. Move to Plus for unlimited goals, then Pro for milestone forecasting."
               limit={goalLimit}
               resourceLabel="goals"
               usage={goalUsage}

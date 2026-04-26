@@ -180,7 +180,7 @@ function BudgetPage({ currentUser, onLogout }) {
 
     return signals.slice(0, 4);
   }, [summary.overspent, summary.watch, topPressureBudget, unbudgetedCategories.length]);
-  const premiumBudgetAutomation = access.isPremium;
+  const premiumBudgetAutomation = Boolean(access.featureAccess?.smartBudgeting);
 
   const openCreate = () => {
     if (!canCreateBudget) {
@@ -290,7 +290,7 @@ function BudgetPage({ currentUser, onLogout }) {
         <section className="budget-cockpit-secondary" aria-label="Budget tools">
           {!isBillingLoading && budgetLimit !== null ? (
             <ResourceLimitCard
-              body="Free workspaces can keep a focused budget set. Upgrade when you want broader category coverage or more monthly plans."
+              body="Free workspaces can keep a focused budget set. Move to Plus for unlimited plans, then Pro for smarter budget intelligence."
               limit={budgetLimit}
               resourceLabel="budgets"
               usage={budgetUsage}
