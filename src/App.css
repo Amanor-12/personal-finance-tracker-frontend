@@ -11860,6 +11860,21 @@ textarea:focus-visible,
   font-size: 0.74rem;
 }
 
+.pricing-tier-tagline {
+  margin-top: 10px;
+}
+
+.pricing-tier-tagline span {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #50607a;
+  background: rgba(242, 246, 252, 0.95);
+  border: 1px solid rgba(211, 220, 233, 0.92);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
 .pricing-proof-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -11922,12 +11937,28 @@ textarea:focus-visible,
   min-height: 56px;
   padding: 12px 14px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px 100px;
+  grid-template-columns: minmax(0, 1fr) 88px 88px 88px;
   gap: 12px;
   align-items: center;
   border-radius: 16px;
   background: #f8fafc;
   border: 1px solid rgba(215, 223, 235, 0.82);
+}
+
+.pricing-comparison-head {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-height: auto !important;
+  padding: 0 4px 8px !important;
+}
+
+.pricing-comparison-head strong {
+  color: #7d879c;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .pricing-comparison-table strong {
@@ -14838,6 +14869,10 @@ textarea:focus-visible,
 .billing-value-grid {
   display: grid;
   gap: 18px;
+}
+
+.pricing-signature-grid article {
+  min-height: 188px;
 }
 
 .finance-intelligence-grid {

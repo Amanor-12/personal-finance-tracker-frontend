@@ -15,6 +15,24 @@ const formatDate = (value) => {
   }).format(new Date(value));
 };
 
+const tierModeRows = {
+  free: [
+    'Manual tracking and starter limits',
+    'No recurring command center yet',
+    'Move up only when you need more control',
+  ],
+  plus: [
+    'Recurring control and reporting are active',
+    'Saved views and exports are available',
+    'Pro is the next step when intelligence matters more',
+  ],
+  pro: [
+    'Forecasting and deeper intelligence are active',
+    'Priority support and premium planning signals are available',
+    'This tier is built for higher-control money management',
+  ],
+};
+
 function BillingSkeleton() {
   return (
     <div className="billing-skeleton-grid" aria-label="Loading billing workspace">
@@ -102,6 +120,7 @@ function BillingPage({ currentUser, onLogout }) {
   const statusLabel = subscriptionStatusCopy[status] || status;
   const stripeConfigured = Boolean(billing?.provider?.configured);
   const activeTier = billing?.access?.tier || 'free';
+  const activeTierModeRows = tierModeRows[activeTier] || tierModeRows.free;
   const tierHighlights =
     activeTier === 'pro'
       ? ['Advanced insights are active', 'Forecasting and smart planning are available', 'Priority support is active', 'Early-access features are available']
@@ -264,6 +283,36 @@ function BillingPage({ currentUser, onLogout }) {
               <span>Paid tiers unlock</span>
               <strong>Less manual cleanup</strong>
               <p>Save ledger views, export data, and use stronger planning signals across budgets and goals.</p>
+            </article>
+          </section>
+
+          <section className="pricing-proof-grid pricing-signature-grid" aria-label="Billing tier modes">
+            <article>
+              <span>Current mode</span>
+              <strong>{activeTier === 'pro' ? 'Pro intelligence layer' : activeTier === 'plus' ? 'Plus control layer' : 'Free foundation'}</strong>
+              <p>
+                {activeTier === 'pro'
+                  ? 'This workspace is tuned for deeper financial signal depth and higher-touch support.'
+                  : activeTier === 'plus'
+                    ? 'This workspace is tuned for active money operations and recurring control.'
+                    : 'This workspace is tuned for calm manual tracking before paid automation becomes necessary.'}
+              </p>
+            </article>
+            <article>
+              <span>What it means</span>
+              <strong>How the tier behaves day to day</strong>
+              <p>{activeTierModeRows.join(' • ')}</p>
+            </article>
+            <article>
+              <span>Upgrade path</span>
+              <strong>{activeTier === 'pro' ? 'Top tier already active' : activeTier === 'plus' ? 'Pro is the next level' : 'Plus is the next level'}</strong>
+              <p>
+                {activeTier === 'pro'
+                  ? 'Billing stays focused on maintaining access and reviewing invoices.'
+                  : activeTier === 'plus'
+                    ? 'Move to Pro when forecasting, stronger planning, and priority support become worth paying for.'
+                    : 'Move to Plus when recurring control, reporting, and export workflows start saving real time.'}
+              </p>
             </article>
           </section>
 

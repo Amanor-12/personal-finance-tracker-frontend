@@ -35,6 +35,24 @@ const tierValueRows = [
   },
 ];
 
+const tierSignatures = [
+  {
+    plan: 'Free',
+    title: 'Manual foundation',
+    body: 'Track money cleanly, build habits, and keep the workspace calm before you need automation.',
+  },
+  {
+    plan: 'Plus',
+    title: 'Control layer',
+    body: 'Run recurring bills, exports, and everyday money operations without losing time to manual cleanup.',
+  },
+  {
+    plan: 'Pro',
+    title: 'Intelligence layer',
+    body: 'Use forecasting, deeper signals, and premium support when financial decisions need more than recordkeeping.',
+  },
+];
+
 const pricingFaq = [
   {
     question: 'Can I stay on the free plan long term?',
@@ -52,7 +70,6 @@ const pricingFaq = [
 
 function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
   const isFree = plan.id === 'free';
-  const isPaid = !isFree;
 
   return (
     <article className={`pricing-card${isFeatured ? ' is-featured' : ''}`}>
@@ -65,6 +82,9 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
       <div className="pricing-price">
         <strong>{plan.price}</strong>
         {plan.suffix ? <span>{plan.suffix}</span> : null}
+      </div>
+      <div className="pricing-tier-tagline">
+        <span>{plan.name === 'Free' ? 'Starter workspace' : plan.name === 'Plus' ? 'Operational control' : 'High-control intelligence'}</span>
       </div>
       <ul>
         {plan.features.map((feature) => (
@@ -170,12 +190,28 @@ function PricingPage({ currentUser }) {
         ))}
       </section>
 
+      <section className="pricing-proof-grid pricing-signature-grid" aria-label="Tier signatures">
+        {tierSignatures.map((item) => (
+          <article key={item.plan}>
+            <span>{item.plan}</span>
+            <strong>{item.title}</strong>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </section>
+
       <section className="pricing-comparison">
         <div>
           <span className="pricing-eyebrow">Plan comparison</span>
           <h2>Clear enough to trust before upgrading.</h2>
         </div>
         <div className="pricing-comparison-table">
+          <div className="pricing-comparison-head" aria-hidden="true">
+            <span>Feature</span>
+            <strong>Free</strong>
+            <strong>Plus</strong>
+            <strong>Pro</strong>
+          </div>
           {comparisonRows.map((row) => (
             <div key={row.label}>
               <span>{row.label}</span>

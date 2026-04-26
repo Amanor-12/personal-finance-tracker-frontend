@@ -211,6 +211,24 @@ function SupportPage({ currentUser, onLogout }) {
           ))}
         </div>
       </section>
+
+      <section className="pricing-proof-grid pricing-signature-grid" aria-label="Support tier guidance">
+        <article>
+          <span>Free</span>
+          <strong>Learn the workflow first</strong>
+          <p>Use Ledgr to build the habit, keep the workspace light, and move up only when more control saves time.</p>
+        </article>
+        <article>
+          <span>Plus</span>
+          <strong>Run the money operations layer</strong>
+          <p>Recurring bills, exports, and reporting make Plus the everyday paid workspace for customers actively managing money.</p>
+        </article>
+        <article>
+          <span>Pro</span>
+          <strong>Use the higher-control guidance layer</strong>
+          <p>Pro is where support, forecasting, and deeper planning signals start to justify a more serious subscription.</p>
+        </article>
+      </section>
     </FinanceLayout>
   );
 }
