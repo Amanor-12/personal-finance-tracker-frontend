@@ -1,8 +1,5 @@
 import { apiClient } from './apiClient';
 
-const TIER_PREVIEW_STORAGE_KEY = 'ledgr-tier-preview';
-const DEFAULT_TIER_PREVIEW = 'pro';
-
 export const billingPlans = [
   {
     id: 'free',
@@ -78,7 +75,6 @@ export const subscriptionStatusCopy = {
   none: 'No paid subscription',
   not_configured: 'Stripe not configured',
   past_due: 'Past due',
-  preview: 'Preview unlocked',
   trialing: 'Trialing',
   unpaid: 'Unpaid',
 };
@@ -108,86 +104,6 @@ export const defaultBillingAccess = {
     goals: 0,
     recurringPayments: 0,
   },
-};
-
-const canUseStorage = () => typeof window !== 'undefined' && Boolean(window.localStorage);
-
-const getTierPreviewOverride = () => {
-  if (typeof window === 'undefined') {
-    return DEFAULT_TIER_PREVIEW;
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const paramValue = params.get('tiers') || params.get('tierPreview');
-
-  if (paramValue === 'off') {
-    if (canUseStorage()) {
-      window.localStorage.removeItem(TIER_PREVIEW_STORAGE_KEY);
-    }
-    return '';
-  }
-
-  if (paramValue === 'plus' || paramValue === 'pro') {
-    if (canUseStorage()) {
-      window.localStorage.setItem(TIER_PREVIEW_STORAGE_KEY, paramValue);
-    }
-    return paramValue;
-  }
-
-  if (canUseStorage()) {
-    const storedValue = window.localStorage.getItem(TIER_PREVIEW_STORAGE_KEY);
-    if (storedValue === 'plus' || storedValue === 'pro') {
-      return storedValue;
-    }
-  }
-
-  return DEFAULT_TIER_PREVIEW;
-};
-
-const getPreviewBillingOverview = (previewTier) => {
-  if (previewTier !== 'plus' && previewTier !== 'pro') {
-    return null;
-  }
-
-  const isPro = previewTier === 'pro';
-
-  return {
-    access: {
-      ...defaultBillingAccess,
-      currentPlanId: isPro ? 'pro_monthly' : 'plus_monthly',
-      featureAccess: {
-        billingPortal: true,
-        recurringPayments: true,
-        reports: true,
-        smartBudgeting: isPro,
-        forecasting: isPro,
-        prioritySupport: isPro,
-        earlyAccess: isPro,
-      },
-      isPremium: true,
-      limits: {
-        accounts: null,
-        budgets: null,
-        goals: null,
-      },
-      tier: previewTier,
-      upgradePlanId: isPro ? 'pro_monthly' : 'plus_monthly',
-    },
-    currentPlan: {
-      id: isPro ? 'pro_monthly' : 'plus_monthly',
-      name: isPro ? 'Pro' : 'Plus',
-      priceLabel: isPro ? '$19 / month' : '$9 / month',
-    },
-    invoices: [],
-    provider: {
-      configured: false,
-      preview: true,
-    },
-    subscription: {
-      currentPeriodEnd: null,
-      status: 'preview',
-    },
-  };
 };
 
 const getFallbackAccess = (billing) => {
@@ -285,13 +201,6 @@ export const resolveBillingAccess = (billing) => {
 
 export const billingStore = {
   async getOverview() {
-    const previewTier = getTierPreviewOverride();
-    const previewBilling = getPreviewBillingOverview(previewTier);
-
-    if (previewBilling) {
-      return previewBilling;
-    }
-
     const payload = await apiClient.get('/api/billing/subscription');
     return {
       ...payload.billing,
