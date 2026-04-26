@@ -2,6 +2,7 @@ import { sessionStore } from './sessionStore';
 
 const API_OFFLINE_MESSAGE = 'Ledgr cannot reach the finance service. Start the backend server, then try again.';
 const API_BASE_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const API_TIMEOUT_MS = 15000;
 
 const looksLikeHtml = (value) =>
   typeof value === 'string' &&
@@ -51,6 +52,7 @@ const parseResponse = async (response) => {
 const request = async (path, { method = 'GET', body, headers = {}, auth = true } = {}) => {
   const token = sessionStore.getToken();
   const nextHeaders = {
+    Accept: 'application/json',
     ...headers,
   };
 
@@ -63,6 +65,8 @@ const request = async (path, { method = 'GET', body, headers = {}, auth = true }
   }
 
   let response;
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
     const requestUrl = resolveRequestUrl(path);
@@ -71,15 +75,24 @@ const request = async (path, { method = 'GET', body, headers = {}, auth = true }
       method,
       headers: nextHeaders,
       body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
   } catch (error) {
     throw buildError(0, {
       message: API_OFFLINE_MESSAGE,
       cause: error.message,
     });
+  } finally {
+    globalThis.clearTimeout(timeoutId);
   }
 
   const payload = await parseResponse(response);
+
+  if (path.startsWith('/api') && looksLikeHtml(payload)) {
+    throw buildError(response.status || 0, {
+      message: API_OFFLINE_MESSAGE,
+    });
+  }
 
   if (!response.ok) {
     if (response.status === 404 && path.startsWith('/api')) {

@@ -30,6 +30,15 @@ const resolveSessionPayload = (payload) => {
   return null;
 };
 
+const resolveUserPayload = (payload) =>
+  payload?.user ||
+  payload?.profile ||
+  payload?.account ||
+  payload?.data?.user ||
+  payload?.data?.profile ||
+  payload?.data?.account ||
+  null;
+
 export const authStore = {
   getSession() {
     return sessionStore.getSession()?.user || null;
@@ -44,7 +53,14 @@ export const authStore = {
 
     try {
       const payload = await apiClient.get('/api/auth/me');
-      return sessionStore.updateUser(payload.user);
+      const user = resolveUserPayload(payload);
+
+      if (!user) {
+        sessionStore.clearSession();
+        throw new Error('Ledgr could not read the current account session.');
+      }
+
+      return sessionStore.updateUser(user);
     } catch (error) {
       if (error.status === 401) {
         sessionStore.clearSession();
@@ -115,7 +131,13 @@ export const authStore = {
       email: normalizeEmail(email),
     });
 
-    return sessionStore.updateUser(payload.user);
+    const user = resolveUserPayload(payload);
+
+    if (!user) {
+      throw new Error('Ledgr could not refresh the profile after saving.');
+    }
+
+    return sessionStore.updateUser(user);
   },
   async updatePassword({ currentPassword, newPassword }) {
     return apiClient.put('/api/auth/password', {
