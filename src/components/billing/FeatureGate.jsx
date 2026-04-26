@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export function FeatureGate({ eyebrow, features = [], helper, title }) {
+export function FeatureGate({ eyebrow, features = [], helper, primaryLabel = 'Upgrade to Pro', title }) {
   return (
     <section className="feature-gate-shell">
       <div className="feature-gate-copy">
@@ -9,7 +9,7 @@ export function FeatureGate({ eyebrow, features = [], helper, title }) {
         <p>{helper}</p>
         <div className="feature-gate-actions">
           <Link className="feature-gate-primary" to="/pricing">
-            Upgrade to Pro
+            {primaryLabel}
           </Link>
           <Link className="feature-gate-secondary" to="/billing">
             View billing

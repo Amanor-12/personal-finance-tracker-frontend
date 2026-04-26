@@ -336,12 +336,13 @@ function DashboardPage({ currentUser, onLogout }) {
       route: hasRecurringAccess ? '/recurring' : '/pricing',
       emptyCopy: hasRecurringAccess
         ? 'Track recurring bills before they surprise you.'
-        : 'Pro adds subscriptions, rent, and fixed charges in one renewal queue.',
+        : 'Plus adds subscriptions, rent, and fixed charges in one renewal queue.',
       readyCopy: hasRecurringAccess
         ? 'Upcoming renewals are already in view.'
         : 'Upgrade to unlock recurring control before charges land.',
       locked: !hasRecurringAccess,
       actionLabel: hasRecurringAccess ? undefined : 'Unlock',
+      requiredTier: 'Plus',
     },
   ];
   const accessibleModules = workspaceModules.filter((module) => !module.locked);
@@ -660,7 +661,7 @@ function DashboardPage({ currentUser, onLogout }) {
                     </div>
                   </div>
                   <div className="ref-workspace-route-meta">
-                    <strong>{item.locked ? 'Pro' : String(item.value).padStart(2, '0')}</strong>
+                    <strong>{item.locked ? item.requiredTier || 'Plus' : String(item.value).padStart(2, '0')}</strong>
                     <Link to={item.route}>{item.actionLabel || (item.value ? 'Open' : 'Set up')}</Link>
                   </div>
                 </article>

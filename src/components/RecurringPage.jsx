@@ -26,8 +26,9 @@ import { financeStore } from '../utils/financeStore';
 
 function RecurringPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
-  const { hasFeature, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
+  const { access, hasFeature, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const hasRecurringAccess = hasFeature('recurringPayments');
+  const isPro = access.tier === 'pro';
   const [payments, setPayments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -261,9 +262,10 @@ function RecurringPage({ currentUser, onLogout }) {
 
         {!isBillingLoading && !hasRecurringAccess ? (
           <FeatureGate
-            eyebrow="Pro access"
+            eyebrow="Plus access"
             features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Monthly fixed-cost view', 'Annualized commitment view']}
-            helper="Recurring payments are part of Ledgr Pro because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
+            helper="Recurring payments begin in Ledgr Plus because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
+            primaryLabel="Upgrade to Plus"
             title="Unlock recurring payment tracking"
           />
         ) : null}
@@ -297,7 +299,7 @@ function RecurringPage({ currentUser, onLogout }) {
               <section className="recurring-command-deck">
                 <div className="recurring-workbench-head">
                   <div>
-                    <span className="recurring-chip">Pro workflow</span>
+                    <span className="recurring-chip">{isPro ? 'Pro workflow' : 'Plus workflow'}</span>
                     <h3>Search, sort, and triage fixed costs before they become noise.</h3>
                     <p>Keep upcoming charges, missing account links, and biggest monthly commitments visible in one command surface.</p>
                   </div>

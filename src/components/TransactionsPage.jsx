@@ -617,6 +617,7 @@ function TransactionsPage({ currentUser, onLogout }) {
             eyebrow="Plus transaction tools"
             title="Unlock faster ledger operations"
             helper="Plus adds saved views and CSV export for repeated finance workflows. Pro adds bulk categorization for heavier cleanup."
+            primaryLabel="Upgrade to Plus"
             features={['Saved ledger views', 'CSV export of current view or selection', 'Cleaner repeated review workflows', 'Optional Pro bulk categorization']}
           />
         )}
