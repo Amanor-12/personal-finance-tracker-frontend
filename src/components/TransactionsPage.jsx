@@ -248,7 +248,7 @@ function TransactionsPage({ currentUser, onLogout }) {
 
     setSavedViews(nextViews);
     setSavedViewName('');
-    setToolMessage('Saved view added to your premium tools.');
+    setToolMessage('Saved view added to your Pro tools.');
   };
 
   const handleApplyView = (view) => {
@@ -364,7 +364,7 @@ function TransactionsPage({ currentUser, onLogout }) {
       <article className="ref-panel activity-rail-card activity-rail-card-dark">
         <span>Ledger state</span>
         <h3>{transactions.length ? `${transactions.length} records` : 'Ready for records'}</h3>
-        <p>Core ledger tools stay free. Premium adds saved views, bulk actions, and CSV export for heavier workflows.</p>
+        <p>Core ledger tools stay free. Pro adds saved views, bulk actions, and CSV export for heavier workflows.</p>
       </article>
       <article className="ref-panel activity-rail-card">
         <span>Linked setup</span>
@@ -454,7 +454,7 @@ function TransactionsPage({ currentUser, onLogout }) {
         />
 
         {isPremium ? (
-          <PremiumPanel eyebrow="Premium tools" title="Faster ledger operations">
+          <PremiumPanel eyebrow="Pro tools" title="Faster ledger operations">
             <section className="transactions-power-grid">
               <article className="transactions-power-card">
                 <div className="transactions-power-head">
@@ -601,9 +601,9 @@ function TransactionsPage({ currentUser, onLogout }) {
           </PremiumPanel>
         ) : (
           <FeatureGate
-            eyebrow="Premium transaction tools"
+            eyebrow="Pro transaction tools"
             title="Unlock faster ledger operations"
-            helper="Premium adds saved views for repeated analysis, CSV export for finance workflows, and bulk categorization for high-volume cleanup."
+            helper="Pro adds saved views for repeated analysis, CSV export for finance workflows, and bulk categorization for high-volume cleanup."
             features={['Saved ledger views', 'CSV export of current view or selection', 'Bulk transaction categorization', 'Faster review workflows for heavy usage']}
           />
         )}

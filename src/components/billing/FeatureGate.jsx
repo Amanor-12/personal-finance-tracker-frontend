@@ -9,7 +9,7 @@ export function FeatureGate({ eyebrow, features = [], helper, title }) {
         <p>{helper}</p>
         <div className="feature-gate-actions">
           <Link className="feature-gate-primary" to="/pricing">
-            Upgrade to Premium
+            Upgrade to Pro
           </Link>
           <Link className="feature-gate-secondary" to="/billing">
             View billing
@@ -33,7 +33,7 @@ export function ResourceLimitCard({ body, limit, resourceLabel, usage }) {
   return (
     <article className="resource-limit-card">
       <div>
-        <span>Free plan limit</span>
+        <span>Free tier limit</span>
         <strong>
           {usage}/{limit} {resourceLabel}
         </strong>

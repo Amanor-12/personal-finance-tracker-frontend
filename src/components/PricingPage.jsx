@@ -10,24 +10,24 @@ const comparisonRows = [
   { label: 'Goals', free: 'Up to 3', premium: 'Unlimited' },
   { label: 'Recurring bill and renewal control', free: '-', premium: 'Included' },
   { label: 'Server-backed reports and insights', free: '-', premium: 'Included' },
-  { label: 'Priority support and billing portal', free: '-', premium: 'Included' },
+  { label: 'Saved views, export, and planning intelligence', free: '-', premium: 'Included' },
 ];
 
 const premiumValueRows = [
   {
     eyebrow: 'Recurring control',
     title: 'See bills before they hit',
-    body: 'Premium keeps subscriptions, rent, insurance, and other fixed charges in one renewal workspace with due-soon context.',
+    body: 'Pro keeps subscriptions, rent, insurance, and other fixed charges in one renewal workspace with due-soon context.',
   },
   {
     eyebrow: 'Advanced insights',
     title: 'Understand what is changing',
-    body: 'Premium reports answer real questions about category concentration, merchant exposure, pace, and net cash flow.',
+    body: 'Pro reports answer real questions about category concentration, merchant exposure, pace, and net cash flow.',
   },
   {
     eyebrow: 'Power workflows',
     title: 'Do less manual cleanup',
-    body: 'Premium adds saved ledger views, CSV export, and stronger planning intelligence across budgets and goals.',
+    body: 'Pro adds saved ledger views, CSV export, and stronger planning intelligence across budgets and goals.',
   },
 ];
 
@@ -37,8 +37,8 @@ const pricingFaq = [
     answer: 'Yes. Free is designed for manual tracking with starter limits, not as a forced trial.',
   },
   {
-    question: 'What makes Premium worth paying for?',
-    answer: 'Premium saves time and gives better control: recurring bill tracking, backend-powered insights, and more planning room.',
+    question: 'What makes Pro worth paying for?',
+    answer: 'Pro saves time and gives better control: recurring bill tracking, backend-powered insights, less manual cleanup, and more planning room.',
   },
   {
     question: 'Do I lose data if I upgrade later?',
@@ -53,7 +53,7 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
     <article className={`pricing-card${isFeatured ? ' is-featured' : ''}`}>
       <div className="pricing-card-head">
         <span className="pricing-eyebrow">{plan.eyebrow}</span>
-        {isFeatured ? <strong>Best for launch</strong> : null}
+        {isFeatured ? <strong>Best for active customers</strong> : null}
       </div>
       <h2>{plan.name}</h2>
       <p>{plan.description}</p>
@@ -128,10 +128,10 @@ function PricingPage({ currentUser }) {
 
       <section className="pricing-market-hero">
         <div>
-          <span className="pricing-eyebrow">Stripe-ready SaaS billing</span>
-          <h1>Start free. Upgrade when your money workflow needs more control.</h1>
+          <span className="pricing-eyebrow">Ledgr plans</span>
+          <h1>Start free. Move to Pro when money management needs more control.</h1>
           <p>
-            Ledgr Free stays useful for manual tracking. Premium becomes worth paying for when customers need recurring control,
+            Ledgr Free stays useful for manual tracking. Pro becomes worth paying for when customers need recurring control,
             deeper reporting, transaction power tools, and unlimited planning space.
           </p>
         </div>
@@ -181,7 +181,7 @@ function PricingPage({ currentUser }) {
       <section className="pricing-comparison">
         <div>
           <span className="pricing-eyebrow">Plan comparison</span>
-          <h2>Clear enough to trust before payment.</h2>
+          <h2>Clear enough to trust before upgrading.</h2>
         </div>
         <div className="pricing-comparison-table">
           {comparisonRows.map((row) => (

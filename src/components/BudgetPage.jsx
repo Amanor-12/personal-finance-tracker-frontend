@@ -351,7 +351,7 @@ function BudgetPage({ currentUser, onLogout }) {
             <div className="finance-intelligence-head">
               <div>
                 <span className="finance-intelligence-kicker">Budget intelligence</span>
-                <h3>{premiumBudgetAutomation ? 'Pressure watchlist is live' : 'Premium adds pressure watchlists'}</h3>
+                <h3>{premiumBudgetAutomation ? 'Pressure watchlist is live' : 'Pro adds pressure watchlists'}</h3>
               </div>
               {!premiumBudgetAutomation ? (
                 <button className="finance-upgrade-action" type="button" onClick={() => navigate('/pricing')}>
@@ -362,7 +362,7 @@ function BudgetPage({ currentUser, onLogout }) {
             <p className="finance-intelligence-copy">
               {premiumBudgetAutomation
                 ? 'Ledgr keeps the highest-risk categories visible first so you do not need to scan the full board to find pressure.'
-                : 'Free keeps budgeting clean. Premium adds a smarter watchlist for overspend pressure, near-limit categories, and coverage gaps.'}
+                : 'Free keeps budgeting clean. Pro adds a smarter watchlist for overspend pressure, near-limit categories, and coverage gaps.'}
             </p>
             <div className="finance-intelligence-list">
               {(premiumBudgetAutomation ? budgetSignals : budgetSignals.slice(0, 2)).map((signal) => (

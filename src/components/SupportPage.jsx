@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
 import { useBillingAccess } from '../context/BillingAccessContext';
+import { getPlanDisplayName } from '../utils/billingStore';
 const baseFaqItems = [
   {
     question: 'Why does my workspace start empty?',
@@ -27,7 +28,7 @@ function SupportPage({ currentUser, onLogout }) {
   const isPremium = access.isPremium;
   const hasRecurringAccess = hasFeature('recurringPayments');
   const hasReportsAccess = hasFeature('reports');
-  const planLabel = billing?.currentPlan?.name || (isPremium ? 'Premium' : 'Free');
+  const planLabel = getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name || (isPremium ? 'Pro' : 'Free'));
   const supportPaths = useMemo(
     () => [
       {
@@ -55,27 +56,27 @@ function SupportPage({ currentUser, onLogout }) {
         title: hasRecurringAccess ? 'Track recurring bills' : 'Unlock recurring payments',
         body: hasRecurringAccess
           ? 'Subscriptions, rent, insurance, and memberships stay in one renewal queue with due dates and annualized cost.'
-          : 'Recurring bills are part of Premium so active customers can see subscriptions and fixed costs before they hit.',
-        cta: hasRecurringAccess ? 'Open subscriptions' : 'View premium',
-        keywords: 'subscriptions recurring bills rent insurance premium renewals',
+              : 'Recurring bills are part of Pro so active customers can see subscriptions and fixed costs before they hit.',
+        cta: hasRecurringAccess ? 'Open subscriptions' : 'View Pro',
+        keywords: 'subscriptions recurring bills rent insurance pro renewals',
         to: hasRecurringAccess ? '/recurring' : '/pricing',
       },
       {
         title: hasReportsAccess ? 'Read advanced insights' : 'Unlock advanced reports',
         body: hasReportsAccess
           ? 'Backend-powered reporting answers real questions about merchants, categories, concentration, and cash flow.'
-          : 'Reports are Premium because they move the user from recording money to understanding it with real backend analysis.',
-        cta: hasReportsAccess ? 'Open insights' : 'View premium',
-        keywords: 'reports insights analytics merchants concentration premium',
+          : 'Reports are part of Pro because they move the user from recording money to understanding it with real backend analysis.',
+        cta: hasReportsAccess ? 'Open insights' : 'View Pro',
+        keywords: 'reports insights analytics merchants concentration pro',
         to: hasReportsAccess ? '/reports' : '/pricing',
       },
       {
-        title: isPremium ? 'Manage your premium plan' : 'Compare plans and billing',
+        title: isPremium ? 'Manage your Pro plan' : 'Compare plans and billing',
         body: isPremium
           ? 'Open billing to manage invoices, payment methods, portal access, and subscription state.'
-          : 'See what Premium adds, what Free still includes, and how billing stays separate from personal spending.',
+          : 'See what Pro adds, what Free still includes, and how billing stays separate from personal spending.',
         cta: isPremium ? 'Open billing' : 'View pricing',
-        keywords: 'billing pricing plan invoices checkout stripe premium',
+        keywords: 'billing pricing plan invoices checkout stripe pro',
         to: isPremium ? '/billing' : '/pricing',
       },
     ],
@@ -85,10 +86,10 @@ function SupportPage({ currentUser, onLogout }) {
     () => [
       ...baseFaqItems,
       {
-        question: 'What does Premium actually unlock?',
+        question: 'What does Pro actually unlock?',
         answer: isPremium
           ? 'Your workspace currently includes recurring payment tracking, backend-powered reports, unlimited planning space, and priority support access.'
-          : 'Premium unlocks recurring payment tracking, backend-powered reports, unlimited planning capacity, and priority support without changing your core manual tracking workflow.',
+          : 'Pro unlocks recurring payment tracking, backend-powered reports, unlimited planning capacity, and priority support without changing your core manual tracking workflow.',
       },
     ],
     [isPremium]
@@ -112,10 +113,10 @@ function SupportPage({ currentUser, onLogout }) {
         <h3>{isPremium ? 'Priority support is active' : 'Self-serve support on Free'}</h3>
         <p>
           {isPremium
-            ? 'Billing, premium tools, and priority support live inside the same workspace.'
-            : 'Free customers get guided product help. Premium adds faster support and deeper finance tooling.'}
+            ? 'Billing, Pro tools, and priority support live inside the same workspace.'
+            : 'Free customers get guided product help. Pro adds faster support and deeper finance tooling.'}
         </p>
-        <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage billing' : 'See premium'}</Link>
+        <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage billing' : 'See Pro'}</Link>
       </article>
       <article className="support-rail-card">
         <span>Account controls</span>
@@ -157,11 +158,11 @@ function SupportPage({ currentUser, onLogout }) {
               <span>{isBillingLoading ? 'Loading access' : `${planLabel} workspace`}</span>
               <strong>
                 {isPremium
-                  ? 'Premium tools and priority support are already available.'
-                  : 'Premium adds renewals, deeper reports, and faster support.'}
+                  ? 'Pro tools and priority support are already available.'
+                  : 'Pro adds renewals, deeper reports, and faster support.'}
               </strong>
             </div>
-            <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage plan' : 'View premium'}</Link>
+            <Link to={isPremium ? '/billing' : '/pricing'}>{isPremium ? 'Manage plan' : 'View Pro'}</Link>
           </div>
         </div>
       </section>

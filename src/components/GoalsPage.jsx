@@ -383,7 +383,7 @@ function GoalsPage({ currentUser, onLogout }) {
             <div className="finance-intelligence-head">
               <div>
                 <span className="finance-intelligence-kicker">Milestone intelligence</span>
-                <h3>{premiumGoalIntelligence ? 'Premium milestone guidance is live' : 'Premium adds milestone guidance'}</h3>
+                <h3>{premiumGoalIntelligence ? 'Pro milestone guidance is live' : 'Pro adds milestone guidance'}</h3>
               </div>
               {!premiumGoalIntelligence ? (
                 <button className="finance-upgrade-action" type="button" onClick={() => navigate('/pricing')}>
@@ -394,7 +394,7 @@ function GoalsPage({ currentUser, onLogout }) {
             <p className="finance-intelligence-copy">
               {premiumGoalIntelligence
                 ? 'Ledgr highlights which target needs attention next, how quickly it needs funding, and which milestones are getting close.'
-                : 'Free keeps goals simple. Premium adds due-soon signals, contribution pacing, and milestone guidance so customers know where to act next.'}
+                : 'Free keeps goals simple. Pro adds due-soon signals, contribution pacing, and milestone guidance so customers know where to act next.'}
             </p>
             <div className="finance-intelligence-list">
               {(premiumGoalIntelligence ? milestoneSignals : milestoneSignals.slice(0, 2)).map((signal) => (

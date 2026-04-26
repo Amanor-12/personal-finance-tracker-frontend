@@ -336,7 +336,7 @@ function DashboardPage({ currentUser, onLogout }) {
       route: hasRecurringAccess ? '/recurring' : '/pricing',
       emptyCopy: hasRecurringAccess
         ? 'Track recurring bills before they surprise you.'
-        : 'Premium adds subscriptions, rent, and fixed charges in one renewal queue.',
+        : 'Pro adds subscriptions, rent, and fixed charges in one renewal queue.',
       readyCopy: hasRecurringAccess
         ? 'Upcoming renewals are already in view.'
         : 'Upgrade to unlock recurring control before charges land.',

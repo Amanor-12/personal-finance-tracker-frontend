@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
-import { billingPlans, billingStore, subscriptionStatusCopy } from '../utils/billingStore';
+import { billingPlans, billingStore, getPlanDisplayName, subscriptionStatusCopy } from '../utils/billingStore';
 
 const formatDate = (value) => {
   if (!value) {
@@ -48,7 +48,7 @@ function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout,
       </ul>
       {isFree ? (
         <Link className="billing-secondary-action" to="/dashboard">
-          Keep free plan
+          Keep Free
         </Link>
       ) : (
         <button className="billing-primary-action" type="button" disabled={isProcessing || !isAvailable} onClick={() => onCheckout(plan.id)}>
@@ -101,9 +101,9 @@ function BillingPage({ currentUser, onLogout }) {
   const status = billing?.subscription?.status || 'none';
   const statusLabel = subscriptionStatusCopy[status] || status;
   const stripeConfigured = Boolean(billing?.provider?.configured);
-  const premiumHighlights = billing?.access?.isPremium
-    ? ['Recurring renewals workspace', 'Advanced insights and reports', 'Unlimited planning capacity', 'Saved views and export tools']
-    : ['Keep free plan limits', 'Upgrade when you need deeper control', 'Manage payment details in one place', 'Invoices stay attached to the same account'];
+  const proHighlights = billing?.access?.isPremium
+    ? ['Renewal tracking is active', 'Advanced insights are active', 'Unlimited planning is active', 'Saved views and export tools are active']
+    : ['Keep Free tier limits', 'Move to Pro when you need sharper control', 'Manage payment details in one place', 'Invoices stay attached to the same account'];
 
   const handleCheckout = async (planId) => {
     setProcessingPlanId(planId);
@@ -149,14 +149,14 @@ function BillingPage({ currentUser, onLogout }) {
     <aside className="billing-sidecar">
       <article className="billing-readiness-card">
         <span>Plan value</span>
-        <h3>{billing?.access?.isPremium ? 'Premium is active' : 'Free plan is active'}</h3>
+        <h3>{billing?.access?.isPremium ? 'Pro is active' : 'Free is active'}</h3>
         <p>
           {billing?.access?.isPremium
-            ? 'Recurring control, deeper reporting, and unlimited planning are live in this workspace.'
-            : 'Free keeps manual tracking clean. Premium is there when the workspace needs more automation, analysis, and room to scale.'}
+            ? 'Renewal control, deeper reporting, and unlimited planning are live in this workspace.'
+            : 'Free keeps manual tracking clean. Pro steps in when the workspace needs stronger automation, clearer insight, and more room to grow.'}
         </p>
         <div className="billing-config-list">
-          {premiumHighlights.map((item) => (
+          {proHighlights.map((item) => (
             <span key={item}>{item}</span>
           ))}
         </div>
@@ -179,14 +179,14 @@ function BillingPage({ currentUser, onLogout }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Billing"
-      pageSubtitle="Choose the right Ledgr plan, manage invoices, and keep premium access clear."
+      pageSubtitle="Choose the right Ledgr plan, manage invoices, and keep workspace access clear."
       rail={rail}
     >
       <section className="billing-studio-hero">
         <div>
           <span className="billing-eyebrow">Subscription workspace</span>
-          <h2>{billing?.currentPlan?.name || 'Free'} plan</h2>
-          <p>See what the current plan unlocks, move to Premium when it adds real value, and keep billing changes simple.</p>
+          <h2>{getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name)} plan</h2>
+          <p>See what the current plan unlocks, move to Pro when it adds real value, and keep billing changes simple.</p>
         </div>
         <div className="billing-status-card">
           <span>Status</span>
@@ -215,7 +215,7 @@ function BillingPage({ currentUser, onLogout }) {
           <section className="billing-control-strip">
             <article>
               <span>Current plan</span>
-              <strong>{billing?.currentPlan?.name || 'Free'}</strong>
+              <strong>{getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name)}</strong>
               <p>{billing?.currentPlan?.priceLabel || '$0'} for the finance workspace and its current feature set.</p>
             </article>
             <article>
@@ -232,7 +232,7 @@ function BillingPage({ currentUser, onLogout }) {
             </article>
             <article>
               <span>Workspace access</span>
-              <strong>{billing?.access?.isPremium ? 'Premium unlocked' : 'Free limits active'}</strong>
+              <strong>{billing?.access?.isPremium ? 'Pro unlocked' : 'Free limits active'}</strong>
               <p>
                 {billing?.access?.isPremium
                   ? 'Recurring control, advanced reporting, saved transaction workflows, and unlimited planning are active.'
@@ -241,20 +241,20 @@ function BillingPage({ currentUser, onLogout }) {
             </article>
           </section>
 
-          <section className="billing-value-grid" aria-label="Premium plan value">
+          <section className="billing-value-grid" aria-label="Pro plan value">
             <article>
-              <span>Premium unlocks</span>
+              <span>Pro unlocks</span>
               <strong>Recurring command center</strong>
               <p>Track subscriptions, bills, rent, and renewals before they hit the account.</p>
             </article>
             <article>
-              <span>Premium unlocks</span>
-              <strong>Deeper analysis</strong>
+              <span>Pro unlocks</span>
+              <strong>Sharper analysis</strong>
               <p>Use server-backed insights to understand concentration, pace, and cash flow changes.</p>
             </article>
             <article>
-              <span>Premium unlocks</span>
-              <strong>Power workflows</strong>
+              <span>Pro unlocks</span>
+              <strong>Less manual cleanup</strong>
               <p>Save ledger views, export data, and use smarter planning signals across budgets and goals.</p>
             </article>
           </section>

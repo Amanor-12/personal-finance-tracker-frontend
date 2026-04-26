@@ -171,7 +171,7 @@ function FinanceLayout({
         label: item.label,
         note:
           item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading
-            ? 'Premium page'
+            ? 'Pro page'
             : 'Open page',
         section: 'Pages',
         to: item.to,
@@ -190,7 +190,7 @@ function FinanceLayout({
       {
         icon: 'recurring',
         label: 'Add recurring payment',
-        note: hasFeature('recurringPayments') ? 'Open subscriptions and track a fixed bill' : 'Premium feature',
+        note: hasFeature('recurringPayments') ? 'Open subscriptions and track a fixed bill' : 'Pro feature',
         section: 'Actions',
         to: '/recurring',
       },
@@ -267,7 +267,7 @@ function FinanceLayout({
                     </span>
                     <span className="ref-nav-label">{item.label}</span>
                     {item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? (
-                      <small className="ref-nav-badge">Premium</small>
+                      <small className="ref-nav-badge">Pro</small>
                     ) : null}
                   </NavLink>
                 ) : (

@@ -252,7 +252,7 @@ function ReportsPage({ currentUser, onLogout }) {
       <article className="ref-panel reports-rail-card reports-rail-card-dark">
         <span className="reports-rail-kicker">Signal strength</span>
         <h3>{summary.transactionCount ? 'Analysis ready' : 'Waiting for activity'}</h3>
-        <p>Insights stay premium when the page answers real questions instead of showing empty chart noise.</p>
+        <p>Insights stay worth paying for when the page answers real questions instead of showing empty chart noise.</p>
         <div className="reports-rail-meter">
           <span style={{ '--reports-meter': `${analyticsCoverage}%` }} />
         </div>
@@ -275,7 +275,7 @@ function ReportsPage({ currentUser, onLogout }) {
       currentUser={currentUser}
       onLogout={onLogout}
       pageTitle="Insights"
-      pageSubtitle="Premium reporting that stays quiet until real activity exists."
+      pageSubtitle="Advanced reporting that stays quiet until real activity exists."
       primaryActionLabel={!isBillingLoading && !hasReportsAccess ? 'Upgrade' : undefined}
       onPrimaryAction={!isBillingLoading && !hasReportsAccess ? () => navigate('/pricing') : undefined}
       rail={rail}
@@ -288,9 +288,9 @@ function ReportsPage({ currentUser, onLogout }) {
 
       {!isBillingLoading && !hasReportsAccess ? (
         <FeatureGate
-          eyebrow="Premium access"
+          eyebrow="Pro access"
           features={['Server-backed reporting', 'Date-range analytics', 'Merchant concentration analysis', 'Budget pressure and recurring-load insight']}
-          helper="Insights are part of Ledgr Premium because this is where customers move from recording money to understanding it. Upgrade to unlock backend-powered reporting across income, spending, merchants, and cash flow."
+          helper="Insights are part of Ledgr Pro because this is where customers move from recording money to understanding it. Upgrade to unlock backend-powered reporting across income, spending, merchants, and cash flow."
           title="Unlock advanced reporting"
         />
       ) : null}
@@ -313,12 +313,12 @@ function ReportsPage({ currentUser, onLogout }) {
 
           <PremiumPanel eyebrow="Analysis controls" title="Ask a real finance question">
             <section className="reports-command-deck">
-              <div className="reports-command-head">
-                <div>
-                  <span className="reports-chip">Premium workflow</span>
-                  <h3>Change the range, compare pressure points, and let the page surface what matters.</h3>
-                  <p>The value of Premium is not more charts. It is faster answers: what is drifting, what is concentrated, and what deserves action next.</p>
-                </div>
+                <div className="reports-command-head">
+                  <div>
+                    <span className="reports-chip">Pro workflow</span>
+                    <h3>Change the range, compare pressure points, and let the page surface what matters.</h3>
+                    <p>The value of Pro is not more charts. It is faster answers: what is drifting, what is concentrated, and what deserves action next.</p>
+                  </div>
                 <span>{summary.transactionCount} transaction{summary.transactionCount === 1 ? '' : 's'} in view</span>
               </div>
 

@@ -261,9 +261,9 @@ function RecurringPage({ currentUser, onLogout }) {
 
         {!isBillingLoading && !hasRecurringAccess ? (
           <FeatureGate
-            eyebrow="Premium access"
+            eyebrow="Pro access"
             features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Monthly fixed-cost view', 'Annualized commitment view']}
-            helper="Recurring payments are part of Ledgr Premium because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
+            helper="Recurring payments are part of Ledgr Pro because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
             title="Unlock recurring payment tracking"
           />
         ) : null}
@@ -297,7 +297,7 @@ function RecurringPage({ currentUser, onLogout }) {
               <section className="recurring-command-deck">
                 <div className="recurring-workbench-head">
                   <div>
-                    <span className="recurring-chip">Premium workflow</span>
+                    <span className="recurring-chip">Pro workflow</span>
                     <h3>Search, sort, and triage fixed costs before they become noise.</h3>
                     <p>Keep upcoming charges, missing account links, and biggest monthly commitments visible in one command surface.</p>
                   </div>

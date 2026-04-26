@@ -12,30 +12,52 @@ export const billingPlans = [
   },
   {
     id: 'premium_monthly',
-    name: 'Premium',
+    name: 'Pro',
     eyebrow: 'Monthly',
     interval: 'monthly',
     price: '$8',
     suffix: '/ month',
-    description: 'Recurring control, deeper analysis, and more room to plan.',
+    description: 'Sharper control, deeper insight, and less manual cleanup.',
     features: [
-      'Recurring renewals workspace',
-      'Server-backed reports and insights',
+      'Renewal tracking for bills and subscriptions',
+      'Server-backed insights and trend reporting',
       'Unlimited accounts, budgets, and goals',
-      'CSV export, saved views, and planning intelligence',
+      'CSV export, saved views, and smarter planning guidance',
     ],
   },
   {
     id: 'premium_annual',
-    name: 'Premium Annual',
+    name: 'Pro Annual',
     eyebrow: 'Best value',
     interval: 'annual',
     price: '$72',
     suffix: '/ year',
-    description: 'Premium access with a lower annual price.',
-    features: ['Everything in Premium', 'Annual savings', 'Invoice history', 'Plan management'],
+    description: 'Pro access with a lower annual price.',
+    features: ['Everything in Pro', 'Annual savings', 'Invoice history', 'Plan management'],
   },
 ];
+
+export const getPlanDisplayName = (planId, fallbackName = '') => {
+  if (planId === 'free') {
+    return 'Free';
+  }
+
+  if (planId === 'premium_monthly') {
+    return 'Pro';
+  }
+
+  if (planId === 'premium_annual') {
+    return 'Pro Annual';
+  }
+
+  if (typeof fallbackName === 'string' && fallbackName.trim()) {
+    return fallbackName
+      .replace(/^premium annual$/i, 'Pro Annual')
+      .replace(/^premium$/i, 'Pro');
+  }
+
+  return fallbackName || 'Free';
+};
 
 export const subscriptionStatusCopy = {
   active: 'Active',
