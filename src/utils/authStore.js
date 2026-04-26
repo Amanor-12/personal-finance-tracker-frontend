@@ -3,8 +3,17 @@ import { sessionStore } from './sessionStore';
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
-const resolveSessionPayload = (payload) => {
-  const candidates = [payload, payload?.session, payload?.data, payload?.auth, payload?.result];
+const resolveTokenPayload = (payload) => {
+  const candidates = [
+    payload,
+    payload?.session,
+    payload?.data,
+    payload?.data?.session,
+    payload?.auth,
+    payload?.auth?.session,
+    payload?.result,
+    payload?.result?.session,
+  ];
 
   for (const candidate of candidates) {
     if (!candidate) {
@@ -17,26 +26,52 @@ const resolveSessionPayload = (payload) => {
       candidate.access_token ||
       candidate.jwt ||
       '';
-    const user = candidate.user || candidate.profile || candidate.account || null;
 
-    if (token && user) {
-      return {
-        token,
-        user,
-      };
+    if (token) {
+      return token;
     }
   }
 
-  return null;
+  return '';
+};
+
+const resolveSessionPayload = (payload) => {
+  const token = resolveTokenPayload(payload);
+  const user = resolveUserPayload(payload);
+
+  return token && user
+    ? {
+        token,
+        user,
+      }
+    : null;
 };
 
 const resolveUserPayload = (payload) =>
   payload?.user ||
   payload?.profile ||
   payload?.account ||
+  payload?.session?.user ||
+  payload?.session?.profile ||
+  payload?.session?.account ||
   payload?.data?.user ||
   payload?.data?.profile ||
   payload?.data?.account ||
+  payload?.data?.session?.user ||
+  payload?.data?.session?.profile ||
+  payload?.data?.session?.account ||
+  payload?.auth?.user ||
+  payload?.auth?.profile ||
+  payload?.auth?.account ||
+  payload?.auth?.session?.user ||
+  payload?.auth?.session?.profile ||
+  payload?.auth?.session?.account ||
+  payload?.result?.user ||
+  payload?.result?.profile ||
+  payload?.result?.account ||
+  payload?.result?.session?.user ||
+  payload?.result?.session?.profile ||
+  payload?.result?.session?.account ||
   null;
 
 export const authStore = {
