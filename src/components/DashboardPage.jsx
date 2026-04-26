@@ -339,7 +339,7 @@ function DashboardPage({ currentUser, onLogout }) {
         : 'Plus adds subscriptions, rent, and fixed charges in one renewal queue.',
       readyCopy: hasRecurringAccess
         ? 'Upcoming renewals are already in view.'
-        : 'Upgrade to unlock recurring control before charges land.',
+        : 'Move to Plus to unlock recurring control before charges land.',
       locked: !hasRecurringAccess,
       actionLabel: hasRecurringAccess ? undefined : 'Unlock',
       requiredTier: 'Plus',

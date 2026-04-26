@@ -268,7 +268,7 @@ function AccountsPage({ currentUser, onLogout }) {
         onLogout={onLogout}
         pageTitle="Wallets"
         pageSubtitle="A private vault for every place your money lives."
-        primaryActionLabel={!isBillingLoading && !canCreateAccount ? 'Upgrade' : '+ Add account'}
+        primaryActionLabel={!isBillingLoading && !canCreateAccount ? 'See plans' : '+ Add account'}
         onPrimaryAction={!isBillingLoading && !canCreateAccount ? () => navigate('/pricing') : openAddDialog}
         rail={rail}
       >
@@ -306,7 +306,7 @@ function AccountsPage({ currentUser, onLogout }) {
         <section className="accounts-wallet-secondary" aria-label="Account workspace tools">
           {!isBillingLoading && accountLimit !== null ? (
             <ResourceLimitCard
-              body="Free workspaces can keep a small vault. Upgrade when you need more accounts for separate cash, cards, savings, or investments."
+              body="Free workspaces can keep a small vault. Move to Plus when you need more accounts for separate cash, cards, savings, or investments."
               limit={accountLimit}
               resourceLabel="active accounts"
               usage={accountUsage}
