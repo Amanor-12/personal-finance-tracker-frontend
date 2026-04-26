@@ -172,7 +172,7 @@ function PricingPage({ currentUser }) {
           <span className="pricing-eyebrow">Ledgr plans</span>
           <h1>Start free. Move to Plus for control. Move to Pro for intelligence.</h1>
           <p>
-            Ledgr Free stays useful for manual tracking. Plus becomes the everyday paid workspace. Pro becomes the high-control tier for customers who want deeper analysis, forecasting, and premium support.
+            Free stays useful for manual tracking. Plus is for stronger control. Pro is for deeper analysis, forecasting, and higher-touch support.
           </p>
         </div>
         <div className="pricing-toggle" aria-label="Plan framing">

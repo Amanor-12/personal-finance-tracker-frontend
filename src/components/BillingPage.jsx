@@ -231,7 +231,7 @@ function BillingPage({ currentUser, onLogout }) {
             </article>
             <article>
               <span>Customer portal</span>
-              <strong>{stripeConfigured ? 'Available' : 'Coming online'}</strong>
+              <strong>{stripeConfigured ? 'Available' : 'Unavailable'}</strong>
               <button className="billing-secondary-action" type="button" disabled={isOpeningPortal || !stripeConfigured} onClick={handlePortal}>
                 {isOpeningPortal ? 'Opening...' : 'Manage billing'}
               </button>
@@ -264,9 +264,9 @@ function BillingPage({ currentUser, onLogout }) {
 
           {!stripeConfigured ? (
             <section className="billing-empty-state">
-              <span>Payments not live yet</span>
-              <h3>Plan structure is ready before checkout goes live.</h3>
-              <p>Stripe checkout, invoices, and the customer portal will activate once billing keys are configured.</p>
+              <span>Checkout unavailable</span>
+              <h3>Billing actions will appear once payments are configured.</h3>
+              <p>Plan structure is ready. Stripe checkout, invoices, and the customer portal will activate after billing keys are connected.</p>
             </section>
           ) : null}
 

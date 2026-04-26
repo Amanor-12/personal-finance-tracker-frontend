@@ -570,7 +570,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <p>
                     {hasPaidExports
                       ? 'CSV workflows belong to the paid operating tiers. The backend export route still needs to become the production source of truth.'
-                      : 'Exports should appear once customers move into Plus, where heavier cleanup and reporting workflows become worth paying for.'}
+                      : 'Exports unlock in Plus, where heavier cleanup and reporting workflows start saving real time.'}
                   </p>
                 </div>
                 <div>
@@ -579,7 +579,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <p>
                     {hasProControls
                       ? 'Pro is where forecasting, smarter planning, and higher-control support should feel cohesive across the app.'
-                      : 'Pro should be the intelligence tier, not just another badge. This area stays honest until those controls are fully backend-backed.'}
+                      : 'Pro should be the intelligence tier, not just another badge. These controls stay honest until they are fully backend-backed.'}
                   </p>
                 </div>
                 <div className="settings-danger-zone">
