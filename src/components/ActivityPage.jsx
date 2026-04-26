@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import FinanceLayout from './FinanceLayout';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
@@ -108,6 +109,7 @@ function ActivitySkeleton() {
 }
 
 function ActivityPage({ currentUser, onLogout }) {
+  const { hasFeature, isPro, tier } = useBillingAccess();
   const [records, setRecords] = useState({
     accounts: [],
     budgets: [],
@@ -195,6 +197,7 @@ function ActivityPage({ currentUser, onLogout }) {
     ],
     [records]
   );
+  const latestEvent = visibleEvents[0] || events[0] || null;
 
   const rail = (
     <aside className="activity-signal-rail">
@@ -213,6 +216,18 @@ function ActivityPage({ currentUser, onLogout }) {
             </div>
           ))}
         </div>
+      </article>
+
+      <article className="activity-signal-card">
+        <span>Tier lens</span>
+        <h3>{isPro ? 'Pro audit context' : hasFeature('reports') ? 'Plus audit context' : 'Free audit context'}</h3>
+        <p>
+          {isPro
+            ? 'Activity should support higher-control review before opening deeper reporting and forecasting.'
+            : hasFeature('reports')
+              ? 'This stream should help paid customers move quickly between renewals, reporting, and the transaction ledger.'
+              : 'Free keeps activity simple: review changes, then jump into the correct page to act there.'}
+        </p>
       </article>
     </aside>
   );
@@ -237,6 +252,46 @@ function ActivityPage({ currentUser, onLogout }) {
       </section>
 
       <section className="activity-ledger">
+        <div className="billing-value-grid" aria-label="Activity guidance">
+          <article>
+            <span>Latest signal</span>
+            <strong>{latestEvent ? latestEvent.title : 'Nothing recorded yet'}</strong>
+            <p>
+              {latestEvent
+                ? `${activityTypes[latestEvent.type]?.label || 'Record'} updated ${formatEventDate(latestEvent.date)}.`
+                : 'The timeline will stay empty until real accounts, transactions, budgets, goals, or renewals are saved.'}
+            </p>
+          </article>
+          <article>
+            <span>Best next move</span>
+            <strong>
+              {records.transactions.length
+                ? 'Review the ledger first'
+                : records.accounts.length
+                  ? 'Add the first transaction'
+                  : 'Create the first account'}
+            </strong>
+            <p>
+              {records.transactions.length
+                ? 'Transactions usually create the fastest path into budgets, reports, and recurring analysis.'
+                : records.accounts.length
+                  ? 'Once an account exists, the activity stream becomes more meaningful after the first money movement.'
+                  : 'Activity only becomes useful after the workspace has a real money location to work from.'}
+            </p>
+          </article>
+          <article>
+            <span>Paid layer</span>
+            <strong>{tier === 'pro' ? 'Pro depth active' : hasFeature('reports') ? 'Plus depth active' : 'Free foundation active'}</strong>
+            <p>
+              {tier === 'pro'
+                ? 'Use this stream as the fast audit surface before opening deeper insight and planning pages.'
+                : hasFeature('reports')
+                  ? 'Paid customers can move from this timeline into renewals, reports, and exports without losing context.'
+                  : 'Free keeps the timeline clean while paid layers add stronger analysis and operating workflows.'}
+            </p>
+          </article>
+        </div>
+
         <div className="activity-workbench-head">
           <div>
             <span className="activity-eyebrow">Recent events</span>

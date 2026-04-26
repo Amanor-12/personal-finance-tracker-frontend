@@ -53,6 +53,24 @@ const tierSignatures = [
   },
 ];
 
+const upgradeMoments = [
+  {
+    eyebrow: 'Stay on Free',
+    title: 'When manual tracking still feels calm',
+    body: 'Free is enough when customers only need a clean place to record accounts, transactions, budgets, and goals without operational pressure.',
+  },
+  {
+    eyebrow: 'Move to Plus',
+    title: 'When fixed costs and exports start costing time',
+    body: 'Plus becomes worth it when recurring bills, CSV workflows, and unlimited planning save enough cleanup to justify a paid workspace.',
+  },
+  {
+    eyebrow: 'Move to Pro',
+    title: 'When decisions need better forward signal',
+    body: 'Pro becomes worth it when customers want stronger analysis, forecasting, and more confidence before money drift turns into a problem.',
+  },
+];
+
 const pricingFaq = [
   {
     question: 'Can I stay on the free plan long term?',
@@ -110,7 +128,6 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
 
 function PricingPage({ currentUser }) {
   const navigate = useNavigate();
-  const [billingCadence, setBillingCadence] = useState('monthly');
   const [processingPlanId, setProcessingPlanId] = useState('');
   const [message, setMessage] = useState('');
 
@@ -194,6 +211,16 @@ function PricingPage({ currentUser }) {
         {tierSignatures.map((item) => (
           <article key={item.plan}>
             <span>{item.plan}</span>
+            <strong>{item.title}</strong>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="pricing-proof-grid" aria-label="Upgrade timing guidance">
+        {upgradeMoments.map((item) => (
+          <article key={item.title}>
+            <span>{item.eyebrow}</span>
             <strong>{item.title}</strong>
             <p>{item.body}</p>
           </article>

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
+import { useBillingAccess } from '../context/BillingAccessContext';
 import FinanceLayout from './FinanceLayout';
 import { accountStore } from '../utils/accountStore';
 import { authStore } from '../utils/authStore';
@@ -86,6 +87,7 @@ function SectionHeader({ eyebrow, title, body }) {
 }
 
 function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
+  const { tier } = useBillingAccess();
   const storedSettings = useMemo(
     () => settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName),
     [currentUser?.fullName, currentUser?.id]
@@ -280,6 +282,8 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     workspaceStats.budgets +
     workspaceStats.goals +
     workspaceStats.recurring;
+  const hasPaidExports = tier === 'plus' || tier === 'pro';
+  const hasProControls = tier === 'pro';
 
   const rail = (
     <aside className="settings-trust-rail">
@@ -298,6 +302,18 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
           <span>{workspaceStats.transactions} transactions</span>
           <span>{workspaceStats.budgets + workspaceStats.goals + workspaceStats.recurring} plans</span>
         </div>
+      </article>
+
+      <article className="settings-trust-card">
+        <span>Tier posture</span>
+        <strong>{tier === 'pro' ? 'Pro controls' : tier === 'plus' ? 'Plus controls' : 'Free controls'}</strong>
+        <p>
+          {tier === 'pro'
+            ? 'Forecasting, smarter planning, and higher-control support pathways should feel cohesive here.'
+            : tier === 'plus'
+              ? 'Exports, recurring workflows, and unlimited planning should feel operationally stronger here.'
+              : 'Free keeps the workspace clean and safe before paid controls become necessary.'}
+        </p>
       </article>
     </aside>
   );
@@ -508,14 +524,25 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
             <article className="settings-editor-card settings-split-card">
               <SectionHeader
                 eyebrow="Subscription"
-                title="Billing belongs in a dedicated workspace"
-                body="Plan state, checkout, invoices, and Stripe portal access need their own audit-friendly surface."
+                title="Billing stays separate from finance editing"
+                body="Plan state, checkout, invoices, and payment methods belong in a dedicated billing workspace with clearer audit boundaries."
               />
               <div className="settings-status-stack">
                 <div>
+                  <span>Current tier</span>
+                  <strong>{tier === 'pro' ? 'Pro' : tier === 'plus' ? 'Plus' : 'Free'}</strong>
+                  <p>
+                    {tier === 'pro'
+                      ? 'The workspace should feel like a higher-control finance product with deeper analysis and priority handling.'
+                      : tier === 'plus'
+                        ? 'The workspace should feel stronger for recurring control, exports, and everyday money operations.'
+                        : 'Free stays focused on clean manual tracking until paid control is genuinely worth it.'}
+                  </p>
+                </div>
+                <div>
                   <span>Billing area</span>
-                  <strong>Stripe-ready</strong>
-                  <p>Open the billing workspace to review plan status and manage invoices.</p>
+                  <strong>Dedicated workspace</strong>
+                  <p>Open the billing area to review subscription state, invoices, and the exact difference between Free, Plus, and Pro.</p>
                 </div>
                 <Link className="settings-save-button settings-link-button" to="/billing">
                   Open billing
@@ -529,7 +556,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <SectionHeader
                 eyebrow="Data"
                 title="Export and deletion guardrails"
-                body="High-risk actions should stay explicit, confirmed, and backed by safe backend behavior."
+                body="High-risk actions should stay explicit, confirmed, and backed by safe backend behavior instead of pretending the frontend alone is enough."
               />
               <div className="settings-data-grid">
                 <div>
@@ -539,8 +566,21 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                 </div>
                 <div>
                   <span>Export</span>
-                  <strong>API planned</strong>
-                  <p>CSV/export should be served by a backend route before launch.</p>
+                  <strong>{hasPaidExports ? 'Plus unlocked' : 'Free locked'}</strong>
+                  <p>
+                    {hasPaidExports
+                      ? 'CSV workflows belong to the paid operating tiers. The backend export route still needs to become the production source of truth.'
+                      : 'Exports should appear once customers move into Plus, where heavier cleanup and reporting workflows become worth paying for.'}
+                  </p>
+                </div>
+                <div>
+                  <span>Advanced controls</span>
+                  <strong>{hasProControls ? 'Pro posture' : 'Upgrade path'}</strong>
+                  <p>
+                    {hasProControls
+                      ? 'Pro is where forecasting, smarter planning, and higher-control support should feel cohesive across the app.'
+                      : 'Pro should be the intelligence tier, not just another badge. This area stays honest until those controls are fully backend-backed.'}
+                  </p>
                 </div>
                 <div className="settings-danger-zone">
                   <span>Delete account</span>

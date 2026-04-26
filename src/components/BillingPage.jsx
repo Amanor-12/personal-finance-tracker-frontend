@@ -301,7 +301,7 @@ function BillingPage({ currentUser, onLogout }) {
             <article>
               <span>What it means</span>
               <strong>How the tier behaves day to day</strong>
-              <p>{activeTierModeRows.join(' • ')}</p>
+              <p>{activeTierModeRows.join(' / ')}</p>
             </article>
             <article>
               <span>Upgrade path</span>
@@ -328,6 +328,14 @@ function BillingPage({ currentUser, onLogout }) {
               />
             ))}
           </section>
+
+          {!stripeConfigured ? (
+            <section className="billing-empty-state">
+              <span>Payments not live yet</span>
+              <h3>Plan structure is ready before checkout goes live.</h3>
+              <p>Free, Plus, and Pro behavior can still be reviewed in the workspace. Stripe checkout and invoice handling will activate once billing keys are configured.</p>
+            </section>
+          ) : null}
 
           <section className="billing-invoices">
             <div className="billing-section-head">
@@ -362,3 +370,4 @@ function BillingPage({ currentUser, onLogout }) {
 }
 
 export default BillingPage;
+
