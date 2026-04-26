@@ -4,30 +4,34 @@ import BrandLogo from './BrandLogo';
 import { billingPlans, billingStore } from '../utils/billingStore';
 
 const comparisonRows = [
-  { label: 'Best for', free: 'Manual tracking', premium: 'Active money management' },
-  { label: 'Accounts', free: '2 active', premium: 'Unlimited' },
-  { label: 'Budgets', free: 'Up to 6', premium: 'Unlimited' },
-  { label: 'Goals', free: 'Up to 3', premium: 'Unlimited' },
-  { label: 'Recurring bill and renewal control', free: '-', premium: 'Included' },
-  { label: 'Server-backed reports and insights', free: '-', premium: 'Included' },
-  { label: 'Saved views, export, and planning intelligence', free: '-', premium: 'Included' },
+  { label: 'Basic tracking', free: 'Included', plus: 'Included', pro: 'Included' },
+  { label: 'Budgets', free: 'Limited', plus: 'Unlimited', pro: 'Unlimited' },
+  { label: 'Savings goals', free: 'Limited', plus: 'Unlimited', pro: 'Unlimited' },
+  { label: 'Recurring bills', free: '-', plus: 'Included', pro: 'Included' },
+  { label: 'Advanced analytics', free: '-', plus: 'Included', pro: 'Included' },
+  { label: 'PDF/CSV export', free: '-', plus: 'Included', pro: 'Included' },
+  { label: 'AI spending insights', free: '-', plus: 'Basic', pro: 'Advanced' },
+  { label: 'Smart budget generation', free: '-', plus: 'Limited', pro: 'Included' },
+  { label: 'Financial forecast', free: '-', plus: '-', pro: 'Included' },
+  { label: 'Priority support', free: '-', plus: '-', pro: 'Included' },
+  { label: 'Early access features', free: '-', plus: '-', pro: 'Included' },
 ];
 
-const premiumValueRows = [
+const tierValueRows = [
   {
-    eyebrow: 'Recurring control',
-    title: 'See bills before they hit',
-    body: 'Pro keeps subscriptions, rent, insurance, and other fixed charges in one renewal workspace with due-soon context.',
+    eyebrow: 'Plus value',
+    title: 'Control recurring costs before they hit',
+    body: 'Plus gives active customers one place to manage subscriptions, rent, insurance, and other fixed charges with export-ready workflows.',
   },
   {
-    eyebrow: 'Advanced insights',
-    title: 'Understand what is changing',
-    body: 'Pro reports answer real questions about category concentration, merchant exposure, pace, and net cash flow.',
+    eyebrow: 'Pro intelligence',
+    title: 'Move from tracking money to understanding it',
+    body: 'Pro adds stronger reporting, better signals, and forecasting so customers can see drift before it becomes a problem.',
   },
   {
-    eyebrow: 'Power workflows',
-    title: 'Do less manual cleanup',
-    body: 'Pro adds saved ledger views, CSV export, and stronger planning intelligence across budgets and goals.',
+    eyebrow: 'Real operations',
+    title: 'Pay for less manual cleanup, not just more pages',
+    body: 'Both paid tiers save time, while Pro becomes the high-control workspace for customers who want deeper planning and premium support.',
   },
 ];
 
@@ -37,8 +41,8 @@ const pricingFaq = [
     answer: 'Yes. Free is designed for manual tracking with starter limits, not as a forced trial.',
   },
   {
-    question: 'What makes Pro worth paying for?',
-    answer: 'Pro saves time and gives better control: recurring bill tracking, backend-powered insights, less manual cleanup, and more planning room.',
+    question: 'What is the difference between Plus and Pro?',
+    answer: 'Plus is for active manual money management: recurring bills, exports, and unlimited planning. Pro adds stronger intelligence, forecasting, priority support, and earlier access to new tools.',
   },
   {
     question: 'Do I lose data if I upgrade later?',
@@ -48,12 +52,13 @@ const pricingFaq = [
 
 function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
   const isFree = plan.id === 'free';
+  const isPaid = !isFree;
 
   return (
     <article className={`pricing-card${isFeatured ? ' is-featured' : ''}`}>
       <div className="pricing-card-head">
         <span className="pricing-eyebrow">{plan.eyebrow}</span>
-        {isFeatured ? <strong>Best for active customers</strong> : null}
+        {isFeatured ? <strong>{plan.name === 'Plus' ? 'Best for active customers' : 'Best for high-control customers'}</strong> : null}
       </div>
       <h2>{plan.name}</h2>
       <p>{plan.description}</p>
@@ -72,7 +77,7 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
         </Link>
       ) : currentUser ? (
         <button className="pricing-primary-button" type="button" disabled={isProcessing} onClick={() => onCheckout(plan.id)}>
-          {isProcessing ? 'Starting checkout...' : 'Start checkout'}
+          {isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
         </button>
       ) : (
         <Link className="pricing-primary-button" to="/signup">
@@ -90,9 +95,8 @@ function PricingPage({ currentUser }) {
   const [message, setMessage] = useState('');
 
   const visiblePlans = useMemo(() => {
-    const premiumPlanId = billingCadence === 'annual' ? 'premium_annual' : 'premium_monthly';
-    return billingPlans.filter((plan) => plan.id === 'free' || plan.id === premiumPlanId);
-  }, [billingCadence]);
+    return billingPlans;
+  }, []);
 
   const handleCheckout = async (planId) => {
     setProcessingPlanId(planId);
@@ -129,26 +133,14 @@ function PricingPage({ currentUser }) {
       <section className="pricing-market-hero">
         <div>
           <span className="pricing-eyebrow">Ledgr plans</span>
-          <h1>Start free. Move to Pro when money management needs more control.</h1>
+          <h1>Start free. Move to Plus for control. Move to Pro for intelligence.</h1>
           <p>
-            Ledgr Free stays useful for manual tracking. Pro becomes worth paying for when customers need recurring control,
-            deeper reporting, transaction power tools, and unlimited planning space.
+            Ledgr Free stays useful for manual tracking. Plus becomes the everyday paid workspace. Pro becomes the high-control tier for customers who want deeper analysis, forecasting, and premium support.
           </p>
         </div>
-        <div className="pricing-toggle" aria-label="Billing cadence">
-          <button
-            className={billingCadence === 'monthly' ? 'is-active' : ''}
-            type="button"
-            onClick={() => setBillingCadence('monthly')}
-          >
-            Monthly
-          </button>
-          <button
-            className={billingCadence === 'annual' ? 'is-active' : ''}
-            type="button"
-            onClick={() => setBillingCadence('annual')}
-          >
-            Annual
+        <div className="pricing-toggle" aria-label="Plan framing">
+          <button className="is-active" type="button">
+            Real tiers
           </button>
         </div>
       </section>
@@ -169,7 +161,7 @@ function PricingPage({ currentUser }) {
       </section>
 
       <section className="pricing-proof-grid">
-        {premiumValueRows.map((row) => (
+        {tierValueRows.map((row) => (
           <article key={row.title}>
             <span>{row.eyebrow}</span>
             <strong>{row.title}</strong>
@@ -188,7 +180,8 @@ function PricingPage({ currentUser }) {
             <div key={row.label}>
               <span>{row.label}</span>
               <strong>{row.free}</strong>
-              <strong>{row.premium}</strong>
+              <strong>{row.plus}</strong>
+              <strong>{row.pro}</strong>
             </div>
           ))}
         </div>

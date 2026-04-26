@@ -11,29 +11,36 @@ export const billingPlans = [
     features: ['Up to 2 active accounts', 'Manual transactions and categories', 'Up to 6 budgets', 'Up to 3 goals'],
   },
   {
-    id: 'premium_monthly',
-    name: 'Pro',
+    id: 'plus_monthly',
+    checkoutPlanId: 'premium_monthly',
+    name: 'Plus',
     eyebrow: 'Monthly',
     interval: 'monthly',
-    price: '$8',
+    price: '$9',
     suffix: '/ month',
-    description: 'Sharper control, deeper insight, and less manual cleanup.',
+    description: 'Recurring control, export tools, and more planning room for active customers.',
     features: [
       'Renewal tracking for bills and subscriptions',
-      'Server-backed insights and trend reporting',
       'Unlimited accounts, budgets, and goals',
-      'CSV export, saved views, and smarter planning guidance',
+      'CSV export and saved transaction views',
+      'Basic AI spending insights',
     ],
   },
   {
-    id: 'premium_annual',
-    name: 'Pro Annual',
+    id: 'pro_monthly',
+    checkoutPlanId: 'premium_annual',
+    name: 'Pro',
     eyebrow: 'Best value',
-    interval: 'annual',
-    price: '$72',
-    suffix: '/ year',
-    description: 'Pro access with a lower annual price.',
-    features: ['Everything in Pro', 'Annual savings', 'Invoice history', 'Plan management'],
+    interval: 'monthly',
+    price: '$19',
+    suffix: '/ month',
+    description: 'Advanced intelligence, forecasting, and the highest-control Ledgr workspace.',
+    features: [
+      'Everything in Plus',
+      'Advanced backend-powered insights',
+      'Smart budget generation and financial forecasting',
+      'Priority support and early-access features',
+    ],
   },
 ];
 
@@ -42,18 +49,19 @@ export const getPlanDisplayName = (planId, fallbackName = '') => {
     return 'Free';
   }
 
-  if (planId === 'premium_monthly') {
-    return 'Pro';
+  if (planId === 'plus_monthly' || planId === 'premium_monthly') {
+    return 'Plus';
   }
 
-  if (planId === 'premium_annual') {
-    return 'Pro Annual';
+  if (planId === 'pro_monthly' || planId === 'premium_annual') {
+    return 'Pro';
   }
 
   if (typeof fallbackName === 'string' && fallbackName.trim()) {
     return fallbackName
-      .replace(/^premium annual$/i, 'Pro Annual')
-      .replace(/^premium$/i, 'Pro');
+      .replace(/^premium annual$/i, 'Pro')
+      .replace(/^premium monthly$/i, 'Plus')
+      .replace(/^premium$/i, 'Plus');
   }
 
   return fallbackName || 'Free';
@@ -78,14 +86,18 @@ export const defaultBillingAccess = {
     prioritySupport: false,
     recurringPayments: false,
     reports: false,
+    smartBudgeting: false,
+    forecasting: false,
+    earlyAccess: false,
   },
   isPremium: false,
+  tier: 'free',
   limits: {
     accounts: 2,
     budgets: 6,
     goals: 3,
   },
-  upgradePlanId: 'premium_monthly',
+  upgradePlanId: 'plus_monthly',
   usage: {
     accounts: 0,
     budgets: 0,
@@ -97,21 +109,27 @@ export const defaultBillingAccess = {
 const getFallbackAccess = (billing) => {
   const currentPlanId = billing?.currentPlan?.id || 'free';
   const status = billing?.subscription?.status || 'none';
-  const hasPremiumAccess =
+  const hasPaidAccess =
     currentPlanId !== 'free' &&
     ['active', 'trialing', 'past_due', 'incomplete', 'unpaid'].includes(status);
 
-  if (hasPremiumAccess) {
+  if (hasPaidAccess) {
+    const isPro = currentPlanId === 'pro_monthly' || currentPlanId === 'premium_annual';
+
     return {
       ...defaultBillingAccess,
       currentPlanId,
       featureAccess: {
         billingPortal: true,
-        prioritySupport: true,
         recurringPayments: true,
-        reports: true,
+        reports: isPro,
+        smartBudgeting: isPro,
+        forecasting: isPro,
+        prioritySupport: isPro,
+        earlyAccess: isPro,
       },
       isPremium: true,
+      tier: isPro ? 'pro' : 'plus',
       limits: {
         accounts: null,
         budgets: null,
@@ -125,9 +143,20 @@ const getFallbackAccess = (billing) => {
 
 export const resolveBillingAccess = (billing) => {
   if (billing?.access) {
+    const currentPlanId = billing.access.currentPlanId || billing?.currentPlan?.id || defaultBillingAccess.currentPlanId;
+    const normalizedTier =
+      billing.access.tier ||
+      (currentPlanId === 'premium_annual' || currentPlanId === 'pro_monthly'
+        ? 'pro'
+        : currentPlanId === 'premium_monthly' || currentPlanId === 'plus_monthly'
+          ? 'plus'
+          : 'free');
+
     return {
       ...defaultBillingAccess,
       ...billing.access,
+      currentPlanId,
+      tier: normalizedTier,
       featureAccess: {
         ...defaultBillingAccess.featureAccess,
         ...(billing.access.featureAccess || {}),
@@ -155,8 +184,9 @@ export const billingStore = {
     };
   },
   async createCheckoutSession(planId) {
+    const selectedPlan = billingPlans.find((plan) => plan.id === planId);
     const payload = await apiClient.post('/api/billing/checkout', {
-      plan_id: planId,
+      plan_id: selectedPlan?.checkoutPlanId || planId,
       return_url: `${window.location.origin}/billing`,
     });
 

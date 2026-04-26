@@ -26,7 +26,7 @@ function BillingSkeleton() {
 }
 
 function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout, plan }) {
-  const isCurrent = currentPlanId === plan.id;
+  const isCurrent = currentPlanId === plan.id || currentPlanId === plan.checkoutPlanId;
   const isFree = plan.id === 'free';
 
   return (
@@ -52,7 +52,7 @@ function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout,
         </Link>
       ) : (
         <button className="billing-primary-action" type="button" disabled={isProcessing || !isAvailable} onClick={() => onCheckout(plan.id)}>
-          {!isAvailable ? 'Billing unavailable' : isProcessing ? 'Starting checkout...' : 'Start checkout'}
+          {!isAvailable ? 'Billing unavailable' : isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
         </button>
       )}
     </article>
@@ -94,16 +94,20 @@ function BillingPage({ currentUser, onLogout }) {
     () =>
       billingPlans.map((plan) => ({
         ...plan,
-        ...(billing?.plans?.find((backendPlan) => backendPlan.id === plan.id) || {}),
+        ...(billing?.plans?.find((backendPlan) => backendPlan.id === plan.id || backendPlan.id === plan.checkoutPlanId) || {}),
       })),
     [billing?.plans]
   );
   const status = billing?.subscription?.status || 'none';
   const statusLabel = subscriptionStatusCopy[status] || status;
   const stripeConfigured = Boolean(billing?.provider?.configured);
-  const proHighlights = billing?.access?.isPremium
-    ? ['Renewal tracking is active', 'Advanced insights are active', 'Unlimited planning is active', 'Saved views and export tools are active']
-    : ['Keep Free tier limits', 'Move to Pro when you need sharper control', 'Manage payment details in one place', 'Invoices stay attached to the same account'];
+  const activeTier = billing?.access?.tier || 'free';
+  const tierHighlights =
+    activeTier === 'pro'
+      ? ['Advanced insights are active', 'Forecasting and smart planning are available', 'Priority support is active', 'Early-access features are available']
+      : activeTier === 'plus'
+        ? ['Renewal tracking is active', 'Unlimited planning is active', 'Saved views and export tools are active', 'Upgrade to Pro when you want deeper intelligence']
+        : ['Keep Free tier limits', 'Move to Plus for stronger control', 'Move to Pro for higher intelligence', 'Invoices stay attached to the same account'];
 
   const handleCheckout = async (planId) => {
     setProcessingPlanId(planId);
@@ -149,14 +153,16 @@ function BillingPage({ currentUser, onLogout }) {
     <aside className="billing-sidecar">
       <article className="billing-readiness-card">
         <span>Plan value</span>
-        <h3>{billing?.access?.isPremium ? 'Pro is active' : 'Free is active'}</h3>
+        <h3>{activeTier === 'pro' ? 'Pro is active' : activeTier === 'plus' ? 'Plus is active' : 'Free is active'}</h3>
         <p>
-          {billing?.access?.isPremium
-            ? 'Renewal control, deeper reporting, and unlimited planning are live in this workspace.'
-            : 'Free keeps manual tracking clean. Pro steps in when the workspace needs stronger automation, clearer insight, and more room to grow.'}
+          {activeTier === 'pro'
+            ? 'Forecasting, advanced analysis, and the highest-control workspace are live.'
+            : activeTier === 'plus'
+              ? 'Recurring control, export tools, and unlimited planning are live in this workspace.'
+              : 'Free keeps manual tracking clean. Plus adds stronger control. Pro adds deeper intelligence and premium support.'}
         </p>
         <div className="billing-config-list">
-          {proHighlights.map((item) => (
+          {tierHighlights.map((item) => (
             <span key={item}>{item}</span>
           ))}
         </div>
@@ -186,7 +192,7 @@ function BillingPage({ currentUser, onLogout }) {
         <div>
           <span className="billing-eyebrow">Subscription workspace</span>
           <h2>{getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name)} plan</h2>
-          <p>See what the current plan unlocks, move to Pro when it adds real value, and keep billing changes simple.</p>
+          <p>See what the current plan unlocks, move up only when the added control or intelligence becomes worth it, and keep billing changes simple.</p>
         </div>
         <div className="billing-status-card">
           <span>Status</span>
@@ -232,30 +238,32 @@ function BillingPage({ currentUser, onLogout }) {
             </article>
             <article>
               <span>Workspace access</span>
-              <strong>{billing?.access?.isPremium ? 'Pro unlocked' : 'Free limits active'}</strong>
+              <strong>{activeTier === 'pro' ? 'Pro unlocked' : activeTier === 'plus' ? 'Plus unlocked' : 'Free limits active'}</strong>
               <p>
-                {billing?.access?.isPremium
-                  ? 'Recurring control, advanced reporting, saved transaction workflows, and unlimited planning are active.'
+                {activeTier === 'pro'
+                  ? 'Recurring control, advanced reporting, smart planning, forecasting, and priority support are active.'
+                  : activeTier === 'plus'
+                    ? 'Recurring control, export workflows, basic AI insights, and unlimited planning are active.'
                   : `Free includes ${billing?.access?.limits?.accounts ?? 0} accounts, ${billing?.access?.limits?.budgets ?? 0} budgets, and ${billing?.access?.limits?.goals ?? 0} goals.`}
               </p>
             </article>
           </section>
 
-          <section className="billing-value-grid" aria-label="Pro plan value">
+          <section className="billing-value-grid" aria-label="Paid plan value">
             <article>
-              <span>Pro unlocks</span>
+              <span>Plus unlocks</span>
               <strong>Recurring command center</strong>
               <p>Track subscriptions, bills, rent, and renewals before they hit the account.</p>
             </article>
             <article>
               <span>Pro unlocks</span>
-              <strong>Sharper analysis</strong>
-              <p>Use server-backed insights to understand concentration, pace, and cash flow changes.</p>
+              <strong>Sharper analysis and forecasting</strong>
+              <p>Use server-backed insights and forward-looking planning signals to understand concentration, pace, and what is likely to drift next.</p>
             </article>
             <article>
-              <span>Pro unlocks</span>
+              <span>Paid tiers unlock</span>
               <strong>Less manual cleanup</strong>
-              <p>Save ledger views, export data, and use smarter planning signals across budgets and goals.</p>
+              <p>Save ledger views, export data, and use stronger planning signals across budgets and goals.</p>
             </article>
           </section>
 
