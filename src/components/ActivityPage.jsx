@@ -4,6 +4,7 @@ import { useBillingAccess } from '../context/BillingAccessContext';
 import FinanceLayout from './FinanceLayout';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
+import { isProTier, isPlusTier } from '../utils/tierAccess';
 
 const activityTypes = {
   account: { label: 'Account', route: '/accounts' },
@@ -199,6 +200,7 @@ function ActivityPage({ currentUser, onLogout }) {
   );
   const latestEvent = visibleEvents[0] || events[0] || null;
 
+  const isPlus = isPlusTier(tier);
   const rail = (
     <aside className="activity-signal-rail">
       <article className="activity-signal-card">
@@ -281,11 +283,11 @@ function ActivityPage({ currentUser, onLogout }) {
           </article>
           <article>
             <span>Paid layer</span>
-            <strong>{tier === 'pro' ? 'Pro depth active' : hasFeature('reports') ? 'Plus depth active' : 'Free foundation active'}</strong>
+            <strong>{isPro ? 'Pro depth active' : isPlus ? 'Plus depth active' : 'Free foundation active'}</strong>
             <p>
-              {tier === 'pro'
+              {isPro
                 ? 'Use this stream as the fast audit surface before opening deeper insight and planning pages.'
-                : hasFeature('reports')
+                : isPlus
                   ? 'Paid customers can move from this timeline into renewals, reports, and exports without losing context.'
                   : 'Free keeps the timeline clean while paid layers add stronger analysis and operating workflows.'}
             </p>

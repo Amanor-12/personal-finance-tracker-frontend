@@ -12,6 +12,7 @@ import {
 } from './reports/reportUtils';
 import { useBillingAccess } from '../context/BillingAccessContext';
 import { financeStore } from '../utils/financeStore';
+import { isProTier } from '../utils/tierAccess';
 
 const safePercent = (value) => `${Math.round(Number(value) || 0)}%`;
 
@@ -41,7 +42,7 @@ function ReportsPage({ currentUser, onLogout }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const hasReportsAccess = hasFeature('reports');
-  const isPro = access.tier === 'pro';
+  const isPro = isProTier(access.tier);
 
   useEffect(() => {
     let isCancelled = false;

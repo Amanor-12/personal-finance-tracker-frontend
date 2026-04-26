@@ -9,6 +9,7 @@ import { accountStore } from '../utils/accountStore';
 import { authStore } from '../utils/authStore';
 import { financeStore } from '../utils/financeStore';
 import { settingsStore } from '../utils/settingsStore';
+import { getTierLabel, isPlusTier, isProTier } from '../utils/tierAccess';
 
 const currencyOptions = ['USD', 'CAD', 'GBP', 'EUR'];
 const weekStartOptions = ['Monday', 'Sunday'];
@@ -282,8 +283,8 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     workspaceStats.budgets +
     workspaceStats.goals +
     workspaceStats.recurring;
-  const hasPaidExports = tier === 'plus' || tier === 'pro';
-  const hasProControls = tier === 'pro';
+  const hasPaidExports = isPlusTier(tier);
+  const hasProControls = isProTier(tier);
 
   const rail = (
     <aside className="settings-trust-rail">
@@ -306,11 +307,11 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
 
       <article className="settings-trust-card">
         <span>Tier posture</span>
-        <strong>{tier === 'pro' ? 'Pro controls' : tier === 'plus' ? 'Plus controls' : 'Free controls'}</strong>
+        <strong>{getTierLabel(tier)} controls</strong>
         <p>
-          {tier === 'pro'
+          {isProTier(tier)
             ? 'Forecasting, smarter planning, and higher-control support pathways should feel cohesive here.'
-            : tier === 'plus'
+            : isPlusTier(tier)
               ? 'Exports, recurring workflows, and unlimited planning should feel operationally stronger here.'
               : 'Free keeps the workspace clean and safe before paid controls become necessary.'}
         </p>
@@ -530,11 +531,11 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <div className="settings-status-stack">
                 <div>
                   <span>Current tier</span>
-                  <strong>{tier === 'pro' ? 'Pro' : tier === 'plus' ? 'Plus' : 'Free'}</strong>
+                  <strong>{getTierLabel(tier)}</strong>
                   <p>
-                    {tier === 'pro'
+                    {isProTier(tier)
                       ? 'The workspace should feel like a higher-control finance product with deeper analysis and priority handling.'
-                      : tier === 'plus'
+                      : isPlusTier(tier)
                         ? 'The workspace should feel stronger for recurring control, exports, and everyday money operations.'
                         : 'Free stays focused on clean manual tracking until paid control is genuinely worth it.'}
                   </p>

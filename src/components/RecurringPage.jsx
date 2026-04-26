@@ -23,12 +23,13 @@ import {
 import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
+import { isProTier } from '../utils/tierAccess';
 
 function RecurringPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { access, hasFeature, isLoading: isBillingLoading, refreshBillingAccess } = useBillingAccess();
   const hasRecurringAccess = hasFeature('recurringPayments');
-  const isPro = access.tier === 'pro';
+  const isPro = isProTier(access.tier);
   const [payments, setPayments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts] = useState([]);

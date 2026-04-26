@@ -26,11 +26,12 @@ import {
 import { useBillingAccess } from '../context/BillingAccessContext';
 import { accountStore } from '../utils/accountStore';
 import { financeStore } from '../utils/financeStore';
+import { isPlusTier, isProTier } from '../utils/tierAccess';
 
 function TransactionsPage({ currentUser, onLogout }) {
   const { access } = useBillingAccess();
-  const isPlus = access.tier === 'plus' || access.tier === 'pro';
-  const isPro = access.tier === 'pro';
+  const isPlus = isPlusTier(access.tier);
+  const isPro = isProTier(access.tier);
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);

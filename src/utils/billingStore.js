@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import { normalizeTier } from './tierAccess';
 
 export const billingPlans = [
   {
@@ -144,13 +145,14 @@ const getFallbackAccess = (billing) => {
 export const resolveBillingAccess = (billing) => {
   if (billing?.access) {
     const currentPlanId = billing.access.currentPlanId || billing?.currentPlan?.id || defaultBillingAccess.currentPlanId;
-    const normalizedTier =
+    const normalizedTier = normalizeTier(
       billing.access.tier ||
       (currentPlanId === 'premium_annual' || currentPlanId === 'pro_monthly'
         ? 'pro'
         : currentPlanId === 'premium_monthly' || currentPlanId === 'plus_monthly'
           ? 'plus'
-          : 'free');
+          : 'free')
+    );
 
     const inferredFeatures =
       normalizedTier === 'pro'

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
 import { useBillingAccess } from '../context/BillingAccessContext';
 import { getPlanDisplayName } from '../utils/billingStore';
+import { getTierLabel, isPlusTier, isProTier } from '../utils/tierAccess';
 const baseFaqItems = [
   {
     question: 'Why does my workspace start empty?',
@@ -25,11 +26,11 @@ const baseFaqItems = [
 function SupportPage({ currentUser, onLogout }) {
   const { access, billing, hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const [query, setQuery] = useState('');
-  const isPlus = access.tier === 'plus' || access.tier === 'pro';
-  const isPro = access.tier === 'pro';
+  const isPlus = isPlusTier(access.tier);
+  const isPro = isProTier(access.tier);
   const hasRecurringAccess = hasFeature('recurringPayments');
   const hasReportsAccess = hasFeature('reports');
-  const planLabel = getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name || (isPro ? 'Pro' : isPlus ? 'Plus' : 'Free'));
+  const planLabel = getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name || getTierLabel(access.tier));
   const supportPaths = useMemo(
     () => [
       {

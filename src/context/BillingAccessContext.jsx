@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { billingStore, defaultBillingAccess } from '../utils/billingStore';
+import { hasTierAccess, isPlusTier, isProTier, normalizeTier } from '../utils/tierAccess';
 
 const BillingAccessContext = createContext({
   access: defaultBillingAccess,
@@ -48,14 +49,11 @@ export function BillingAccessProvider({ children, onLogout }) {
       billing,
       errorMessage,
       hasFeature: (featureKey) => Boolean(access.featureAccess?.[featureKey]),
-      hasTier: (tier) => {
-        const order = { free: 0, plus: 1, pro: 2 };
-        return (order[access.tier] || 0) >= (order[tier] || 0);
-      },
-      isPlus: access.tier === 'plus' || access.tier === 'pro',
-      isPro: access.tier === 'pro',
+      hasTier: (tier) => hasTierAccess(access.tier, tier),
+      isPlus: isPlusTier(access.tier),
+      isPro: isProTier(access.tier),
       isLoading,
-      tier: access.tier || 'free',
+      tier: normalizeTier(access.tier),
       refreshBillingAccess: loadBillingAccess,
     }),
     [access, billing, errorMessage, isLoading]
