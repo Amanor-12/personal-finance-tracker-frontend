@@ -54,7 +54,7 @@ const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
 const formatCurrency = (value) => currencyFormatter.format(value || 0);
 const formatShortDate = (value) => shortDateFormatter.format(new Date(value));
 
-const getCardTitle = (card) => card?.nickname?.trim() || `${card?.brand || 'Ledgr'} Card`;
+const getCardTitle = (card) => card?.nickname?.trim() || `${card?.brand || 'Rivo'} Card`;
 const matchesCardQuery = (card, query) =>
   !query ||
   [getCardTitle(card), card?.holderName, card?.brand, card?.last4]
@@ -108,7 +108,7 @@ function CardSearchIcon() {
 
 function WalletStackCard({ card, depth = 0, placeholder = false, isActive = false, onSelect = null }) {
   const theme = placeholder ? 'indigo' : card?.theme || 'indigo';
-  const title = placeholder ? 'Ledgr' : card?.brand || 'Card';
+  const title = placeholder ? 'Rivo' : card?.brand || 'Card';
   const label = placeholder ? 'Preview card' : card?.holderName || 'Card holder';
   const number = placeholder ? '**** ----' : `**** ${card.last4}`;
   const expiry = placeholder ? '--/--' : card?.expiry || '--/--';
@@ -171,7 +171,7 @@ function DashboardPage({ currentUser, onLogout }) {
   const [workspaceSignals, setWorkspaceSignals] = useState(defaultWorkspaceSignals);
   const [dataMessage, setDataMessage] = useState('');
 
-  const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
+  const firstName = currentUser?.fullName?.split(' ')[0] || 'Rivo';
   const hasRecurringAccess = hasFeature('recurringPayments');
 
   useEffect(() => {
@@ -311,7 +311,7 @@ function DashboardPage({ currentUser, onLogout }) {
       tone: 'teal',
       route: '/accounts',
       emptyCopy: 'Add the real places your money lives.',
-      readyCopy: 'Money locations are ready to use across Ledgr.',
+      readyCopy: 'Money locations are ready to use across Rivo.',
     },
     {
       label: 'Budgets',

@@ -361,7 +361,7 @@ function BudgetPage({ currentUser, onLogout }) {
             </div>
             <p className="finance-intelligence-copy">
               {premiumBudgetAutomation
-                ? 'Ledgr keeps the highest-risk categories visible first so you do not need to scan the full board to find pressure.'
+                ? 'Rivo keeps the highest-risk categories visible first so you do not need to scan the full board to find pressure.'
                 : 'Free keeps budgeting clean. Pro adds a smarter watchlist for overspend pressure, near-limit categories, and coverage gaps.'}
             </p>
             <div className="finance-intelligence-list">

@@ -50,17 +50,17 @@ function App() {
 
   useEffect(() => {
     if (location.pathname === '/pricing') {
-      document.title = 'Ledgr | Pricing';
+      document.title = 'Rivo | Pricing';
       return;
     }
 
     if (!currentUser) {
-      document.title = 'Ledgr | Access';
+      document.title = 'Rivo | Access';
       return;
     }
 
     const pageTitle = pageTitles[location.pathname] || 'Dashboard';
-    document.title = `Ledgr | ${pageTitle}`;
+    document.title = `Rivo | ${pageTitle}`;
   }, [currentUser, location.pathname]);
 
   useEffect(() => {

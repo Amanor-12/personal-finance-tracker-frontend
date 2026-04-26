@@ -93,7 +93,7 @@ function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, per
           {saveError ? <p className="ledger-form-alert">{saveError}</p> : null}
           {!categories.length ? (
             <p className="ledger-form-alert">
-              Add an expense category before creating budgets. Ledgr only budgets against real categories.
+              Add an expense category before creating budgets. Rivo only budgets against real categories.
             </p>
           ) : null}
 

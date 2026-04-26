@@ -31,7 +31,7 @@ const writeStoredSettings = (value) => {
 };
 
 const createDefaultSettings = (fullName = '') => {
-  const firstName = fullName.split(' ').filter(Boolean)[0] || 'Ledgr';
+  const firstName = fullName.split(' ').filter(Boolean)[0] || 'Rivo';
 
   return {
     workspaceName: `${firstName} Space`,

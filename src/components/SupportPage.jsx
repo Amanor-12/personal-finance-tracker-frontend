@@ -7,11 +7,11 @@ import { getTierLabel, isPlusTier, isProTier } from '../utils/tierAccess';
 const baseFaqItems = [
   {
     question: 'Why does my workspace start empty?',
-    answer: 'Ledgr does not seed fake money data. Your workspace only shows accounts, transactions, budgets, goals, and recurring payments you create or connect later.',
+    answer: 'Rivo does not seed fake money data. Your workspace only shows accounts, transactions, budgets, goals, and recurring payments you create or connect later.',
   },
   {
     question: 'Is billing the same as recurring payments?',
-    answer: 'No. Billing is for your Ledgr subscription. Recurring payments are your personal bills and subscriptions.',
+    answer: 'No. Billing is for your Rivo subscription. Recurring payments are your personal bills and subscriptions.',
   },
   {
     question: 'Are protected routes real?',
@@ -145,7 +145,7 @@ function SupportPage({ currentUser, onLogout }) {
     >
       <section className="support-concierge-hero">
         <div>
-          <span className="support-eyebrow">Ledgr concierge</span>
+          <span className="support-eyebrow">Rivo concierge</span>
           <h2>Fast answers. Clear next steps.</h2>
           <p>Search the core product areas and move directly into the workflow that solves the issue.</p>
         </div>
@@ -217,7 +217,7 @@ function SupportPage({ currentUser, onLogout }) {
         <article>
           <span>Free</span>
           <strong>Learn the workflow first</strong>
-          <p>Use Ledgr to build the habit, keep the workspace light, and move up only when more control saves time.</p>
+          <p>Use Rivo to build the habit, keep the workspace light, and move up only when more control saves time.</p>
         </article>
         <article>
           <span>Plus</span>

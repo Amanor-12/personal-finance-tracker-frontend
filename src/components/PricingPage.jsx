@@ -158,7 +158,7 @@ function PricingPage({ currentUser }) {
   return (
     <main className="pricing-shell pricing-market-shell">
       <header className="pricing-nav">
-        <BrandLogo compact subtitle="" title="Ledgr" tone="dark" />
+        <BrandLogo compact subtitle="" title="Rivo" tone="dark" />
         <nav aria-label="Pricing navigation">
           <Link to={currentUser ? '/dashboard' : '/login'}>{currentUser ? 'Dashboard' : 'Sign in'}</Link>
           <button type="button" onClick={() => navigate(currentUser ? '/billing' : '/signup')}>
@@ -169,7 +169,7 @@ function PricingPage({ currentUser }) {
 
       <section className="pricing-market-hero">
         <div>
-          <span className="pricing-eyebrow">Ledgr plans</span>
+          <span className="pricing-eyebrow">Rivo plans</span>
           <h1>Start free. Move to Plus for control. Move to Pro for intelligence.</h1>
           <p>
             Free stays useful for manual tracking. Plus is for stronger control. Pro is for deeper analysis, forecasting, and higher-touch support.
@@ -184,7 +184,7 @@ function PricingPage({ currentUser }) {
 
       {message ? <p className="pricing-message">{message}</p> : null}
 
-      <section className="pricing-market-grid" aria-label="Ledgr pricing plans">
+      <section className="pricing-market-grid" aria-label="Rivo pricing plans">
         {visiblePlans.map((plan) => (
           <PricingCard
             key={plan.id}

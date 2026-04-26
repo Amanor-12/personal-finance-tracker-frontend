@@ -393,7 +393,7 @@ function GoalsPage({ currentUser, onLogout }) {
             </div>
             <p className="finance-intelligence-copy">
               {premiumGoalIntelligence
-                ? 'Ledgr highlights which target needs attention next, how quickly it needs funding, and which milestones are getting close.'
+                ? 'Rivo highlights which target needs attention next, how quickly it needs funding, and which milestones are getting close.'
                 : 'Free keeps goals simple. Pro adds due-soon signals, contribution pacing, and milestone guidance so customers know where to act next.'}
             </p>
             <div className="finance-intelligence-list">

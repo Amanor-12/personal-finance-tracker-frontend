@@ -287,7 +287,7 @@ function TransactionsPage({ currentUser, onLogout }) {
     const stamp = new Date().toISOString().slice(0, 10);
 
     link.href = url;
-    link.download = `ledgr-transactions-${stamp}.csv`;
+    link.download = `rivo-transactions-${stamp}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

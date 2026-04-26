@@ -57,7 +57,7 @@ export const authStore = {
 
       if (!user) {
         sessionStore.clearSession();
-        throw new Error('Ledgr could not read the current account session.');
+        throw new Error('Rivo could not read the current account session.');
       }
 
       return sessionStore.updateUser(user);
@@ -85,7 +85,7 @@ export const authStore = {
     const session = resolveSessionPayload(payload);
 
     if (!session) {
-      throw new Error('Ledgr could not start a session from the sign-in response.');
+      throw new Error('Rivo could not start a session from the sign-in response.');
     }
 
     return sessionStore.setSession(session);
@@ -134,7 +134,7 @@ export const authStore = {
     const user = resolveUserPayload(payload);
 
     if (!user) {
-      throw new Error('Ledgr could not refresh the profile after saving.');
+      throw new Error('Rivo could not refresh the profile after saving.');
     }
 
     return sessionStore.updateUser(user);

@@ -167,10 +167,10 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
         normalizedMessage === 'request failed' ||
         normalizedMessage === 'request failed.' ||
         normalizedMessage.includes('cannot reach the finance service')
-          ? 'Ledgr cannot reach the finance service. Start the backend server, then try again.'
+          ? 'Rivo cannot reach the finance service. Start the backend server, then try again.'
           : error.message;
 
-      setMessage(authMessage || 'Ledgr could not complete that request. Please try again.');
+      setMessage(authMessage || 'Rivo could not complete that request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -181,7 +181,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
       <section className="authx-shell">
         <section className="authx-auth-column">
           <div className="authx-brand-row">
-            <BrandLogo className="authx-brand" title="Ledgr" subtitle="Private finance workspace" tone="dark" />
+            <BrandLogo className="authx-brand" title="Rivo" subtitle="Private finance workspace" tone="dark" />
           </div>
 
           <div className="authx-auth-card">
@@ -196,7 +196,7 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
 
             <div className="authx-card-copy">
               <span className="authx-panel-kicker">{isLogin ? 'Secure access' : 'Create access'}</span>
-              <h1>{isLogin ? 'Welcome back.' : 'Start with Ledgr.'}</h1>
+              <h1>{isLogin ? 'Welcome back.' : 'Start with Rivo.'}</h1>
               <p>
                 {isLogin
                   ? 'Sign in to your private finance workspace.'
@@ -349,10 +349,10 @@ function LoginPage({ mode = 'login', onLogin, onSignUp }) {
           </div>
         </section>
 
-        <section className="authx-preview-column" aria-label="Ledgr product summary">
+        <section className="authx-preview-column" aria-label="Rivo product summary">
           <div className="authx-product-stage">
             <div className="authx-product-nav">
-              <span className="authx-kicker">Ledgr workspace</span>
+              <span className="authx-kicker">Rivo workspace</span>
               <div className="authx-preview-pills">
                 <span>Private</span>
                 <span>Organized</span>

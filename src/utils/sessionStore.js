@@ -69,7 +69,7 @@ export const sessionStore = {
     const user = session?.user || session?.profile || session?.account || null;
 
     if (!token || !user) {
-      throw new Error('Ledgr received an incomplete auth session from the API.');
+      throw new Error('Rivo received an incomplete auth session from the API.');
     }
 
     const nextSession = {

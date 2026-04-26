@@ -292,7 +292,7 @@ function ReportsPage({ currentUser, onLogout }) {
         <FeatureGate
           eyebrow="Plus access"
           features={['Server-backed reporting', 'Date-range analytics', 'Merchant concentration analysis', 'Budget pressure and recurring-load insight']}
-          helper="Insights begin in Ledgr Plus because this is where customers move from recording money to understanding it. Pro adds deeper intelligence and richer forecasting on top."
+          helper="Insights begin in Rivo Plus because this is where customers move from recording money to understanding it. Pro adds deeper intelligence and richer forecasting on top."
           primaryLabel="Upgrade to Plus"
           title="Unlock advanced reporting"
         />

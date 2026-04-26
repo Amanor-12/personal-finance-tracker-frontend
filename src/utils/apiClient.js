@@ -1,6 +1,6 @@
 import { sessionStore } from './sessionStore';
 
-const API_OFFLINE_MESSAGE = 'Ledgr cannot reach the finance service. Start the backend server, then try again.';
+const API_OFFLINE_MESSAGE = 'Rivo cannot reach the finance service. Start the backend server, then try again.';
 const API_BASE_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const API_TIMEOUT_MS = 15000;
 export const API_UNAUTHORIZED_EVENT = 'ledgr:api-unauthorized';

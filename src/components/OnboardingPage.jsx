@@ -122,7 +122,7 @@ function OnboardingPage({ currentUser, onLogout }) {
   return (
     <main className="onboarding-shell">
       <header className="onboarding-topbar">
-        <BrandLogo compact subtitle="" title="Ledgr" tone="dark" />
+        <BrandLogo compact subtitle="" title="Rivo" tone="dark" />
         <div>
           <Link to={redirectPath}>Skip setup</Link>
           <button type="button" onClick={onLogout}>
@@ -170,7 +170,7 @@ function OnboardingPage({ currentUser, onLogout }) {
               <span className="onboarding-eyebrow">Start clean</span>
               <h2>Your workspace is empty by design.</h2>
               <p>
-                Ledgr starts with your choices. Set a few basics now, or skip ahead and add details from each page.
+                Rivo starts with your choices. Set a few basics now, or skip ahead and add details from each page.
               </p>
               <div className="onboarding-action-row">
                 <button className="onboarding-primary" type="button" onClick={goNext}>
@@ -320,7 +320,7 @@ function OnboardingPage({ currentUser, onLogout }) {
           {activeStep.id === 'finish' ? (
             <article className="onboarding-card onboarding-finish-card">
               <span className="onboarding-eyebrow">Workspace ready</span>
-              <h2>Enter Ledgr with a clean foundation.</h2>
+              <h2>Enter Rivo with a clean foundation.</h2>
               <p>
                 The app will show empty states until you add real accounts, transactions, budgets, goals, and recurring
                 payments.

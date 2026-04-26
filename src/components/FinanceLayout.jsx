@@ -152,7 +152,7 @@ function FinanceLayout({
   const location = useLocation();
   const navigate = useNavigate();
   const initials = getInitials(currentUser?.fullName);
-  const firstName = currentUser?.fullName?.split(' ')[0] || 'Ledgr';
+  const firstName = currentUser?.fullName?.split(' ')[0] || 'Rivo';
   const workspaceName = settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName).workspaceName;
   const hasRail = Boolean(rail);
   const [searchQuery, setSearchQuery] = useState('');
@@ -235,7 +235,7 @@ function FinanceLayout({
       <aside className="ref-sidebar">
         <div className="ref-sidebar-top">
           <div className="ref-brand-lockup">
-            <BrandLogo className="ref-brand" compact subtitle="" title="Ledgr" tone="dark" />
+            <BrandLogo className="ref-brand" compact subtitle="" title="Rivo" tone="dark" />
             <span className="ref-brand-arrow" aria-hidden="true">
               {'<<'}
             </span>

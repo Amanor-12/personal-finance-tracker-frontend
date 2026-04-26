@@ -35,7 +35,7 @@ export const billingPlans = [
     interval: 'monthly',
     price: '$19',
     suffix: '/ month',
-    description: 'Advanced intelligence, forecasting, and the highest-control Ledgr workspace.',
+    description: 'Advanced intelligence, forecasting, and the highest-control Rivo workspace.',
     features: [
       'Everything in Plus',
       'Advanced backend-powered insights',

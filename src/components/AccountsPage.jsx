@@ -43,7 +43,7 @@ const getAccountTheme = (accountType) => {
   return 'indigo';
 };
 
-const getAccountPreviewTitle = (account) => account?.institutionName?.trim() || 'Ledgr';
+const getAccountPreviewTitle = (account) => account?.institutionName?.trim() || 'Rivo';
 const getAccountPreviewLabel = (account) =>
   account ? `${getAccountTypeLabel(account.accountType)} account` : 'Choose a primary account';
 const getAccountPreviewNote = (account) =>
@@ -53,7 +53,7 @@ const getAccountPreviewNote = (account) =>
 
 function AccountPreviewCard({ account, depth = 0, placeholder = false, stacked = true, compact = false }) {
   const accountType = placeholder ? 'Preview account' : getAccountTypeLabel(account.accountType);
-  const title = placeholder ? 'Ledgr' : getAccountPreviewTitle(account);
+  const title = placeholder ? 'Rivo' : getAccountPreviewTitle(account);
   const balance = placeholder ? 'Add your first account' : formatAccountCurrency(account.currentBalance, account.currency);
   const identifier = placeholder ? '**** ----' : account.maskedIdentifier || account.institutionName || 'Manual account';
   const footer = placeholder ? 'preview' : account.isPrimary ? 'primary' : account.status;

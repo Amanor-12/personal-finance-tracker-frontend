@@ -6,7 +6,7 @@ function Navbar({ user, onLogout }) {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link className="navbar-logo" to="/dashboard">
-          <h2>Ledgr</h2>
+          <h2>Rivo</h2>
         </Link>
         <p>Signed in as {user?.email}</p>
       </div>

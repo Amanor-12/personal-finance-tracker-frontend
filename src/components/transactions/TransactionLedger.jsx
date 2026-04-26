@@ -33,7 +33,7 @@ function TransactionEmptyState({ hasTransactions, onAddTransaction }) {
       <p>
         {hasTransactions
           ? 'Adjust the filters above to widen the view.'
-          : 'Add your first income or expense when you are ready. Ledgr will only show records that belong to your signed-in account.'}
+          : 'Add your first income or expense when you are ready. Rivo will only show records that belong to your signed-in account.'}
       </p>
       {!hasTransactions ? (
         <button className="ledger-primary-action" type="button" onClick={onAddTransaction}>

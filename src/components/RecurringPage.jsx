@@ -265,7 +265,7 @@ function RecurringPage({ currentUser, onLogout }) {
           <FeatureGate
             eyebrow="Plus access"
             features={['Recurring bill tracking', 'Upcoming renewal timeline', 'Monthly fixed-cost view', 'Annualized commitment view']}
-            helper="Recurring payments begin in Ledgr Plus because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
+            helper="Recurring payments begin in Rivo Plus because active customers need one place to stay ahead of subscriptions, rent, insurance, and other fixed charges before they hit."
             primaryLabel="Upgrade to Plus"
             title="Unlock recurring payment tracking"
           />

@@ -249,7 +249,7 @@ function BillingPage({ currentUser, onLogout }) {
             </article>
           </section>
 
-          <section className="billing-plan-grid" aria-label="Ledgr plans">
+          <section className="billing-plan-grid" aria-label="Rivo plans">
             {plans.map((plan) => (
               <BillingPlanCard
                 key={plan.id}
