@@ -30,7 +30,13 @@ const parseCookies = (cookieHeader = '') => {
 };
 
 const serializeCookie = (name, value, { httpOnly = true, maxAgeSeconds = 0, path = '/' } = {}) => {
-  const directives = [`${name}=${encodeURIComponent(value || '')}`, `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`, `Path=${path}`, 'SameSite=Lax'];
+  const sameSitePolicy = isProduction ? 'None' : 'Lax';
+  const directives = [
+    `${name}=${encodeURIComponent(value || '')}`,
+    `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
+    `Path=${path}`,
+    `SameSite=${sameSitePolicy}`,
+  ];
 
   if (httpOnly) {
     directives.push('HttpOnly');
