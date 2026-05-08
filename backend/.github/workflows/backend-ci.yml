@@ -1,0 +1,61 @@
+﻿name: backend-ci
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: financial_tracker
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d financial_tracker"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      ACCESS_TOKEN_TTL_MINUTES: 15
+      ALLOWED_ORIGINS: http://127.0.0.1:4173,http://localhost:4173
+      APP_BASE_URL: http://127.0.0.1:4173
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/financial_tracker
+      JWT_SECRET: ci_rivo_backend_secret
+      PGPASSWORD: postgres
+      RATE_LIMIT_MAX_ATTEMPTS: 10
+      RATE_LIMIT_WINDOW_MS: 600000
+      REFRESH_TOKEN_TTL_DAYS: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load schema
+        run: psql -h 127.0.0.1 -U postgres -d financial_tracker -f schema.sql
+
+      - name: Lint backend
+        run: npm run lint
+
+      - name: Test backend
+        run: npm run test
+
+      - name: Verify backend
+        run: npm run verify

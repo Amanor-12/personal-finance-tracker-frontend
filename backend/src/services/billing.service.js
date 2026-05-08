@@ -1,4 +1,4 @@
-const Stripe = require('stripe');
+﻿const Stripe = require('stripe');
 
 const pool = require('../config/db');
 const AppError = require('../utils/AppError');
@@ -17,32 +17,41 @@ const plans = [
   },
   {
     id: 'premium_monthly',
-    name: 'Premium',
+    name: 'Plus',
     interval: 'monthly',
     price: 8,
     priceLabel: '$8 / month',
-    description: 'Advanced money workflows for active users.',
-    features: ['Recurring payments', 'Reports', 'Unlimited accounts, budgets, and goals', 'Priority support'],
+    description: 'Reporting, recurring control, and faster money workflows.',
+    features: ['Recurring payments', 'Reports', 'AI report briefings', 'Connected bank sync', 'Unlimited accounts, budgets, and goals'],
   },
   {
     id: 'premium_annual',
-    name: 'Premium Annual',
+    name: 'Pro',
     interval: 'annual',
     price: 72,
     priceLabel: '$72 / year',
-    description: 'Premium access billed annually.',
-    features: ['Everything in Premium', 'Annual savings', 'Billing portal access'],
+    description: 'The highest-control workflow with forecasting, deeper AI review, and goal guidance.',
+    features: ['Everything in Plus', 'Cash forecasting', 'AI transaction review', 'AI goal guidance', 'Reconciliation queue', 'Annual savings'],
   },
 ];
 
 const paidSubscriptionStatuses = new Set(['active', 'trialing', 'past_due', 'incomplete', 'unpaid']);
 const planAccessMatrix = {
   free: {
+    tier: 'free',
     featureAccess: {
+      aiReports: false,
+      aiTransactionReview: false,
+      bankSync: false,
       billingPortal: false,
+      earlyAccess: false,
+      forecasting: false,
+      goalGuidance: false,
       prioritySupport: false,
+      reconciliationWorkbench: false,
       recurringPayments: false,
       reports: false,
+      smartBudgeting: false,
     },
     limits: {
       accounts: 2,
@@ -51,11 +60,20 @@ const planAccessMatrix = {
     },
   },
   premium_annual: {
+    tier: 'pro',
     featureAccess: {
+      aiReports: true,
+      aiTransactionReview: true,
+      bankSync: true,
       billingPortal: true,
-      prioritySupport: true,
+      earlyAccess: true,
+      forecasting: true,
+      goalGuidance: true,
+      prioritySupport: false,
+      reconciliationWorkbench: true,
       recurringPayments: true,
       reports: true,
+      smartBudgeting: true,
     },
     limits: {
       accounts: null,
@@ -64,11 +82,20 @@ const planAccessMatrix = {
     },
   },
   premium_monthly: {
+    tier: 'plus',
     featureAccess: {
+      aiReports: true,
+      aiTransactionReview: false,
+      bankSync: true,
       billingPortal: true,
-      prioritySupport: true,
+      earlyAccess: false,
+      forecasting: false,
+      goalGuidance: false,
+      prioritySupport: false,
+      reconciliationWorkbench: false,
       recurringPayments: true,
       reports: true,
+      smartBudgeting: false,
     },
     limits: {
       accounts: null,
@@ -208,7 +235,7 @@ const normalizeReturnUrl = (returnUrl) => {
 
   try {
     parsedUrl = new URL(returnUrl);
-  } catch (error) {
+  } catch {
     throw new AppError('A valid return URL is required.', 400);
   }
 
@@ -500,6 +527,7 @@ const buildAccessState = async (user) => {
     featureAccess: matrix.featureAccess,
     isPremium: effectivePlanId !== 'free',
     limits: matrix.limits,
+    tier: matrix.tier || 'free',
     upgradePlanId: 'premium_monthly',
     usage,
   };
@@ -509,10 +537,14 @@ const buildOverview = async (stripe, user, customer = null) => {
   const stripeConfig = getStripeConfig();
 
   if (!stripe || !customer) {
+    const fallbackStatus =
+      user.subscription_status || (stripeConfig.configured ? 'none' : 'not_configured');
+    const effectivePlanId = getEffectivePlanId(user.current_plan_id, fallbackStatus);
+    const currentPlan = plans.find((plan) => plan.id === effectivePlanId) || plans[0];
     const access = await buildAccessState({
       ...user,
-      current_plan_id: 'free',
-      subscription_status: stripeConfig.configured ? 'none' : 'not_configured',
+      current_plan_id: effectivePlanId,
+      subscription_status: fallbackStatus,
     });
 
     return {
@@ -524,12 +556,12 @@ const buildOverview = async (stripe, user, customer = null) => {
         name: 'stripe',
       },
       currentPlan: {
-        id: 'free',
-        interval: 'none',
-        name: 'Free',
-        price: 0,
-        priceLabel: '$0',
-        status: 'active',
+        id: currentPlan.id,
+        interval: currentPlan.interval,
+        name: currentPlan.name,
+        price: currentPlan.price,
+        priceLabel: currentPlan.priceLabel,
+        status: fallbackStatus === 'not_configured' ? 'active' : fallbackStatus,
       },
       invoices: [],
       plans,
@@ -537,7 +569,7 @@ const buildOverview = async (stripe, user, customer = null) => {
         cancelAtPeriodEnd: false,
         currentPeriodEnd: null,
         id: null,
-        status: stripeConfig.configured ? 'none' : 'not_configured',
+        status: fallbackStatus,
         trialEndsAt: null,
       },
     };
@@ -762,9 +794,11 @@ const createPortalSession = async (currentUser, payload = {}) => {
 };
 
 module.exports = {
+  ensureBillingSchema,
   createCheckoutSession,
   createPortalSession,
   getBillingAccess,
   getSubscriptionOverview,
   handleWebhook,
 };
+

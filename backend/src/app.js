@@ -1,8 +1,12 @@
-const cors = require('cors');
+﻿const cors = require('cors');
 const express = require('express');
 
+const { allowedOrigins, isProduction } = require('./config/env');
 const errorHandler = require('./middleware/error.middleware');
+const { attachRequestContext } = require('./middleware/request-context.middleware');
+const { setupExpressErrorHandler } = require('./services/sentry.service');
 const accountRoutes = require('./routes/account.routes');
+const aiRoutes = require('./routes/ai.routes');
 const authRoutes = require('./routes/auth.routes');
 const billingRoutes = require('./routes/billing.routes');
 const budgetRoutes = require('./routes/budget.routes');
@@ -11,6 +15,7 @@ const categoryRoutes = require('./routes/category.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const goalRoutes = require('./routes/goal.routes');
 const healthRoutes = require('./routes/health.routes');
+const observabilityRoutes = require('./routes/observability.routes');
 const recurringRoutes = require('./routes/recurring.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const transactionRoutes = require('./routes/transaction.routes');
@@ -19,17 +24,40 @@ const billingController = require('./controllers/billing.controller');
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
+app.use(attachRequestContext);
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+
+  if (isProduction) {
+    res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  }
+
+  next();
+});
+
 app.use(
   cors({
-    origin: '*',
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('The request origin is not allowed by CORS.'));
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'baggage', 'sentry-trace'],
   })
 );
+
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), billingController.handleWebhook);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.get('/', (req, res) => {
   res.json({
@@ -40,7 +68,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/health', healthRoutes);
+app.use('/api/observability', observabilityRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/budgets', budgetRoutes);
@@ -61,6 +91,7 @@ app.use((req, res) => {
   });
 });
 
+setupExpressErrorHandler(app);
 app.use(errorHandler);
 
 module.exports = app;

@@ -6,21 +6,31 @@
   "scripts": {
     "db:reset-demo": "powershell -ExecutionPolicy Bypass -File scripts/reset-demo-database.ps1",
     "db:start-local": "powershell -ExecutionPolicy Bypass -File scripts/start-local-postgres.ps1",
+    "contracts": "node scripts/validate-contracts.js",
     "dev": "nodemon src/server.js",
+    "lint": "eslint .",
     "seed:demo": "node src/utils/seedDemoData.js",
     "start": "node src/server.js",
+    "test": "node -r dotenv/config tests/run-tests.js",
+    "check": "npm run lint && npm run contracts && npm run test && npm run verify",
     "verify": "node scripts/verify.js"
   },
   "dependencies": {
+    "@sentry/node": "^10.52.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
+    "plaid": "^42.2.0",
     "stripe": "^22.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.2.2"
   }
 }

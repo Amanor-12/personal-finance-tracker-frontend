@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+﻿const pool = require('../config/db');
 const AppError = require('../utils/AppError');
 const { ensureAccountsTable } = require('./account.service');
 
@@ -132,8 +132,6 @@ const getOwnedAccount = async (db, userId, accountId) => {
 };
 
 const getTransactions = async (userId) => {
-  await ensureTransactionSchema();
-
   const result = await pool.query(
     `
       ${transactionSelectSql}
@@ -146,8 +144,6 @@ const getTransactions = async (userId) => {
 };
 
 const getTransactionById = async (userId, transactionId, db = pool) => {
-  await ensureTransactionSchema();
-
   const result = await db.query(
     `
       ${transactionSelectSql}
@@ -164,10 +160,10 @@ const getTransactionById = async (userId, transactionId, db = pool) => {
 };
 
 const createTransaction = async (userId, payload) => {
-  await ensureTransactionSchema();
   const client = await pool.connect();
 
   try {
+    await client.query('BEGIN');
     const category = await getOwnedCategory(client, userId, payload.category_id);
     await getOwnedAccount(client, userId, payload.account_id);
 
@@ -204,17 +200,21 @@ const createTransaction = async (userId, payload) => {
       ]
     );
 
+    await client.query('COMMIT');
     return getTransactionById(userId, result.rows[0].id, client);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }
 };
 
 const updateTransaction = async (userId, transactionId, payload) => {
-  await ensureTransactionSchema();
   const client = await pool.connect();
 
   try {
+    await client.query('BEGIN');
     await getTransactionById(userId, transactionId, client);
     const category = await getOwnedCategory(client, userId, payload.category_id);
     await getOwnedAccount(client, userId, payload.account_id);
@@ -251,32 +251,47 @@ const updateTransaction = async (userId, transactionId, payload) => {
       ]
     );
 
+    await client.query('COMMIT');
     return getTransactionById(userId, transactionId, client);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }
 };
 
 const deleteTransaction = async (userId, transactionId) => {
-  await ensureTransactionSchema();
+  const client = await pool.connect();
 
-  const result = await pool.query(
-    `
-      DELETE FROM transactions
-      WHERE id = $1 AND user_id = $2
-      RETURNING id
-    `,
-    [transactionId, userId]
-  );
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(
+      `
+        DELETE FROM transactions
+        WHERE id = $1 AND user_id = $2
+        RETURNING id
+      `,
+      [transactionId, userId]
+    );
 
-  if (result.rowCount === 0) {
-    throw new AppError('Transaction not found.', 404);
+    if (result.rowCount === 0) {
+      throw new AppError('Transaction not found.', 404);
+    }
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
 };
 
 module.exports = {
   createTransaction,
   deleteTransaction,
+  ensureTransactionSchema,
   getTransactionById,
   getTransactions,
   updateTransaction,

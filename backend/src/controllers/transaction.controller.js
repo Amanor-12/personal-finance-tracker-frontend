@@ -1,4 +1,5 @@
 const transactionService = require('../services/transaction.service');
+const transactionWorkspaceService = require('../services/transaction-workspace.service');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getTransactions = asyncHandler(async (req, res) => {
@@ -43,10 +44,49 @@ const deleteTransaction = asyncHandler(async (req, res) => {
   });
 });
 
+const getSavedViews = asyncHandler(async (req, res) => {
+  const views = await transactionWorkspaceService.getSavedTransactionViews(req.user.id);
+
+  res.json({
+    views,
+  });
+});
+
+const saveView = asyncHandler(async (req, res) => {
+  const view = await transactionWorkspaceService.saveTransactionView(req.user.id, req.body);
+
+  res.status(201).json({
+    message: 'Saved view created successfully.',
+    view,
+  });
+});
+
+const deleteView = asyncHandler(async (req, res) => {
+  await transactionWorkspaceService.deleteTransactionView(req.user.id, req.params.id);
+
+  res.json({
+    message: 'Saved view deleted successfully.',
+  });
+});
+
+const exportTransactions = asyncHandler(async (req, res) => {
+  const exportPayload = await transactionWorkspaceService.exportTransactionsCsv(
+    req.user.id,
+    transactionService.getTransactions,
+    req.body
+  );
+
+  res.json(exportPayload);
+});
+
 module.exports = {
   createTransaction,
   deleteTransaction,
+  deleteView,
+  exportTransactions,
+  getSavedViews,
   getTransaction,
   getTransactions,
+  saveView,
   updateTransaction,
 };

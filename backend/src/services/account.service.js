@@ -1,7 +1,27 @@
-const pool = require('../config/db');
+﻿const pool = require('../config/db');
 const AppError = require('../utils/AppError');
 
 let schemaReady = false;
+
+const ledgerBalanceSql = `
+  (
+    a.opening_balance +
+    COALESCE(
+      (
+        SELECT SUM(
+          CASE
+            WHEN t.status = 'recorded' AND t.type = 'income' THEN t.amount
+            WHEN t.status = 'recorded' AND t.type = 'expense' THEN -t.amount
+            ELSE 0
+          END
+        )
+        FROM transactions t
+        WHERE t.user_id = a.user_id AND t.account_id = a.id
+      ),
+      0
+    )
+  )
+`;
 
 const accountSelectSql = `
   SELECT
@@ -12,7 +32,7 @@ const accountSelectSql = `
     a.institution_name,
     a.masked_identifier,
     a.opening_balance,
-    a.current_balance,
+    ${ledgerBalanceSql} AS current_balance,
     a.currency,
     a.notes,
     a.status,
@@ -112,13 +132,22 @@ const getAccountCount = async (db, userId) => {
   return result.rows[0].total;
 };
 
+const getAccountTransactionCount = async (db, userId, accountId) => {
+  const result = await db.query(
+    `
+      SELECT COUNT(*)::int AS total
+      FROM transactions
+      WHERE user_id = $1 AND account_id = $2
+    `,
+    [userId, accountId]
+  );
+
+  return result.rows[0].total;
+};
+
 const normalizeAccountPayload = (payload) => ({
   account_type: payload.account_type,
   currency: (payload.currency || 'USD').trim().toUpperCase(),
-  current_balance:
-    payload.current_balance === undefined || payload.current_balance === null
-      ? Number(payload.opening_balance || 0)
-      : Number(payload.current_balance),
   institution_name: payload.institution_name?.trim() || null,
   masked_identifier: payload.masked_identifier?.trim() || null,
   name: payload.name.trim(),
@@ -127,8 +156,6 @@ const normalizeAccountPayload = (payload) => ({
 });
 
 const getAccounts = async (userId) => {
-  await ensureAccountsTable();
-
   const result = await pool.query(
     `
       ${accountSelectSql}
@@ -145,8 +172,6 @@ const getAccounts = async (userId) => {
 };
 
 const getAccountById = async (userId, accountId, db = pool) => {
-  await ensureAccountsTable();
-
   const result = await db.query(
     `
       ${accountSelectSql}
@@ -163,7 +188,6 @@ const getAccountById = async (userId, accountId, db = pool) => {
 };
 
 const createAccount = async (userId, payload) => {
-  await ensureAccountsTable();
   const client = await pool.connect();
   const account = normalizeAccountPayload(payload);
 
@@ -198,7 +222,7 @@ const createAccount = async (userId, payload) => {
           notes,
           is_primary
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $6, $7, $8, $9)
         RETURNING id
       `,
       [
@@ -208,7 +232,6 @@ const createAccount = async (userId, payload) => {
         account.institution_name,
         account.masked_identifier,
         account.opening_balance,
-        account.current_balance,
         account.currency,
         account.notes,
         isPrimary,
@@ -216,7 +239,7 @@ const createAccount = async (userId, payload) => {
     );
 
     await client.query('COMMIT');
-    return getAccountById(userId, result.rows[0].id);
+    return getAccountById(userId, result.rows[0].id, client);
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -226,13 +249,27 @@ const createAccount = async (userId, payload) => {
 };
 
 const updateAccount = async (userId, accountId, payload) => {
-  await ensureAccountsTable();
   const client = await pool.connect();
   const account = normalizeAccountPayload(payload);
 
   try {
     await client.query('BEGIN');
-    await getAccountById(userId, accountId, client);
+    const existingAccount = await getAccountById(userId, accountId, client);
+    const transactionCount = await getAccountTransactionCount(client, userId, accountId);
+
+    if (transactionCount > 0 && Number(existingAccount.opening_balance) !== account.opening_balance) {
+      throw new AppError(
+        'Opening balance can only be changed before any transactions are linked to the account.',
+        409
+      );
+    }
+
+    if (transactionCount > 0 && existingAccount.currency !== account.currency) {
+      throw new AppError(
+        'Account currency can only be changed before any transactions are linked to the account.',
+        409
+      );
+    }
 
     if (payload.is_primary === true) {
       await client.query(
@@ -254,11 +291,24 @@ const updateAccount = async (userId, accountId, payload) => {
           institution_name = $3,
           masked_identifier = $4,
           opening_balance = $5,
-          current_balance = $6,
-          currency = $7,
-          notes = $8,
-          is_primary = CASE WHEN $9 = TRUE THEN TRUE ELSE is_primary END
-        WHERE id = $10 AND user_id = $11
+          current_balance = $5 + COALESCE(
+            (
+              SELECT SUM(
+                CASE
+                  WHEN t.status = 'recorded' AND t.type = 'income' THEN t.amount
+                  WHEN t.status = 'recorded' AND t.type = 'expense' THEN -t.amount
+                  ELSE 0
+                END
+              )
+              FROM transactions t
+              WHERE t.user_id = $10 AND t.account_id = $9
+            ),
+            0
+          ),
+          currency = $6,
+          notes = $7,
+          is_primary = CASE WHEN $8 = TRUE THEN TRUE ELSE is_primary END
+        WHERE id = $9 AND user_id = $10
       `,
       [
         account.name,
@@ -266,7 +316,6 @@ const updateAccount = async (userId, accountId, payload) => {
         account.institution_name,
         account.masked_identifier,
         account.opening_balance,
-        account.current_balance,
         account.currency,
         account.notes,
         payload.is_primary === true,
@@ -276,7 +325,7 @@ const updateAccount = async (userId, accountId, payload) => {
     );
 
     await client.query('COMMIT');
-    return getAccountById(userId, accountId);
+    return getAccountById(userId, accountId, client);
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -286,7 +335,6 @@ const updateAccount = async (userId, accountId, payload) => {
 };
 
 const setPrimaryAccount = async (userId, accountId) => {
-  await ensureAccountsTable();
   const client = await pool.connect();
 
   try {
@@ -304,7 +352,7 @@ const setPrimaryAccount = async (userId, accountId) => {
     ]);
     await client.query('COMMIT');
 
-    return getAccountById(userId, accountId);
+    return getAccountById(userId, accountId, client);
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -314,7 +362,6 @@ const setPrimaryAccount = async (userId, accountId) => {
 };
 
 const archiveAccount = async (userId, accountId) => {
-  await ensureAccountsTable();
   const client = await pool.connect();
 
   try {

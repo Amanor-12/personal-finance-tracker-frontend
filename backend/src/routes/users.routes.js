@@ -6,9 +6,17 @@ const validate = require('../middleware/validate.middleware');
 const { hasLengthBetween, isEmail } = require('../utils/validators');
 
 const router = express.Router();
+const hydrateNameField = (req, _res, next) => {
+  if (!req.body?.name && req.body?.fullName) {
+    req.body.name = req.body.fullName;
+  }
+
+  next();
+};
 
 router.post(
   '/',
+  hydrateNameField,
   validate({
     body: [
       {
@@ -34,6 +42,7 @@ router.post(
 
 router.post(
   '/register',
+  hydrateNameField,
   validate({
     body: [
       {
@@ -81,6 +90,7 @@ router.get('/me', authenticate, authController.getCurrentUser);
 router.put(
   '/me',
   authenticate,
+  hydrateNameField,
   validate({
     body: [
       {

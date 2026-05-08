@@ -31,6 +31,30 @@ Copy `backend/.env.example` to `backend/.env`:
 PORT=5000
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/financial_tracker
 JWT_SECRET=replace_with_a_long_secure_secret
+AI_PROVIDER=heuristic
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-5-mini
+PASSWORD_RESET_TOKEN_TTL_MINUTES=30
+EMAIL_VERIFICATION_TOKEN_TTL_HOURS=48
+MFA_CHALLENGE_TTL_MINUTES=10
+MFA_ENCRYPTION_SECRET=
+MFA_ISSUER=Rivo
+LOG_LEVEL=info
+OBSERVABILITY_ALERT_WEBHOOK_URL=
+SENTRY_DSN=
+SENTRY_ENVIRONMENT=development
+SENTRY_RELEASE=
+SENTRY_TRACES_SAMPLE_RATE=1
+EMAIL_PROVIDER=
+EMAIL_FROM_ADDRESS=
+RESEND_API_KEY=
+BANK_TOKEN_ENCRYPTION_SECRET=
+PLAID_CLIENT_ID=
+PLAID_SECRET=
+PLAID_ENV=sandbox
+PLAID_COUNTRY_CODES=US
+PLAID_REDIRECT_URI=
+PLAID_WEBHOOK_URL=
 ```
 
 ## Database Setup
@@ -101,6 +125,15 @@ npm run dev
 npm run verify
 ```
 
+## Quality Gates
+
+```bash
+npm run lint
+npm run contracts
+npm run test
+npm run check
+```
+
 ## Routes
 
 ### Health
@@ -111,6 +144,14 @@ npm run verify
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/login/mfa`
+- `POST /api/auth/password-reset/request`
+- `POST /api/auth/password-reset/confirm`
+- `GET /api/auth/mfa`
+- `POST /api/auth/mfa/setup`
+- `POST /api/auth/mfa/setup/confirm`
+- `POST /api/auth/mfa/backup-codes/regenerate`
+- `POST /api/auth/mfa/disable`
 - `GET /api/auth/me`
 
 ### Frontend Handshake Compatibility
@@ -158,14 +199,52 @@ All other app data stays behind the same `Authorization: Bearer <token>` protect
 
 - `GET /api/dashboard/summary`
 
+### AI
+
+- `POST /api/ai/reports/summary`
+- `POST /api/ai/transactions/suggestions`
+- `POST /api/ai/goals/guidance`
+- `GET /api/reports/forecast`
+
+### Observability
+
+- `POST /api/observability/frontend-errors`
+
+Optional Sentry capture is enabled when `SENTRY_DSN` is configured. Request IDs remain the primary cross-system correlation key even without a vendor SDK.
+
+### Accounts / Bank Sync
+
+- `GET /api/accounts/bank-providers`
+- `GET /api/accounts/bank-connections`
+- `POST /api/accounts/bank-connections`
+- `POST /api/accounts/bank-connections/plaid/link-token`
+- `POST /api/accounts/bank-connections/plaid/exchange`
+- `POST /api/accounts/bank-connections/:id/sync`
+- `GET /api/accounts/reconciliation-queue`
+- `POST /api/accounts/reconciliation-queue/:id/reconcile`
+
+If `OPENAI_API_KEY` is configured, the backend uses the OpenAI Responses API with structured JSON output. Without a model key, the AI routes still work through the server-side heuristic engine so the product does not collapse into a 404 or blank premium state.
+
+If `EMAIL_PROVIDER=resend`, `EMAIL_FROM_ADDRESS`, and `RESEND_API_KEY` are configured, password reset and email verification messages are delivered through Resend. Without an email provider in development, the backend returns preview links so the full trust flows can still be tested locally.
+
 ## Security Controls
 
 - Passwords are stored only as `bcrypt` hashes
+- Email verification links are single-use and expire automatically
+- Password reset links are single-use and expire automatically
+- TOTP-based MFA can be enabled with backup codes
+- Security activity is recorded server-side for verified account actions
+- Active sessions can be listed and revoked from the authenticated account settings
+- Account deletion requires the current password and clears auth cookies on success
 - JWT is required for all private routes
 - Protected queries are user-scoped with `WHERE user_id = $1`
 - Composite foreign keys enforce category ownership
 - Validation middleware returns structured field errors
 - Database uniqueness and check constraints backstop application rules
+- Request IDs and structured JSON logs are emitted for API traffic
+- Optional alert webhooks can be triggered for unhandled backend and fatal frontend errors
+- Optional Sentry instrumentation can capture backend exceptions and browser-side React failures
+- Plaid access tokens are encrypted at rest before they are stored in bank connection records
 
 ## Marker Workflow
 

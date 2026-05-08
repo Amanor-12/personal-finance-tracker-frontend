@@ -9,6 +9,15 @@ const getOverview = asyncHandler(async (req, res) => {
   });
 });
 
+const getForecast = asyncHandler(async (req, res) => {
+  const forecast = await reportsService.getForecast(req.user.id, req.query);
+
+  res.json({
+    forecast,
+  });
+});
+
 module.exports = {
+  getForecast,
   getOverview,
 };

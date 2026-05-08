@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+﻿const pool = require('../config/db');
 const AppError = require('../utils/AppError');
 
 const frequencyMonthlyFactor = {
@@ -36,7 +36,13 @@ const recurringSelectSql = `
   WHERE r.user_id = $1
 `;
 
+let recurringSchemaReady = false;
+
 const ensureRecurringPaymentsTable = async (db = pool) => {
+  if (recurringSchemaReady) {
+    return;
+  }
+
   await db.query(`
     CREATE OR REPLACE FUNCTION set_updated_at()
     RETURNS TRIGGER AS $$
@@ -72,7 +78,9 @@ const ensureRecurringPaymentsTable = async (db = pool) => {
     );
   `);
 
-  await db.query('CREATE INDEX IF NOT EXISTS idx_recurring_user_status_date ON recurring_payments (user_id, status, next_payment_date ASC)');
+  await db.query(
+    'CREATE INDEX IF NOT EXISTS idx_recurring_user_status_date ON recurring_payments (user_id, status, next_payment_date ASC)'
+  );
   await db.query('DROP TRIGGER IF EXISTS recurring_payments_set_updated_at ON recurring_payments');
   await db.query(`
     CREATE TRIGGER recurring_payments_set_updated_at
@@ -80,6 +88,8 @@ const ensureRecurringPaymentsTable = async (db = pool) => {
     FOR EACH ROW
     EXECUTE FUNCTION set_updated_at();
   `);
+
+  recurringSchemaReady = true;
 };
 
 const serializeRecurringPayment = (record) => {
@@ -139,8 +149,6 @@ const ensureAccountBelongsToUser = async (db, userId, accountId) => {
 };
 
 const getRecurringPayments = async (userId) => {
-  await ensureRecurringPaymentsTable();
-
   const result = await pool.query(
     `
       ${recurringSelectSql}
@@ -156,8 +164,6 @@ const getRecurringPayments = async (userId) => {
 };
 
 const getRecurringPaymentById = async (userId, recurringPaymentId, db = pool) => {
-  await ensureRecurringPaymentsTable(db);
-
   const result = await db.query(
     `
       ${recurringSelectSql}
@@ -177,7 +183,7 @@ const createRecurringPayment = async (userId, payload) => {
   const client = await pool.connect();
 
   try {
-    await ensureRecurringPaymentsTable(client);
+    await client.query('BEGIN');
     await getExpenseCategory(client, userId, payload.category_id);
     await ensureAccountBelongsToUser(client, userId, payload.account_id);
 
@@ -210,7 +216,11 @@ const createRecurringPayment = async (userId, payload) => {
       ]
     );
 
+    await client.query('COMMIT');
     return getRecurringPaymentById(userId, result.rows[0].id, client);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }
@@ -220,7 +230,7 @@ const updateRecurringPayment = async (userId, recurringPaymentId, payload) => {
   const client = await pool.connect();
 
   try {
-    await ensureRecurringPaymentsTable(client);
+    await client.query('BEGIN');
     await getRecurringPaymentById(userId, recurringPaymentId, client);
     await getExpenseCategory(client, userId, payload.category_id);
     await ensureAccountBelongsToUser(client, userId, payload.account_id);
@@ -253,26 +263,40 @@ const updateRecurringPayment = async (userId, recurringPaymentId, payload) => {
       ]
     );
 
+    await client.query('COMMIT');
     return getRecurringPaymentById(userId, recurringPaymentId, client);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }
 };
 
 const deleteRecurringPayment = async (userId, recurringPaymentId) => {
-  await ensureRecurringPaymentsTable();
+  const client = await pool.connect();
 
-  const result = await pool.query(
-    `
-      DELETE FROM recurring_payments
-      WHERE id = $1 AND user_id = $2
-      RETURNING id
-    `,
-    [recurringPaymentId, userId]
-  );
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(
+      `
+        DELETE FROM recurring_payments
+        WHERE id = $1 AND user_id = $2
+        RETURNING id
+      `,
+      [recurringPaymentId, userId]
+    );
 
-  if (result.rowCount === 0) {
-    throw new AppError('Recurring payment not found.', 404);
+    if (result.rowCount === 0) {
+      throw new AppError('Recurring payment not found.', 404);
+    }
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
 };
 

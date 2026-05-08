@@ -1,9 +1,10 @@
+﻿const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const { jwtSecret } = require('../config/env');
+const { accessTokenTtlMinutes, jwtSecret } = require('../config/env');
 
-const signToken = (user) => {
-  return jwt.sign(
+const signAccessToken = (user) =>
+  jwt.sign(
     {
       sub: user.id,
       email: user.email,
@@ -11,11 +12,20 @@ const signToken = (user) => {
     },
     jwtSecret,
     {
-      expiresIn: '7d',
+      expiresIn: `${accessTokenTtlMinutes}m`,
     }
   );
-};
+
+const verifyAccessToken = (token) => jwt.verify(token, jwtSecret);
+
+const generateRefreshToken = () => crypto.randomBytes(48).toString('base64url');
+
+const hashRefreshToken = (token) =>
+  crypto.createHash('sha256').update(String(token || '')).digest('hex');
 
 module.exports = {
-  signToken,
+  generateRefreshToken,
+  hashRefreshToken,
+  signAccessToken,
+  verifyAccessToken,
 };

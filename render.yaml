@@ -11,6 +11,10 @@ services:
         value: 5000
       - key: APP_BASE_URL
         sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: COOKIE_DOMAIN
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET

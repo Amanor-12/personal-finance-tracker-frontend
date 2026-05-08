@@ -1,6 +1,7 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 
 const app = require('../src/app');
+const { initializeDataModel } = require('../src/bootstrap/initializeDataModel');
 const pool = require('../src/config/db');
 
 if (typeof app !== 'function') {
@@ -9,6 +10,8 @@ if (typeof app !== 'function') {
 
 (async () => {
   try {
+    await initializeDataModel();
+
     const database = await pool.checkDatabase().catch((error) => ({
       configured: true,
       message: error.message || 'Database health check failed.',
