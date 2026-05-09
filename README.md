@@ -1,33 +1,22 @@
-# Personal Finance Tracker Backend
+# Personal Finance Tracker
 
-This repository is intentionally backend-only. It is structured for a rubric that evaluates deployment, relational database design, authentication, CRUD APIs, status handling, and backend code quality without any frontend requirements.
+This repository is now the single source of truth for the product. The React frontend lives in `frontend/`, the Node/Express API lives in `backend/`, and Render can deploy the whole app from this one repo.
 
-## Backend Scope
-
-- PostgreSQL relational schema with `users`, `categories`, `transactions`, and `budgets`
-- JWT authentication with `bcrypt` password hashing
-- Protected CRUD routes for categories, transactions, and budgets
-- Dashboard summary endpoint backed by SQL aggregation
-- Postman collection for marker verification
-- Render deployment blueprint for the API
-
-## Project Structure
+## Structure
 
 ```text
 personal-finance-tracker/
   backend/
     src/
-      config/
-      controllers/
-      middleware/
-      routes/
-      services/
-      utils/
     schema.sql
     .env.example
-    README.md
-  postman/
-    Financial_Tracker_Postman_Collection.json
+  frontend/
+    src/
+    public/
+    tests/
+    package.json
+  shared/
+    contracts/
   render.yaml
 ```
 
@@ -35,38 +24,40 @@ personal-finance-tracker/
 
 ```bash
 npm --prefix backend install
-psql "postgresql://postgres:postgres@localhost:5432/financial_tracker" -f backend/schema.sql
+npm --prefix frontend install
+cp backend/.env.example backend/.env
+npm run build
+npm start
+```
+
+For local frontend development with Vite:
+
+```bash
+npm run dev:frontend
 npm run dev:backend
 ```
 
-Copy `backend/.env.example` to `backend/.env` before starting the server.
+## Production Deploy
 
-Optional demo data:
+Render should deploy this repo as one Node web service using `render.yaml`.
 
-```bash
-npm run seed:demo
-```
+- Build command: `npm --prefix backend install && npm --prefix frontend install && npm run build`
+- Start command: `npm start`
+- Health check: `/api/health`
 
-SQL-first demo data for presentations:
+Set these environment variables on Render:
 
-```bash
-psql "postgresql://postgres:postgres@localhost:5432/financial_tracker" -f backend/schema.sql
-npm run seed:demo
-```
+- `APP_BASE_URL` = the public Render URL for this app
+- `ALLOWED_ORIGINS` = same public origin, or leave aligned with `APP_BASE_URL`
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `COOKIE_DOMAIN` only if you are using a custom shared domain
 
 ## Verification
 
 ```bash
-npm run verify
+npm run lint
+npm run build
+npm --prefix backend run verify
+npm run test:e2e
 ```
-
-## API Summary
-
-- Auth: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
-- Categories: `GET/POST /api/categories`, `GET/PUT/DELETE /api/categories/:id`
-- Transactions: `GET/POST /api/transactions`, `GET/PUT/DELETE /api/transactions/:id`
-- Budgets: `GET/POST /api/budgets`, `GET/PUT/DELETE /api/budgets/:id`
-- Dashboard: `GET /api/dashboard/summary`
-- Health: `GET /api/health`
-
-Detailed backend documentation is in `backend/README.md`.

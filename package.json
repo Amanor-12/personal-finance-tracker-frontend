@@ -1,11 +1,17 @@
 {
-  "name": "personal-finance-tracker-workspace",
+  "name": "personal-finance-tracker",
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "npm --prefix frontend run build",
+    "check": "npm run lint && npm run build",
     "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
     "seed:demo": "npm --prefix backend run seed:demo",
+    "start": "npm --prefix backend run start",
     "start:backend": "npm --prefix backend run start",
+    "test:e2e": "npm --prefix frontend run test:e2e",
     "verify": "npm --prefix backend run verify"
   }
 }

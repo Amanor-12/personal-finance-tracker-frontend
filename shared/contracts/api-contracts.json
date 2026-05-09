@@ -1,0 +1,95 @@
+{
+  "version": "2026-05-08",
+  "auth": {
+    "login": {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    "loginMfa": {
+      "method": "POST",
+      "path": "/api/auth/login/mfa",
+      "requestFields": ["challenge_token", "code"],
+      "responseFields": ["user", "recovery_codes_remaining"]
+    },
+    "mfaStatus": {
+      "method": "GET",
+      "path": "/api/auth/mfa",
+      "responseFields": ["enabled", "enabled_at", "recovery_codes_remaining", "setup_in_progress", "setup_expires_at"]
+    },
+    "mfaSetup": {
+      "method": "POST",
+      "path": "/api/auth/mfa/setup",
+      "responseFields": ["manual_key", "otpauth_url", "expires_at"]
+    },
+    "mfaSetupConfirm": {
+      "method": "POST",
+      "path": "/api/auth/mfa/setup/confirm",
+      "requestFields": ["code"],
+      "responseFields": ["backup_codes", "status"]
+    },
+    "mfaDisable": {
+      "method": "POST",
+      "path": "/api/auth/mfa/disable",
+      "requestFields": ["current_password", "code"],
+      "responseFields": ["message", "status"]
+    },
+    "mfaBackupCodesRegenerate": {
+      "method": "POST",
+      "path": "/api/auth/mfa/backup-codes/regenerate",
+      "requestFields": ["current_password", "code"],
+      "responseFields": ["backup_codes", "status"]
+    }
+  },
+  "observability": {
+    "frontendErrorReport": {
+      "method": "POST",
+      "path": "/api/observability/frontend-errors",
+      "requestFields": ["component_name", "message", "route_path", "severity", "stack_trace", "metadata"],
+      "responseFields": ["accepted", "event_id", "request_id"]
+    }
+  },
+  "accounts": {
+    "bankProviders": {
+      "method": "GET",
+      "path": "/api/accounts/bank-providers",
+      "responseFields": ["providers"]
+    },
+    "bankConnections": {
+      "method": "GET",
+      "path": "/api/accounts/bank-connections"
+    },
+    "bankConnectionPlaidLinkToken": {
+      "method": "POST",
+      "path": "/api/accounts/bank-connections/plaid/link-token",
+      "responseFields": ["linkToken"]
+    },
+    "bankConnectionPlaidExchange": {
+      "method": "POST",
+      "path": "/api/accounts/bank-connections/plaid/exchange",
+      "requestFields": ["public_token", "institution_name", "institution_id", "accounts"],
+      "responseFields": ["connections"]
+    },
+    "bankConnectionCreate": {
+      "method": "POST",
+      "path": "/api/accounts/bank-connections",
+      "requestFields": ["provider", "institution_name", "label"],
+      "responseFields": ["connection"]
+    },
+    "bankConnectionSync": {
+      "method": "POST",
+      "path": "/api/accounts/bank-connections/:id/sync",
+      "responseFields": ["connection", "importedCount", "message"]
+    },
+    "reconciliationQueue": {
+      "method": "GET",
+      "path": "/api/accounts/reconciliation-queue",
+      "responseFields": ["queue"]
+    },
+    "reconcileImportedTransaction": {
+      "method": "POST",
+      "path": "/api/accounts/reconciliation-queue/:id/reconcile",
+      "requestFields": ["category_id", "notes"],
+      "responseFields": ["message"]
+    }
+  }
+}

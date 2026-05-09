@@ -2,13 +2,14 @@ services:
   - type: web
     name: flowledger-api
     env: node
-    rootDir: backend
-    buildCommand: npm install
+    rootDir: .
+    buildCommand: npm --prefix backend install && npm --prefix frontend install && npm run build
     startCommand: npm start
+    healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      - key: PORT
-        value: 5000
+      - key: NODE_ENV
+        value: production
       - key: APP_BASE_URL
         sync: false
       - key: ALLOWED_ORIGINS
