@@ -57,6 +57,7 @@ app.use(
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'baggage', 'sentry-trace'],
+    exposedHeaders: ['X-Request-Id'],
   })
 );
 
@@ -116,6 +117,7 @@ app.use((req, res) => {
   res.status(404).json({
     message: 'Route not found.',
     error: 'Route not found.',
+    request_id: req.requestId,
   });
 });
 

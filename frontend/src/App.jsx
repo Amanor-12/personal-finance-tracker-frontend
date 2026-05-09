@@ -5,30 +5,50 @@ import AppErrorBoundary from './components/AppErrorBoundary';
 import AppShellState from './components/AppShellState';
 import { BillingAccessProvider } from './context/BillingAccessContext.jsx';
 import { ServiceCapabilitiesProvider } from './context/ServiceCapabilitiesProvider.jsx';
-import LandingPage from './components/LandingPage';
-import NotFoundPage from './components/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authStore } from './utils/authStore';
-import { API_UNAUTHORIZED_EVENT } from './utils/apiClient';
+import { API_UNAUTHORIZED_EVENT, getSupportReferenceLabel } from './utils/apiClient';
+import {
+  loadAccountsPage,
+  loadActivityPage,
+  loadBillingPage,
+  loadBudgetPage,
+  loadDashboardPage,
+  loadEmailVerificationPage,
+  loadGoalsPage,
+  loadLandingPage,
+  loadLoginPage,
+  loadNotFoundPage,
+  loadOnboardingPage,
+  loadPasswordRecoveryPage,
+  loadPricingPage,
+  loadRecurringPage,
+  loadReportsPage,
+  loadSettingsPage,
+  loadSupportPage,
+  loadTransactionsPage,
+} from './utils/routePrefetch';
 import { settingsStore } from './utils/settingsStore';
 import { setSentryUser } from './utils/sentry';
 
-const AccountsPage = lazy(() => import('./components/AccountsPage'));
-const ActivityPage = lazy(() => import('./components/ActivityPage'));
-const BillingPage = lazy(() => import('./components/BillingPage'));
-const BudgetPage = lazy(() => import('./components/BudgetPage'));
-const DashboardPage = lazy(() => import('./components/DashboardPage'));
-const EmailVerificationPage = lazy(() => import('./components/EmailVerificationPage'));
-const GoalsPage = lazy(() => import('./components/GoalsPage'));
-const LoginPage = lazy(() => import('./components/LoginPage'));
-const OnboardingPage = lazy(() => import('./components/OnboardingPage'));
-const PasswordRecoveryPage = lazy(() => import('./components/PasswordRecoveryPage'));
-const PricingPage = lazy(() => import('./components/PricingPage'));
-const RecurringPage = lazy(() => import('./components/RecurringPage'));
-const ReportsPage = lazy(() => import('./components/ReportsPage'));
-const SettingsPage = lazy(() => import('./components/SettingsPage'));
-const SupportPage = lazy(() => import('./components/SupportPage'));
-const TransactionsPage = lazy(() => import('./components/TransactionsPage'));
+const LandingPage = lazy(loadLandingPage);
+const AccountsPage = lazy(loadAccountsPage);
+const ActivityPage = lazy(loadActivityPage);
+const BillingPage = lazy(loadBillingPage);
+const BudgetPage = lazy(loadBudgetPage);
+const DashboardPage = lazy(loadDashboardPage);
+const EmailVerificationPage = lazy(loadEmailVerificationPage);
+const GoalsPage = lazy(loadGoalsPage);
+const LoginPage = lazy(loadLoginPage);
+const NotFoundPage = lazy(loadNotFoundPage);
+const OnboardingPage = lazy(loadOnboardingPage);
+const PasswordRecoveryPage = lazy(loadPasswordRecoveryPage);
+const PricingPage = lazy(loadPricingPage);
+const RecurringPage = lazy(loadRecurringPage);
+const ReportsPage = lazy(loadReportsPage);
+const SettingsPage = lazy(loadSettingsPage);
+const SupportPage = lazy(loadSupportPage);
+const TransactionsPage = lazy(loadTransactionsPage);
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
@@ -71,11 +91,14 @@ const withProtectedWorkspace = (currentUser, onLogout, element) => (
   </ProtectedRoute>
 );
 
-function AppServiceState({ message, onRetry }) {
+function AppServiceState({ error, onRetry }) {
+  const supportReference = getSupportReferenceLabel(error);
+
   return (
     <AppShellState
-      body={message}
+      body={error?.message || 'Rivo could not reach the finance service.'}
       eyebrow="Service unavailable"
+      note={supportReference}
       primaryAction={{
         label: 'Retry',
         onClick: onRetry,
@@ -104,7 +127,7 @@ function AppLoadingState({ currentUser, isWorkspace }) {
 function App() {
   const [currentUser, setCurrentUser] = useState(() => authStore.getSession());
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [authBootstrapError, setAuthBootstrapError] = useState('');
+  const [authBootstrapError, setAuthBootstrapError] = useState(null);
   const location = useLocation();
   const isProtectedWorkspacePath = protectedWorkspacePaths.has(location.pathname);
 
@@ -127,7 +150,7 @@ function App() {
       setCurrentUser(null);
 
       if (error.status !== 401) {
-        setAuthBootstrapError(error.message || 'Rivo could not reach the finance service.');
+        setAuthBootstrapError(error);
       }
     } finally {
       setIsAuthLoading(false);
@@ -165,7 +188,7 @@ function App() {
   useEffect(() => {
     const handleUnauthorized = async () => {
       await authStore.logout();
-      setAuthBootstrapError('');
+      setAuthBootstrapError(null);
       setCurrentUser(null);
       setIsAuthLoading(false);
     };
@@ -186,7 +209,7 @@ function App() {
 
     const user = result;
     await settingsStore.syncRemoteSettings(user.id, user.fullName).catch(() => null);
-    setAuthBootstrapError('');
+    setAuthBootstrapError(null);
     setCurrentUser(user);
     return user;
   };
@@ -194,7 +217,7 @@ function App() {
   const handleSignUp = async (payload) => {
     const user = await authStore.signup(payload);
     await settingsStore.syncRemoteSettings(user.id, user.fullName).catch(() => null);
-    setAuthBootstrapError('');
+    setAuthBootstrapError(null);
     setCurrentUser(user);
     return user;
   };
@@ -202,14 +225,14 @@ function App() {
   const handleCompleteMfaLogin = async (payload) => {
     const result = await authStore.completeMfaLogin(payload);
     await settingsStore.syncRemoteSettings(result.user.id, result.user.fullName).catch(() => null);
-    setAuthBootstrapError('');
+    setAuthBootstrapError(null);
     setCurrentUser(result.user);
     return result;
   };
 
   const handleLogout = async () => {
     await authStore.logout();
-    setAuthBootstrapError('');
+    setAuthBootstrapError(null);
     setCurrentUser(null);
   };
 
@@ -226,7 +249,7 @@ function App() {
   }
 
   if (authBootstrapError && !currentUser && isProtectedWorkspacePath) {
-    return <AppServiceState message={authBootstrapError} onRetry={loadCurrentSession} />;
+    return <AppServiceState error={authBootstrapError} onRetry={loadCurrentSession} />;
   }
 
   return (

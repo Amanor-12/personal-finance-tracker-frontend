@@ -15049,7 +15049,79 @@ textarea:focus-visible,
   color: rgba(255, 255, 255, 0.58);
 }
 
+.settings-posture-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.settings-posture-card {
+  --settings-posture-accent: rgba(118, 225, 208, 0.92);
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(202, 210, 216, 0.78);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(111, 108, 249, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 255, 0.94));
+  box-shadow: 0 18px 34px rgba(17, 27, 66, 0.08);
+}
+
+.settings-posture-card::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: 0;
+  width: 68px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--settings-posture-accent);
+}
+
+.settings-posture-card span {
+  display: block;
+  color: #66748d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-posture-card strong {
+  display: block;
+  margin-top: 10px;
+  color: var(--ref-navy);
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.settings-posture-card p {
+  margin: 10px 0 0;
+  color: #5f6c82;
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.settings-posture-card.tone-warning {
+  --settings-posture-accent: rgba(244, 167, 88, 0.96);
+}
+
+.settings-posture-card.tone-positive {
+  --settings-posture-accent: rgba(76, 201, 176, 0.96);
+}
+
+.settings-posture-card.tone-info {
+  --settings-posture-accent: rgba(94, 130, 248, 0.96);
+}
+
+.settings-posture-card.tone-neutral {
+  --settings-posture-accent: rgba(112, 122, 144, 0.72);
+}
+
 @media (max-width: 1180px) {
+  .settings-posture-grid,
   .accounts-wallet-utility-grid,
   .transactions-ops-secondary .transactions-ops-metrics,
   .accounts-wallet-secondary .accounts-command-stats,
@@ -15065,6 +15137,7 @@ textarea:focus-visible,
 }
 
 @media (max-width: 760px) {
+  .settings-posture-grid,
   .transactions-ops-console,
   .accounts-wallet-board,
   .budget-cockpit,

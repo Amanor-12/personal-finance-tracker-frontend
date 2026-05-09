@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
+import { appendSupportReference } from '../utils/apiClient';
+import { prefetchRoute } from '../utils/routePrefetch';
 import './LoginPage.css';
 
 const REMEMBERED_EMAIL_KEY = 'ledgr-remembered-email';
@@ -121,6 +123,14 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isMfaStep = isLogin && Boolean(mfaChallenge?.challengeToken);
 
+  useEffect(() => {
+    prefetchRoute('/dashboard');
+
+    if (!isLogin) {
+      prefetchRoute('/pricing');
+    }
+  }, [isLogin]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((currentForm) => ({
@@ -162,7 +172,12 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
         });
         navigate(redirectPath, { replace: true });
       } catch (error) {
-        setMessage(error.message || 'Rivo could not verify the multi-factor code.');
+        setMessage(
+          appendSupportReference(
+            error.message || 'Rivo could not verify the multi-factor code.',
+            error
+          )
+        );
         setMessageTone('error');
       } finally {
         setIsSubmitting(false);
@@ -244,7 +259,12 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
             : "Rivo can't connect right now. Please try again in a moment."
           : error.message;
 
-      setMessage(authMessage || 'Rivo could not complete that request. Please try again.');
+      setMessage(
+        appendSupportReference(
+          authMessage || 'Rivo could not complete that request. Please try again.',
+          error
+        )
+      );
       setMessageTone('error');
     } finally {
       setIsSubmitting(false);

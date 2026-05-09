@@ -245,6 +245,64 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
 
     return true;
   });
+  const settingsPostureCards = [
+    {
+      label: 'Identity',
+      note: supportsEmailVerification
+        ? currentUser?.isEmailVerified
+          ? 'Recovery and login alerts can trust this address.'
+          : 'Confirm the address so recovery and security notices stay dependable.'
+        : 'Primary email is attached to the account for recovery and product notices.',
+      tone: supportsEmailVerification && !currentUser?.isEmailVerified ? 'warning' : 'positive',
+      value: supportsEmailVerification
+        ? currentUser?.isEmailVerified
+          ? 'Email verified'
+          : 'Verification needed'
+        : 'Primary email active',
+    },
+    {
+      label: 'Security',
+      note: supportsSecurityControls
+        ? mfaStatus.enabled
+          ? 'Multi-factor protection and session oversight are active for this workspace.'
+          : 'Turn on an authenticator app to harden sign-in for this account.'
+        : supportsPasswordUpdate
+          ? 'Password rotation is available here, even without advanced session controls.'
+          : 'Advanced security controls are managed outside this deployment.',
+      tone: supportsSecurityControls && !mfaStatus.enabled ? 'warning' : 'info',
+      value: supportsSecurityControls
+        ? mfaStatus.enabled
+          ? 'Multi-factor active'
+          : 'Password-only sign-in'
+        : supportsPasswordUpdate
+          ? 'Password controls ready'
+          : 'Managed elsewhere',
+    },
+    {
+      label: 'Preferences',
+      note: supportsPreferences
+        ? `${storedSettings.amountView} amounts and ${storedSettings.weekStart.toLowerCase()} week settings are active in this workspace.`
+        : 'Preference controls are not exposed by the current backend capability set.',
+      tone: 'neutral',
+      value: supportsPreferences
+        ? `${storedSettings.currency} · ${storedSettings.weekStart} week`
+        : 'Preferences unavailable',
+    },
+    {
+      label: 'Data',
+      note: supportsTransactionExport
+        ? 'Export tools are available when you need a clean handoff or archive.'
+        : supportsDeleteAccount
+          ? 'Deletion controls are available here even though export is not enabled.'
+          : 'This workspace currently keeps data controls narrow and in-product only.',
+      tone: supportsTransactionExport ? 'positive' : 'info',
+      value: supportsTransactionExport
+        ? 'Export ready'
+        : supportsDeleteAccount
+          ? 'Deletion ready'
+          : 'In-product only',
+    },
+  ];
 
   useEffect(() => {
     if (!settingsSections.some((section) => section.id === activeSection)) {
@@ -785,6 +843,16 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
           <strong>{currentUser?.email}</strong>
           <p>{storedSettings.workspaceName}</p>
         </div>
+      </section>
+
+      <section className="settings-posture-grid" aria-label="Account posture">
+        {settingsPostureCards.map((card) => (
+          <article key={card.label} className={`settings-posture-card tone-${card.tone}`}>
+            <span>{card.label}</span>
+            <strong>{card.value}</strong>
+            <p>{card.note}</p>
+          </article>
+        ))}
       </section>
 
       <section className="settings-hq">

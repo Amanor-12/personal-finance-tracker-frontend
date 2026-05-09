@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
+import { prefetchRoute } from '../utils/routePrefetch';
 import './LandingPage.css';
 
 const featureCards = [
@@ -63,6 +64,7 @@ function LandingPage({ currentUser }) {
   const primaryLabel = currentUser ? 'Open workspace' : 'Start free';
   const secondaryHref = currentUser ? '/billing' : '/pricing';
   const secondaryLabel = currentUser ? 'Manage plan' : 'View pricing';
+  const warmRoute = (path) => () => prefetchRoute(path);
 
   return (
     <main className="landing-shell">
@@ -72,8 +74,19 @@ function LandingPage({ currentUser }) {
           <a href="#product">Product</a>
           <a href="#plans">Plans</a>
           <a href="#trust">Trust</a>
-          <Link to={currentUser ? '/dashboard' : '/login'}>{currentUser ? 'Workspace' : 'Sign in'}</Link>
-          <Link className="landing-nav-cta" to={primaryHref}>
+          <Link
+            to={currentUser ? '/dashboard' : '/login'}
+            onMouseEnter={warmRoute(currentUser ? '/dashboard' : '/login')}
+            onFocus={warmRoute(currentUser ? '/dashboard' : '/login')}
+          >
+            {currentUser ? 'Workspace' : 'Sign in'}
+          </Link>
+          <Link
+            className="landing-nav-cta"
+            to={primaryHref}
+            onMouseEnter={warmRoute(primaryHref)}
+            onFocus={warmRoute(primaryHref)}
+          >
             {primaryLabel}
           </Link>
         </nav>
@@ -87,10 +100,20 @@ function LandingPage({ currentUser }) {
             Rivo gives customers one calm place to track accounts, transactions, budgets, goals, recurring costs, and the signals that matter before money drift gets expensive.
           </p>
           <div className="landing-hero-actions">
-            <Link className="landing-primary-button" to={primaryHref}>
+            <Link
+              className="landing-primary-button"
+              to={primaryHref}
+              onMouseEnter={warmRoute(primaryHref)}
+              onFocus={warmRoute(primaryHref)}
+            >
               {primaryLabel}
             </Link>
-            <Link className="landing-secondary-button" to={secondaryHref}>
+            <Link
+              className="landing-secondary-button"
+              to={secondaryHref}
+              onMouseEnter={warmRoute(secondaryHref)}
+              onFocus={warmRoute(secondaryHref)}
+            >
               {secondaryLabel}
             </Link>
           </div>
@@ -227,10 +250,20 @@ function LandingPage({ currentUser }) {
           <h2>Open a finance workspace that feels deliberate from day one.</h2>
         </div>
         <div className="landing-hero-actions">
-          <Link className="landing-primary-button" to={primaryHref}>
+          <Link
+            className="landing-primary-button"
+            to={primaryHref}
+            onMouseEnter={warmRoute(primaryHref)}
+            onFocus={warmRoute(primaryHref)}
+          >
             {primaryLabel}
           </Link>
-          <Link className="landing-secondary-button" to="/pricing">
+          <Link
+            className="landing-secondary-button"
+            to="/pricing"
+            onMouseEnter={warmRoute('/pricing')}
+            onFocus={warmRoute('/pricing')}
+          >
             See plan details
           </Link>
         </div>

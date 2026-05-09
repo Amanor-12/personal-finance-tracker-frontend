@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import BrandLogo from './BrandLogo';
 import { useServiceCapabilities } from '../context/useServiceCapabilities';
 import { useBillingAccess } from '../context/useBillingAccess';
+import { prefetchRoute, scheduleRoutePrefetch } from '../utils/routePrefetch';
 import { settingsStore, SETTINGS_UPDATED_EVENT } from '../utils/settingsStore';
 
 const navItems = [
@@ -203,6 +204,13 @@ function FinanceLayout({
       }),
     [isCapabilitiesLoading, supportsBillingWorkspace]
   );
+  const navigationPrefetchPaths = useMemo(
+    () =>
+      [...visibleNavItems, ...visibleOtherItems, { to: '/help' }, { to: '/activity' }]
+        .map((item) => item.to)
+        .filter(Boolean),
+    [visibleNavItems, visibleOtherItems]
+  );
 
   useEffect(() => {
     setSearchQuery('');
@@ -283,6 +291,17 @@ function FinanceLayout({
     };
   }, []);
 
+  useEffect(() => {
+    const nextPaths = [...new Set(navigationPrefetchPaths)]
+      .filter((path) => path !== location.pathname)
+      .slice(0, 4);
+    const cleanups = nextPaths.map((path) => scheduleRoutePrefetch(path));
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup?.());
+    };
+  }, [location.pathname, navigationPrefetchPaths]);
+
   const searchItems = useMemo(
     () => [
       ...visibleNavItems.map((item) => ({
@@ -334,6 +353,11 @@ function FinanceLayout({
     : searchItems;
   const searchResults = filteredSearchItems.slice(0, 7);
   const showSearchResults = isSearchFocused || Boolean(normalizedSearchQuery);
+  const warmRoute = (path) => {
+    if (path) {
+      prefetchRoute(path);
+    }
+  };
 
   const handleSearchSelect = (to) => {
     setSearchQuery('');
@@ -405,6 +429,8 @@ function FinanceLayout({
                     key={item.label}
                     className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}${item.featureKey && !hasFeature(item.featureKey) && !isBillingLoading ? ' is-premium' : ''}`}
                     to={item.to}
+                    onMouseEnter={() => warmRoute(item.to)}
+                    onFocus={() => warmRoute(item.to)}
                   >
                     <span className="ref-nav-icon">
                       <SidebarIcon type={item.icon} />
@@ -435,6 +461,8 @@ function FinanceLayout({
                     key={item.label}
                     className={({ isActive }) => `ref-nav-item${isActive ? ' is-active' : ''}`}
                     to={item.to}
+                    onMouseEnter={() => warmRoute(item.to)}
+                    onFocus={() => warmRoute(item.to)}
                   >
                     <span className="ref-nav-icon">
                       <SidebarIcon type={item.icon} />
@@ -455,7 +483,12 @@ function FinanceLayout({
         </div>
 
         <div className="ref-sidebar-bottom">
-          <NavLink className={({ isActive }) => `ref-support-link${isActive ? ' is-active' : ''}`} to="/help">
+          <NavLink
+            className={({ isActive }) => `ref-support-link${isActive ? ' is-active' : ''}`}
+            to="/help"
+            onMouseEnter={() => warmRoute('/help')}
+            onFocus={() => warmRoute('/help')}
+          >
             <span className="ref-nav-icon">
               <SidebarIcon type="help" />
             </span>
@@ -512,7 +545,14 @@ function FinanceLayout({
                         id={`workspace-search-result-${index}`}
                         type="button"
                         onMouseDown={(event) => event.preventDefault()}
-                        onMouseEnter={() => setHighlightedSearchIndex(index)}
+                        onMouseEnter={() => {
+                          setHighlightedSearchIndex(index);
+                          warmRoute(item.to);
+                        }}
+                        onFocus={() => {
+                          setHighlightedSearchIndex(index);
+                          warmRoute(item.to);
+                        }}
                         onClick={() => handleSearchSelect(item.to)}
                       >
                         <span className="ref-search-item-icon">
@@ -537,10 +577,22 @@ function FinanceLayout({
           </label>
 
           <div className="ref-topbar-actions">
-            <NavLink className="ref-icon-button" to="/activity" aria-label="Activity and notifications">
+            <NavLink
+              className="ref-icon-button"
+              to="/activity"
+              aria-label="Activity and notifications"
+              onMouseEnter={() => warmRoute('/activity')}
+              onFocus={() => warmRoute('/activity')}
+            >
               <SidebarIcon type="bell" />
             </NavLink>
-            <NavLink className="ref-icon-button" to="/help" aria-label="Open help center">
+            <NavLink
+              className="ref-icon-button"
+              to="/help"
+              aria-label="Open help center"
+              onMouseEnter={() => warmRoute('/help')}
+              onFocus={() => warmRoute('/help')}
+            >
               <SidebarIcon type="message" />
             </NavLink>
 
@@ -569,7 +621,14 @@ function FinanceLayout({
                     <span>{currentUser?.email || resolvedWorkspaceName}</span>
                   </div>
 
-                  <NavLink className="ref-user-menu-item" role="menuitem" to="/settings" onClick={() => setIsUserMenuOpen(false)}>
+                  <NavLink
+                    className="ref-user-menu-item"
+                    role="menuitem"
+                    to="/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    onMouseEnter={() => warmRoute('/settings')}
+                    onFocus={() => warmRoute('/settings')}
+                  >
                     <span className="ref-user-menu-item-icon">
                       <SidebarIcon type="settings" />
                     </span>
@@ -577,7 +636,14 @@ function FinanceLayout({
                   </NavLink>
 
                   {supportsBillingWorkspace || isCapabilitiesLoading ? (
-                    <NavLink className="ref-user-menu-item" role="menuitem" to="/billing" onClick={() => setIsUserMenuOpen(false)}>
+                    <NavLink
+                      className="ref-user-menu-item"
+                      role="menuitem"
+                      to="/billing"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      onMouseEnter={() => warmRoute('/billing')}
+                      onFocus={() => warmRoute('/billing')}
+                    >
                       <span className="ref-user-menu-item-icon">
                         <SidebarIcon type="billing" />
                       </span>

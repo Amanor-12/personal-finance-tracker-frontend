@@ -32,11 +32,42 @@ const getErrorMessage = (payload) =>
       payload?.errors?.[0]?.message ||
       'Request failed.';
 
-const buildError = (status, payload) => {
+const resolveRequestId = (payload, responseRequestId = '') =>
+  String(
+    responseRequestId ||
+      payload?.request_id ||
+      payload?.requestId ||
+      payload?.error?.request_id ||
+      payload?.error?.requestId ||
+      ''
+  ).trim();
+
+const buildError = (status, payload, responseRequestId = '') => {
   const error = new Error(getErrorMessage(payload));
   error.status = status;
   error.payload = payload;
+  error.requestId = resolveRequestId(payload, responseRequestId);
   return error;
+};
+
+export const getSupportReferenceLabel = (value) => {
+  const requestId = resolveRequestId(value?.payload || value, value?.requestId || '');
+  return requestId ? `Reference code: ${requestId}` : '';
+};
+
+export const appendSupportReference = (message, value) => {
+  const normalizedMessage = String(message || '').trim();
+  const supportReference = getSupportReferenceLabel(value);
+
+  if (!normalizedMessage) {
+    return supportReference;
+  }
+
+  if (!supportReference) {
+    return normalizedMessage;
+  }
+
+  return `${normalizedMessage} ${supportReference}`;
 };
 
 const parseResponse = async (response) => {
@@ -140,11 +171,16 @@ const request = async (
   });
 
   const payload = await parseResponse(response);
+  const requestId = response.headers.get('x-request-id') || '';
 
   if (path.startsWith('/api') && looksLikeHtml(payload)) {
-    throw buildError(response.status || 0, {
-      message: API_OFFLINE_MESSAGE,
-    });
+    throw buildError(
+      response.status || 0,
+      {
+        message: API_OFFLINE_MESSAGE,
+      },
+      requestId
+    );
   }
 
   if (!response.ok) {
@@ -174,12 +210,17 @@ const request = async (
     }
 
     if (response.status === 404 && path.startsWith('/api')) {
-      throw buildError(response.status, {
-        message: notFoundMessage || API_OFFLINE_MESSAGE,
-      });
+      throw buildError(
+        response.status,
+        {
+          ...(payload && typeof payload === 'object' ? payload : {}),
+          message: notFoundMessage || API_OFFLINE_MESSAGE,
+        },
+        requestId
+      );
     }
 
-    throw buildError(response.status, payload);
+    throw buildError(response.status, payload, requestId);
   }
 
   return payload;
