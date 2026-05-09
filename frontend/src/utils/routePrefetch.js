@@ -31,6 +31,9 @@ export const loadReportsPage = createCachedLoader(() => import('../components/Re
 export const loadSettingsPage = createCachedLoader(() => import('../components/SettingsPage'));
 export const loadSupportPage = createCachedLoader(() => import('../components/SupportPage'));
 export const loadTransactionsPage = createCachedLoader(() => import('../components/TransactionsPage'));
+export const loadWorkspaceRouteFrame = createCachedLoader(() =>
+  import('../components/WorkspaceRouteFrame')
+);
 
 const routeLoaders = {
   '/': loadLandingPage,
@@ -54,10 +57,30 @@ const routeLoaders = {
   '/verify-email': loadEmailVerificationPage,
 };
 
+const protectedRoutePaths = new Set([
+  '/accounts',
+  '/activity',
+  '/billing',
+  '/budget',
+  '/dashboard',
+  '/goals',
+  '/help',
+  '/onboarding',
+  '/recurring',
+  '/reports',
+  '/settings',
+  '/transactions',
+]);
+
 const normalizePath = (path) => String(path || '').split('#')[0].split('?')[0];
 
 export const prefetchRoute = (path) => {
-  const loader = routeLoaders[normalizePath(path)];
+  const normalizedPath = normalizePath(path);
+  const loader = routeLoaders[normalizedPath];
+
+  if (protectedRoutePaths.has(normalizedPath)) {
+    void loadWorkspaceRouteFrame();
+  }
 
   if (loader) {
     void loader();

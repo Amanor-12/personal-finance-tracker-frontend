@@ -3,9 +3,6 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AppShellState from './components/AppShellState';
-import { BillingAccessProvider } from './context/BillingAccessContext.jsx';
-import { ServiceCapabilitiesProvider } from './context/ServiceCapabilitiesProvider.jsx';
-import ProtectedRoute from './components/ProtectedRoute';
 import { authStore } from './utils/authStore';
 import { API_UNAUTHORIZED_EVENT, getSupportReferenceLabel } from './utils/apiClient';
 import {
@@ -27,6 +24,7 @@ import {
   loadSettingsPage,
   loadSupportPage,
   loadTransactionsPage,
+  loadWorkspaceRouteFrame,
 } from './utils/routePrefetch';
 import { settingsStore } from './utils/settingsStore';
 import { setSentryUser } from './utils/sentry';
@@ -49,6 +47,7 @@ const ReportsPage = lazy(loadReportsPage);
 const SettingsPage = lazy(loadSettingsPage);
 const SupportPage = lazy(loadSupportPage);
 const TransactionsPage = lazy(loadTransactionsPage);
+const WorkspaceRouteFrame = lazy(loadWorkspaceRouteFrame);
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
@@ -86,9 +85,9 @@ const protectedWorkspacePaths = new Set([
 ]);
 
 const withProtectedWorkspace = (currentUser, onLogout, element) => (
-  <ProtectedRoute currentUser={currentUser}>
-    <BillingAccessProvider onLogout={onLogout}>{element}</BillingAccessProvider>
-  </ProtectedRoute>
+  <WorkspaceRouteFrame currentUser={currentUser} onLogout={onLogout}>
+    {element}
+  </WorkspaceRouteFrame>
 );
 
 function AppServiceState({ error, onRetry }) {
@@ -158,7 +157,7 @@ function App() {
   };
 
   useEffect(() => {
-    setSentryUser(currentUser);
+    void setSentryUser(currentUser);
   }, [currentUser]);
 
   useEffect(() => {
@@ -253,198 +252,196 @@ function App() {
   }
 
   return (
-    <ServiceCapabilitiesProvider>
-      <AppErrorBoundary>
-        <Suspense fallback={<AppLoadingState currentUser={currentUser} isWorkspace={Boolean(currentUser)} />}>
-          <Routes>
-            <Route path="/" element={<LandingPage currentUser={currentUser} />} />
+    <AppErrorBoundary>
+      <Suspense fallback={<AppLoadingState currentUser={currentUser} isWorkspace={Boolean(currentUser)} />}>
+        <Routes>
+          <Route path="/" element={<LandingPage currentUser={currentUser} />} />
 
-          <Route
-            path="/login"
-            element={
-              currentUser ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <LoginPage
-                  mode="login"
-                  onCompleteMfaLogin={handleCompleteMfaLogin}
-                  onLogin={handleLogin}
-                  onSignUp={handleSignUp}
-                />
-              )
-            }
-          />
+        <Route
+          path="/login"
+          element={
+            currentUser ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage
+                mode="login"
+                onCompleteMfaLogin={handleCompleteMfaLogin}
+                onLogin={handleLogin}
+                onSignUp={handleSignUp}
+              />
+            )
+          }
+        />
 
-          <Route
-            path="/signup"
-            element={
-              currentUser ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <LoginPage
-                  mode="signup"
-                  onCompleteMfaLogin={handleCompleteMfaLogin}
-                  onLogin={handleLogin}
-                  onSignUp={handleSignUp}
-                />
-              )
-            }
-          />
+        <Route
+          path="/signup"
+          element={
+            currentUser ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage
+                mode="signup"
+                onCompleteMfaLogin={handleCompleteMfaLogin}
+                onLogin={handleLogin}
+                onSignUp={handleSignUp}
+              />
+            )
+          }
+        />
 
-          <Route path="/pricing" element={<PricingPage currentUser={currentUser} />} />
+        <Route path="/pricing" element={<PricingPage currentUser={currentUser} />} />
 
-          <Route
-            path="/forgot-password"
-            element={currentUser ? <Navigate to="/dashboard" replace /> : <PasswordRecoveryPage />}
-          />
+        <Route
+          path="/forgot-password"
+          element={currentUser ? <Navigate to="/dashboard" replace /> : <PasswordRecoveryPage />}
+        />
 
-          <Route
-            path="/reset-password"
-            element={currentUser ? <Navigate to="/dashboard" replace /> : <PasswordRecoveryPage />}
-          />
+        <Route
+          path="/reset-password"
+          element={currentUser ? <Navigate to="/dashboard" replace /> : <PasswordRecoveryPage />}
+        />
 
-          <Route
-            path="/verify-email"
-            element={<EmailVerificationPage currentUser={currentUser} onRefreshSession={loadCurrentSession} />}
-          />
+        <Route
+          path="/verify-email"
+          element={<EmailVerificationPage currentUser={currentUser} onRefreshSession={loadCurrentSession} />}
+        />
 
-          <Route
-            path="/onboarding"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <OnboardingPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/onboarding"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <OnboardingPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/dashboard"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <DashboardPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/dashboard"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <DashboardPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/settings"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <SettingsPage currentUser={currentUser} onLogout={handleLogout} onUpdateProfile={handleUpdateProfile} />
-              )
-            }
-          />
+        <Route
+          path="/settings"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <SettingsPage currentUser={currentUser} onLogout={handleLogout} onUpdateProfile={handleUpdateProfile} />
+            )
+          }
+        />
 
-          <Route
-            path="/accounts"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <AccountsPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/accounts"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <AccountsPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/transactions"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <TransactionsPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/transactions"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <TransactionsPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/budget"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <BudgetPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/budget"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <BudgetPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/goals"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <GoalsPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/goals"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <GoalsPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/recurring"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <RecurringPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/recurring"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <RecurringPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/reports"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <ReportsPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/reports"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <ReportsPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/activity"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <ActivityPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/activity"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <ActivityPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/billing"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <BillingPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/billing"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <BillingPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-          <Route
-            path="/help"
-            element={
-              withProtectedWorkspace(
-                currentUser,
-                handleLogout,
-                <SupportPage currentUser={currentUser} onLogout={handleLogout} />
-              )
-            }
-          />
+        <Route
+          path="/help"
+          element={
+            withProtectedWorkspace(
+              currentUser,
+              handleLogout,
+              <SupportPage currentUser={currentUser} onLogout={handleLogout} />
+            )
+          }
+        />
 
-            <Route path="*" element={<NotFoundPage currentUser={currentUser} />} />
-          </Routes>
-        </Suspense>
-      </AppErrorBoundary>
-    </ServiceCapabilitiesProvider>
+          <Route path="*" element={<NotFoundPage currentUser={currentUser} />} />
+        </Routes>
+      </Suspense>
+    </AppErrorBoundary>
   );
 }
 

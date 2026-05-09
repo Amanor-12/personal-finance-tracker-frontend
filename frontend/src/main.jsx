@@ -4,12 +4,12 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import { installGlobalErrorHandlers } from './utils/observability';
-import { getReactRootOptions, initializeSentry } from './utils/sentry';
+import { initializeSentry } from './utils/sentry';
 
-initializeSentry();
+void initializeSentry();
 installGlobalErrorHandlers();
 
-createRoot(document.getElementById('root'), getReactRootOptions()).render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <App />

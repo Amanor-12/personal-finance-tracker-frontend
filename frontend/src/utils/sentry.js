@@ -1,5 +1,3 @@
-import * as Sentry from '@sentry/react';
-
 const API_BASE_URL = String(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const APP_VERSION = String(import.meta.env.VITE_APP_VERSION || 'dev');
 const SENTRY_DSN = String(import.meta.env.VITE_SENTRY_DSN || '').trim();
@@ -10,6 +8,7 @@ const SENTRY_RELEASE = String(import.meta.env.VITE_SENTRY_RELEASE || APP_VERSION
 const SENTRY_TRACES_SAMPLE_RATE = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || 0);
 
 let sentryInitialized = false;
+let sentryModulePromise = null;
 
 const traceTargets = [
   /^\//,
@@ -35,8 +34,29 @@ const normalizeError = (errorLike) => {
 
 export const isSentryEnabled = () => Boolean(SENTRY_DSN);
 
-export const initializeSentry = () => {
+const loadSentryModule = async () => {
+  if (!isSentryEnabled()) {
+    return null;
+  }
+
+  if (!sentryModulePromise) {
+    sentryModulePromise = import('@sentry/react').catch((error) => {
+      sentryModulePromise = null;
+      throw error;
+    });
+  }
+
+  return sentryModulePromise;
+};
+
+export const initializeSentry = async () => {
   if (!isSentryEnabled() || sentryInitialized) {
+    return false;
+  }
+
+  const Sentry = await loadSentryModule();
+
+  if (!Sentry) {
     return false;
   }
 
@@ -57,8 +77,14 @@ export const initializeSentry = () => {
   return true;
 };
 
-export const captureSentryException = (errorLike, context = {}) => {
+export const captureSentryException = async (errorLike, context = {}) => {
   if (!isSentryEnabled()) {
+    return null;
+  }
+
+  const Sentry = await loadSentryModule().catch(() => null);
+
+  if (!Sentry) {
     return null;
   }
 
@@ -83,8 +109,14 @@ export const captureSentryException = (errorLike, context = {}) => {
   });
 };
 
-export const setSentryUser = (user) => {
+export const setSentryUser = async (user) => {
   if (!isSentryEnabled()) {
+    return;
+  }
+
+  const Sentry = await loadSentryModule().catch(() => null);
+
+  if (!Sentry) {
     return;
   }
 
@@ -98,18 +130,4 @@ export const setSentryUser = (user) => {
     id: String(user.id),
     username: user.fullName || user.name || undefined,
   });
-};
-
-export const getReactRootOptions = () => {
-  if (!isSentryEnabled()) {
-    return undefined;
-  }
-
-  const handler = Sentry.reactErrorHandler();
-
-  return {
-    onCaughtError: handler,
-    onRecoverableError: handler,
-    onUncaughtError: handler,
-  };
 };

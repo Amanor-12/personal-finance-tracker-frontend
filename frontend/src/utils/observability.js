@@ -49,7 +49,7 @@ export const captureFrontendError = async (
     stack_trace: resolveStack(errorLike),
   };
 
-  captureSentryException(errorLike, {
+  void captureSentryException(errorLike, {
     componentName,
     metadata: payload.metadata,
     routePath: payload.route_path,
