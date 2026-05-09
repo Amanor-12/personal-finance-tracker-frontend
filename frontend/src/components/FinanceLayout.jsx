@@ -177,7 +177,7 @@ function FinanceLayout({
   const supportsReportsWorkspace = supports('reports');
   const searchShortcutLabel =
     typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform)
-      ? '⌘K'
+      ? 'Cmd K'
       : 'Ctrl K';
 
   const visibleNavItems = useMemo(
@@ -374,7 +374,11 @@ function FinanceLayout({
   };
 
   return (
-    <main className="ref-shell">
+    <>
+      <a className="ref-skip-link" href="#workspace-content">
+        Skip to workspace content
+      </a>
+      <main className="ref-shell">
       <aside className="ref-sidebar">
         <div className="ref-sidebar-top">
           <div className="ref-brand-lockup">
@@ -615,11 +619,14 @@ function FinanceLayout({
         </div>
 
         <div className={`ref-content-grid${hasRail ? '' : ' is-single-column'}`}>
-          <section className="ref-main">{children}</section>
+          <section className="ref-main" id="workspace-content" tabIndex="-1">
+            {children}
+          </section>
           {hasRail ? <aside className="ref-rail">{rail}</aside> : null}
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 

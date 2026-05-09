@@ -209,7 +209,7 @@ const buildForecastHighlights = ({
     body:
       recurringFloor > 0
         ? `${formatMoneyValue(recurringFloor)} is already committed before variable spending begins.`
-        : 'No recurring payment floor is recorded yet, which weakens forecast confidence.',
+        : 'No recurring payments are being tracked yet, so the forecast is leaning on transaction history alone.',
     id: 'recurring-floor',
     title: recurringFloor > 0 ? 'Recurring load sets the floor' : 'Recurring load is under-defined',
     tone: recurringFloor > 0 ? 'neutral' : 'warning',

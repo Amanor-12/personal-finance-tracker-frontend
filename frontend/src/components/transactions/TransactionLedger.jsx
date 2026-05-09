@@ -22,25 +22,32 @@ function TransactionSkeleton() {
   );
 }
 
-function TransactionEmptyState({ hasTransactions, onAddTransaction }) {
+function TransactionEmptyState({ hasTransactions, onAddTransaction, onClearFilters }) {
   return (
     <div className="ledger-empty-state">
       <div className="ledger-empty-orb" aria-hidden="true">
         <TransactionsIcon type="ledger" />
       </div>
-      <span className="ledger-eyebrow">No financial records shown</span>
+      <span className="ledger-eyebrow">{hasTransactions ? 'No matching records' : 'Ledger ready'}</span>
       <h2>{hasTransactions ? 'No transactions match these filters' : 'Your ledger is clean'}</h2>
       <p>
         {hasTransactions
-          ? 'Adjust the filters above to widen the view.'
+          ? 'Clear or widen the filters above to bring transactions back into view.'
           : 'Add your first income or expense when you are ready. Rivo will only show records that belong to your signed-in account.'}
       </p>
-      {!hasTransactions ? (
-        <button className="ledger-primary-action" type="button" onClick={onAddTransaction}>
-          <TransactionsIcon type="plus" />
-          Add first transaction
-        </button>
-      ) : null}
+      <div className="ledger-empty-actions">
+        {!hasTransactions ? (
+          <button className="ledger-primary-action" type="button" onClick={onAddTransaction}>
+            <TransactionsIcon type="plus" />
+            Add first transaction
+          </button>
+        ) : null}
+        {hasTransactions ? (
+          <button className="ledger-secondary-action" type="button" onClick={onClearFilters}>
+            Clear filters
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -53,7 +60,7 @@ function TransactionErrorState({ message, onRetry }) {
       </div>
       <span className="ledger-eyebrow">Connection issue</span>
       <h2>Transactions could not load</h2>
-      <p>{message || 'The API did not return your ledger. Try again when the backend is running.'}</p>
+      <p>{message || 'We could not reach your ledger right now. Retry in a moment.'}</p>
       <button className="ledger-secondary-action" type="button" onClick={onRetry}>
         Retry
       </button>
@@ -158,10 +165,10 @@ function TransactionMobileCard({ selectionControl = null, transaction, onDelete,
         <span>{getTransactionStatus(transaction)}</span>
       </div>
       <div className="ledger-mobile-card-actions" onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={() => onEdit(transaction)}>
+        <button type="button" onClick={() => onEdit(transaction)} aria-label={`Edit ${getTransactionTitle(transaction)}`}>
           Edit
         </button>
-        <button type="button" onClick={() => onDelete(transaction)}>
+        <button type="button" onClick={() => onDelete(transaction)} aria-label={`Delete ${getTransactionTitle(transaction)}`}>
           Delete
         </button>
       </div>
@@ -173,6 +180,7 @@ function TransactionLedger({
   errorMessage,
   isLoading,
   onAddTransaction,
+  onClearFilters,
   onDelete,
   onEdit,
   onRetry,
@@ -211,6 +219,7 @@ function TransactionLedger({
         <TransactionEmptyState
           hasTransactions={totalTransactions > 0}
           onAddTransaction={onAddTransaction}
+          onClearFilters={onClearFilters}
         />
       </section>
     );
@@ -250,6 +259,7 @@ function TransactionLedger({
           <tbody>
             {transactions.map((transaction) => (
               <tr
+                aria-selected={selectedIds.includes(transaction.id)}
                 className={`ledger-table-row${selectedIds.includes(transaction.id) ? ' is-selected' : ''}`}
                 key={transaction.id}
                 onClick={() => onSelect(transaction)}
@@ -282,9 +292,18 @@ function TransactionLedger({
       <div className="ledger-mobile-list">
         {transactions.map((transaction) => (
           <article
+            aria-selected={selectedIds.includes(transaction.id)}
             className={`ledger-mobile-card${selectedIds.includes(transaction.id) ? ' is-selected' : ''}`}
             key={transaction.id}
             onClick={() => onSelect(transaction)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onSelect(transaction);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <TransactionMobileCard
               selectionControl={

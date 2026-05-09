@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
 import { FeatureGate } from './billing/FeatureGate';
 import { PremiumPanel } from './premium/PremiumPage';
@@ -24,6 +25,7 @@ import { financeStore } from '../utils/financeStore';
 import { isPlusTier, isProTier } from '../utils/tierAccess';
 
 function TransactionsPage({ currentUser, onLogout }) {
+  const navigate = useNavigate();
   const { access } = useBillingAccess();
   const isPlus = isPlusTier(access.tier);
   const isPro = isProTier(access.tier);
@@ -737,7 +739,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                     Clear selection
                   </button>
                 ) : (
-                  <button className="transactions-selection-clear" type="button" onClick={() => window.location.assign('/pricing')}>
+                  <button className="transactions-selection-clear" type="button" onClick={() => navigate('/pricing')}>
                     See Pro
                   </button>
                 )}
@@ -760,7 +762,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                   </strong>
                   <p>
                     {isPro
-                      ? 'The frontend sends the selected ledger slice to a backend-owned AI route, then lets you apply only categories that already exist in this workspace.'
+                      ? 'Rivo reviews the selected ledger slice on a secure server route, then lets you apply only categories that already exist in this workspace.'
                       : 'Upgrade to Pro to generate backend AI suggestions for the selected transactions.'}
                   </p>
                 </div>
@@ -858,6 +860,7 @@ function TransactionsPage({ currentUser, onLogout }) {
           errorMessage={loadError}
           isLoading={isLoading}
           onAddTransaction={openAddDialog}
+          onClearFilters={clearFilters}
           onDelete={setDeleteCandidate}
           onEdit={openEditDialog}
           onRetry={() => setRefreshKey((value) => value + 1)}

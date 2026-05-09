@@ -19,7 +19,7 @@ const baseFaqItems = [
   },
   {
     question: 'Where do bank connections fit?',
-    answer: 'Manual accounts work now. Bank aggregation can be added later without changing the core account and transaction workflow.',
+    answer: 'Manual accounts work immediately. Connected institutions can be added when available without changing the core account, transaction, budget, goal, or reporting workflow.',
   },
 ];
 
@@ -190,7 +190,7 @@ function SupportPage({ currentUser, onLogout }) {
 
       {!visiblePaths.length ? (
         <section className="support-empty-search">
-          <h3>No help result found</h3>
+          <h3>No matching help result</h3>
           <p>Try searching for account, transaction, budget, report, billing, or security.</p>
           <button type="button" onClick={() => setQuery('')}>
             Clear search

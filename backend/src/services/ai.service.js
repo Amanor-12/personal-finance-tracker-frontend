@@ -260,11 +260,11 @@ const buildHeuristicReportBriefing = ({ currency, overview }) => {
         {
           body: 'Add real income and expense activity before asking for a narrative read of this workspace.',
           id: 'add-activity',
-          title: 'Build a data signal first',
+          title: 'Add activity to this range',
         },
       ],
-      body: 'There are no transactions in the selected range yet, so the workspace does not have enough signal for a meaningful briefing.',
-      headline: 'No transaction signal is available yet.',
+      body: 'No transactions fall inside the selected range yet, so the workspace does not have enough activity for a meaningful briefing.',
+      headline: 'Not enough activity yet for a briefing.',
     };
   }
 
@@ -991,11 +991,11 @@ const buildHeuristicGoalGuidance = ({ currency, focusGoal, goals, reportOverview
         {
           body: 'Create a savings or payoff target before asking for milestone guidance.',
           id: 'create-goal',
-          title: 'Start with one target',
+          title: 'Create the first goal',
         },
       ],
-      body: 'There are no goals in this workspace yet, so the milestone engine does not have anything to guide.',
-      headline: 'No goals are available yet.',
+      body: 'There are no goals in this workspace yet, so the milestone guidance layer does not have an active target to work from.',
+      headline: 'No active goals to guide yet.',
     };
   }
 

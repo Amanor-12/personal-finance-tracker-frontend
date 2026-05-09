@@ -124,6 +124,29 @@
   animation-delay: 0.3s;
 }
 
+.ref-skip-link {
+  position: fixed;
+  left: 16px;
+  top: 12px;
+  z-index: 80;
+  transform: translateY(-140%);
+  min-height: 42px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2d4beb, #2527d7);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 160ms ease;
+}
+
+.ref-skip-link:focus {
+  transform: translateY(0);
+}
+
 @keyframes app-shell-pulse {
   0%,
   100% {
@@ -300,6 +323,22 @@ body,
 .ref-support-link:hover {
   color: var(--ref-navy);
   background: rgba(244, 247, 251, 0.96);
+}
+
+.ref-nav-item:focus-visible,
+.ref-support-link:focus-visible,
+.ref-icon-button:focus-visible,
+.ref-search-item:focus-visible,
+.ref-card-picker-item:focus-visible,
+.ref-mini-action:focus-visible,
+.ref-view-link:focus-visible,
+.ref-inline-filter:focus-visible,
+.ref-secondary-link:focus-visible,
+.ref-wallet-action:focus-visible,
+.ref-workspace-cta:focus-visible,
+.ref-user-menu-item:focus-visible {
+  outline: 3px solid rgba(45, 75, 235, 0.26);
+  outline-offset: 3px;
 }
 
 .ref-nav-item.is-active,
@@ -2836,6 +2875,37 @@ body,
     align-items: stretch;
   }
 
+  .ref-sidebar-top,
+  .ref-sidebar-bottom {
+    gap: 12px;
+  }
+
+  .ref-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .ref-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ref-nav-item,
+  .ref-support-link {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(248, 250, 253, 0.96);
+  }
+
+  .ref-sidebar-bottom {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
   .ref-bottom-grid,
   .ref-statistics-body,
   .ref-hero-card,
@@ -2916,6 +2986,10 @@ body,
   .ref-user-chip,
   .ref-primary-button {
     min-height: 52px;
+  }
+
+  .ref-search-shortcut {
+    display: none;
   }
 
   .ref-wallet-actions {
@@ -8215,6 +8289,13 @@ body,
   line-height: 1.7;
 }
 
+.ledger-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
 .ledger-skeleton-list {
   display: grid;
   gap: 12px;
@@ -8647,6 +8728,11 @@ textarea:focus-visible,
     border-radius: 20px;
     background: #f8fafc;
     border: 1px solid rgba(221, 227, 236, 0.84);
+  }
+
+  .ledger-mobile-card:focus-visible {
+    outline: 3px solid rgba(45, 75, 235, 0.26);
+    outline-offset: 3px;
   }
 
   .ledger-mobile-card-top,
