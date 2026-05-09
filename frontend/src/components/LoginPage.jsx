@@ -240,7 +240,7 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
         normalizedMessage === 'request failed.' ||
         normalizedMessage.includes('cannot reach the finance service')
           ? isLocalDevelopmentHost()
-            ? 'Rivo cannot reach the finance service. Start the backend server, then try again.'
+            ? 'Rivo cannot reach the finance service. Start the local finance service, then try again.'
             : "Rivo can't connect right now. Please try again in a moment."
           : error.message;
 

@@ -763,7 +763,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                   <p>
                     {isPro
                       ? 'Rivo reviews the selected ledger slice on a secure server route, then lets you apply only categories that already exist in this workspace.'
-                      : 'Upgrade to Pro to generate backend AI suggestions for the selected transactions.'}
+                      : 'Upgrade to Pro to generate AI category suggestions for the selected transactions.'}
                   </p>
                 </div>
 

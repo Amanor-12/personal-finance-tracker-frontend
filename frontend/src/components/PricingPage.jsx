@@ -149,7 +149,7 @@ function PricingPage({ currentUser }) {
         return;
       }
 
-      setMessage('Checkout session created, but the backend did not return a redirect URL.');
+      setMessage('Checkout opened, but Rivo could not continue to the secure payment page.');
     } catch (error) {
       setMessage(error.message || 'Checkout could not start.');
     } finally {

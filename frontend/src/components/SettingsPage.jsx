@@ -304,7 +304,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
         });
       } catch (error) {
         if (!isCancelled) {
-          setPreferencesMessage(error.message || 'Preferences could not sync from the API.');
+          setPreferencesMessage(error.message || 'Preferences could not sync right now.');
         }
       } finally {
         if (!isCancelled) {
@@ -808,7 +808,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <SectionHeader
                 eyebrow="Identity"
                 title="Profile and workspace"
-                body="Profile identity and workspace preferences save through the authenticated API so they follow the account across devices."
+                body="Profile identity and workspace preferences stay attached to the account so they follow the workspace across devices."
               />
               <form className="settings-form" onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
                 {isSyncingSettings ? <p className="settings-message">Syncing saved workspace settings...</p> : null}
@@ -871,7 +871,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                         ? currentUser?.isEmailVerified
                           ? `Verified on ${formatSessionDate(currentUser?.emailVerifiedAt)}.`
                           : 'This address still needs confirmation before recovery and login alerts can be fully trusted.'
-                        : 'This deployment is using the saved email as the primary recovery and notification address.'}
+                        : 'This address is currently being used for recovery and account notifications.'}
                     </p>
                   </div>
                   <div className="settings-session-badge">
@@ -904,7 +904,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <SectionHeader
                 eyebrow="Display"
                 title="Money display defaults"
-                body="Set the baseline language for amounts, weeks, and display density. These preferences persist through the backend."
+                body="Set the baseline language for amounts, weeks, and display density. These preferences stay with the workspace."
               />
               <form className="settings-form" onSubmit={preferencesForm.handleSubmit(handlePreferencesSubmit)}>
                 {preferencesMessage ? <p className="settings-message">{preferencesMessage}</p> : null}
@@ -952,7 +952,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <SectionHeader
                 eyebrow="Notifications"
                 title="Choose what deserves attention"
-                body="These switches are stored server-side now so notification intent follows the workspace even before delivery channels are expanded."
+                body="These switches stay attached to the workspace so notification intent remains consistent as delivery expands."
               />
               <form className="settings-form" onSubmit={notificationForm.handleSubmit(handleNotificationsSubmit)}>
                 {notificationMessage ? <p className="settings-message">{notificationMessage}</p> : null}
@@ -990,8 +990,8 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                 title="Password and session controls"
                 body={
                   supportsSecurityControls
-                    ? 'Password changes, session visibility, and revoke actions all run through authenticated backend routes so the account can actively control where it stays signed in.'
-                    : 'This deployment supports profile and password updates, but advanced session and MFA controls stay hidden until a real security service is wired behind them.'
+                    ? 'Password changes, session visibility, and revoke actions let the account actively control where it stays signed in.'
+                    : 'This environment supports profile and password updates, but advanced session and MFA controls stay hidden until the full security layer is enabled.'
                 }
               />
               {supportsPasswordUpdate ? (
@@ -1036,7 +1036,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               ) : (
                 <div className="settings-session-block">
                   <p className="settings-session-empty">
-                    Password changes are not enabled in this deployment yet.
+                    Password changes are not enabled in this environment yet.
                   </p>
                 </div>
               )}
@@ -1050,7 +1050,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                     </div>
                   </div>
                   <p className="settings-session-empty">
-                    Multi-factor authentication, session revocation, and security activity are intentionally hidden until real backend security services are in place.
+                    Multi-factor authentication, session revocation, and security activity remain hidden until the full security layer is enabled.
                   </p>
                 </div>
               ) : (
@@ -1369,7 +1369,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
               <SectionHeader
                 eyebrow="Data"
                 title="Export and deletion guardrails"
-                body="High-risk actions should stay explicit, confirmed, and backed by safe backend behavior instead of pretending the frontend alone is enough."
+                body="High-risk actions should stay explicit, confirmed, and backed by safe account controls instead of casual UI shortcuts."
               />
               <div className="settings-data-grid">
                 <div>
@@ -1389,9 +1389,9 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <p>
                     {supportsTransactionExport
                       ? hasPaidExports
-                        ? 'CSV export now runs through the authenticated backend route so downloaded data stays tied to the current account scope.'
+                        ? 'CSV export stays tied to the current account scope so downloaded data remains properly separated.'
                         : 'Exports unlock in Plus, where heavier cleanup and reporting workflows start saving real time.'
-                      : 'Transaction export is hidden until the backend exposes a real account-scoped export route.'}
+                      : 'Transaction export stays hidden until a full account-scoped export flow is enabled.'}
                   </p>
                 </div>
                 <div>
@@ -1400,9 +1400,9 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <p>
                     {supportsSavedViews
                       ? hasProControls
-                        ? 'Pro now keeps AI review, guidance, and forecast workflows on authenticated backend routes with account-aware access.'
-                        : 'Pro should keep adding real backend-owned intelligence instead of surface-level badges.'
-                      : 'Saved views, AI review, and reporting upgrades stay out of the live product until the backend actually supports them.'}
+                        ? 'Pro keeps AI review, guidance, and forecast workflows inside the authenticated account layer.'
+                        : 'Pro should keep adding real intelligence instead of surface-level badges.'
+                      : 'Saved views, AI review, and reporting upgrades stay out of the live product until the full account layer supports them.'}
                   </p>
                 </div>
                 {supportsDeleteAccount ? (
@@ -1415,7 +1415,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <div className="settings-danger-zone">
                     <span>Delete account</span>
                     <strong>Unavailable</strong>
-                    <p>Account deletion is hidden until the backend can remove data safely and audit the action.</p>
+                    <p>Account deletion stays hidden until the account can be removed safely with proper review and auditing.</p>
                   </div>
                 )}
               </div>

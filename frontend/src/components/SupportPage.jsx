@@ -15,7 +15,7 @@ const baseFaqItems = [
   },
   {
     question: 'Is my workspace really protected?',
-    answer: 'Yes. Protected pages require a signed-in session before rendering and API calls rely on backend-verified session access.',
+    answer: 'Yes. Protected pages require a signed-in session before they open, and account access is verified securely throughout the workspace.',
   },
   {
     question: 'Where do bank connections fit?',
@@ -67,7 +67,7 @@ function SupportPage({ currentUser, onLogout }) {
         title: hasReportsAccess ? 'Read advanced insights' : 'Unlock advanced reports',
         body: hasReportsAccess
           ? 'Backend-powered reporting answers real questions about merchants, categories, concentration, and cash flow.'
-          : 'Reports begin in Plus because they move the user from recording money to understanding it with real backend analysis.',
+          : 'Reports begin in Plus because they move the user from recording money to understanding it with real account-level analysis.',
         cta: hasReportsAccess ? 'Open insights' : 'View Plus',
         keywords: 'reports insights analytics merchants concentration plus pro',
         to: hasReportsAccess ? '/reports' : '/pricing',

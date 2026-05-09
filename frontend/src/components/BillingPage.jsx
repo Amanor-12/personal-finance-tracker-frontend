@@ -136,7 +136,7 @@ function BillingPage({ currentUser, onLogout }) {
         return;
       }
 
-      setActionMessage('Checkout session was created, but no redirect URL was returned.');
+      setActionMessage('Checkout opened, but Rivo could not continue to the secure payment page.');
     } catch (error) {
       setActionMessage(error.message || 'Checkout could not start.');
     } finally {
@@ -156,7 +156,7 @@ function BillingPage({ currentUser, onLogout }) {
         return;
       }
 
-      setActionMessage('Billing portal session was created, but no redirect URL was returned.');
+      setActionMessage('Billing management opened, but Rivo could not continue to the secure billing page.');
     } catch (error) {
       setActionMessage(error.message || 'Billing portal could not open.');
     } finally {
@@ -209,7 +209,7 @@ function BillingPage({ currentUser, onLogout }) {
           <h2>{getPlanDisplayName(billing?.currentPlan?.id, billing?.currentPlan?.name)} plan</h2>
           <p>
             {isBillingUnavailableInDeployment
-              ? 'Plan comparison is available, but live checkout and account billing are not enabled in this deployment yet.'
+              ? 'Plan comparison is available, but live checkout and account billing are not enabled in this environment yet.'
               : 'See the current plan, renewal state, and next billing action in one place.'}
           </p>
         </div>
@@ -225,8 +225,8 @@ function BillingPage({ currentUser, onLogout }) {
       {!isLoading && isBillingUnavailableInDeployment ? (
         <section className="billing-empty-state">
           <span>Billing not enabled</span>
-          <h3>This deployment does not have a live billing backend yet.</h3>
-          <p>Use pricing to review plans. Only expose in-app billing management after checkout, invoices, and portal actions are wired to a real service.</p>
+          <h3>Live billing is not enabled in this environment yet.</h3>
+          <p>Use pricing to review plans. In-app billing management appears once checkout, invoices, and the billing portal are active.</p>
           <Link className="billing-primary-action" to="/pricing">
             Open pricing
           </Link>
@@ -237,7 +237,7 @@ function BillingPage({ currentUser, onLogout }) {
         <section className="billing-empty-state">
           <span>Billing unavailable</span>
           <h3>{errorMessage}</h3>
-          <p>Retry once the finance service is available. Subscription state always comes from account data returned by the backend.</p>
+          <p>Retry in a moment. Subscription access is tied to your secure account state.</p>
           <button className="billing-primary-action" type="button" onClick={loadBilling}>
             Retry
           </button>
@@ -257,7 +257,7 @@ function BillingPage({ currentUser, onLogout }) {
             <article>
               <span>Subscription status</span>
               <strong>{statusLabel}</strong>
-              <p>Access follows the real subscription state returned by the backend.</p>
+              <p>Access follows the secure subscription state attached to this account.</p>
             </article>
             <article>
               <span>Customer portal</span>
@@ -322,7 +322,7 @@ function BillingPage({ currentUser, onLogout }) {
             ) : (
               <div className="billing-invoice-empty">
                 <strong>No invoices yet</strong>
-                <p>Invoices will appear after Stripe returns billing records for this account.</p>
+                <p>Invoices will appear here once this account completes a paid billing cycle.</p>
               </div>
             )}
           </section>

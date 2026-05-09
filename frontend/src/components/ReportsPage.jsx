@@ -449,7 +449,7 @@ function ReportsPage({ currentUser, onLogout }) {
         <FeatureGate
           eyebrow="Plus access"
           features={['Server-backed reporting', 'Date-range analytics', 'Merchant concentration analysis', 'Budget pressure and recurring-load insight']}
-          helper="Insights begin in Rivo Plus because this is where customers move from recording money to understanding it. AI briefings sit on top of the backend reporting layer, and Pro adds the heavier review workflow."
+          helper="Insights begin in Rivo Plus because this is where customers move from recording money to understanding it. AI briefings build on the reporting engine, and Pro adds the heavier review workflow."
           primaryLabel="Upgrade to Plus"
           title="Unlock advanced reporting"
         />
@@ -528,10 +528,10 @@ function ReportsPage({ currentUser, onLogout }) {
             <section className="reports-command-deck">
               <div className="reports-command-head">
                 <div>
-                  <span className="reports-chip">Backend AI</span>
+                  <span className="reports-chip">AI briefing</span>
                   <h3>Turn the selected range into a concise written briefing.</h3>
                   <p>
-                    This calls a server-owned AI route so model keys and prompting stay out of the browser.
+                    Rivo generates this briefing from the account reporting engine while keeping model controls off the client.
                   </p>
                 </div>
                 <button className="finance-upgrade-action" type="button" onClick={handleGenerateAiBriefing} disabled={isAiLoading || !summary.transactionCount}>
@@ -553,7 +553,7 @@ function ReportsPage({ currentUser, onLogout }) {
               {!isAiLoading && !aiError && !aiBriefing ? (
                 <PremiumEmpty
                   title="No AI briefing yet"
-                  body="Generate a server-backed summary for the active reporting window once you want a quick written read."
+                  body="Generate a written summary for the active reporting window once you want a quick read."
                   actionLabel={summary.transactionCount ? 'Generate briefing' : undefined}
                   onAction={summary.transactionCount ? handleGenerateAiBriefing : undefined}
                 />
@@ -581,7 +581,7 @@ function ReportsPage({ currentUser, onLogout }) {
           </PremiumPanel>
 
           {hasForecastingAccess ? (
-            <PremiumPanel eyebrow="Forecast" title="Project the next few months with backend-owned cash math">
+            <PremiumPanel eyebrow="Forecast" title="Project the next few months with account-level cash math">
               <section className="reports-command-deck">
                 <div className="reports-command-head">
                   <div>

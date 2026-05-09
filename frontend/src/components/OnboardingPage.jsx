@@ -234,7 +234,7 @@ function OnboardingPage({ currentUser, onLogout }) {
             <article className="onboarding-card">
               <span className="onboarding-eyebrow">Defaults</span>
               <h2>Set the money language.</h2>
-              <p>These choices persist through the API so the workspace behaves consistently across devices.</p>
+              <p>These choices stay with your workspace so amounts, dates, and labels behave consistently across devices.</p>
 
               <form className="onboarding-form" onSubmit={preferenceForm.handleSubmit(handlePreferences)}>
                 <label className="onboarding-field onboarding-field-wide">

@@ -205,7 +205,7 @@ function ActivityPage({ currentUser, onLogout }) {
     <aside className="activity-signal-rail">
       <article className="activity-signal-card">
         <span>Workspace signal</span>
-        <h3>{events.length ? `${events.length} events` : 'No events yet'}</h3>
+        <h3>{events.length ? `${events.length} events` : 'No activity yet'}</h3>
         <p>Activity is assembled from real records only. No marketing messages or fake notifications appear here.</p>
       </article>
       <article className="activity-signal-card activity-signal-card-light">
@@ -261,7 +261,7 @@ function ActivityPage({ currentUser, onLogout }) {
             <p>
               {latestEvent
                 ? `${activityTypes[latestEvent.type]?.label || 'Record'} updated ${formatEventDate(latestEvent.date)}.`
-                : 'The timeline will stay empty until real accounts, transactions, budgets, goals, or renewals are saved.'}
+                : 'The timeline stays quiet until real accounts, transactions, budgets, goals, or renewals are saved.'}
             </p>
           </article>
           <article>

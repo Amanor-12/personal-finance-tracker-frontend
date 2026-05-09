@@ -473,7 +473,7 @@ function GoalsPage({ currentUser, onLogout }) {
             <div className="finance-intelligence-head">
               <div>
                 <span className="finance-intelligence-kicker">AI goal guidance</span>
-                <h3>{hasProGoalGuidance ? 'Generate a server-backed milestone briefing' : 'AI goal guidance sits inside Pro'}</h3>
+                <h3>{hasProGoalGuidance ? 'Generate a milestone briefing' : 'AI goal guidance sits inside Pro'}</h3>
               </div>
               <button
                 className="finance-upgrade-action"
@@ -486,8 +486,8 @@ function GoalsPage({ currentUser, onLogout }) {
             </div>
             <p className="finance-intelligence-copy">
               {hasProGoalGuidance
-                ? 'This calls the backend AI layer and turns your current goal portfolio into a short operational briefing.'
-                : 'Pro adds backend AI guidance that reads your active milestones, funding pace, and nearby deadlines.'}
+                ? 'Rivo turns your current goal portfolio into a short operational briefing without exposing model controls in the browser.'
+                : 'Pro adds AI guidance that reads your active milestones, funding pace, and nearby deadlines.'}
             </p>
             {isGoalGuidanceLoading ? <PremiumSkeleton count={2} /> : null}
             {!isGoalGuidanceLoading && goalGuidanceError ? (
@@ -518,8 +518,8 @@ function GoalsPage({ currentUser, onLogout }) {
                   <strong>No AI guidance yet</strong>
                   <p>
                     {goals.length
-                      ? 'Generate a backend briefing once you want a quick written read of the current goal portfolio.'
-                      : 'Create at least one goal before asking the AI layer for milestone guidance.'}
+                      ? 'Generate a briefing once you want a quick written read of the current goal portfolio.'
+                      : 'Create at least one goal before asking for milestone guidance.'}
                   </p>
                 </article>
               </div>
