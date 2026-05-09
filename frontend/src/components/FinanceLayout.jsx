@@ -166,13 +166,19 @@ function FinanceLayout({
   const hasRail = Boolean(rail);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [highlightedSearchIndex, setHighlightedSearchIndex] = useState(0);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { hasFeature, isLoading: isBillingLoading } = useBillingAccess();
   const { isLoading: isCapabilitiesLoading, supports } = useServiceCapabilities();
   const userMenuRef = useRef(null);
+  const searchInputRef = useRef(null);
   const resolvedWorkspaceName = workspaceName?.trim() || `${firstName} Workspace`;
   const supportsBillingWorkspace = supports('billing');
   const supportsReportsWorkspace = supports('reports');
+  const searchShortcutLabel =
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform)
+      ? '⌘K'
+      : 'Ctrl K';
 
   const visibleNavItems = useMemo(
     () =>
@@ -201,8 +207,19 @@ function FinanceLayout({
   useEffect(() => {
     setSearchQuery('');
     setIsSearchFocused(false);
+    setHighlightedSearchIndex(0);
     setIsUserMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    setHighlightedSearchIndex((current) => {
+      if (!searchResults.length) {
+        return 0;
+      }
+
+      return Math.min(current, searchResults.length - 1);
+    });
+  }, [searchResults]);
 
   useEffect(() => {
     const handleSettingsUpdate = () => {
@@ -243,6 +260,28 @@ function FinanceLayout({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isUserMenuOpen]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event) => {
+      const isShortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
+
+      if (!isShortcut) {
+        return;
+      }
+
+      event.preventDefault();
+      setIsSearchFocused(true);
+      setHighlightedSearchIndex(0);
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, []);
 
   const searchItems = useMemo(
     () => [
@@ -286,34 +325,51 @@ function FinanceLayout({
   );
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-  const searchResults = useMemo(() => {
-    const items = normalizedSearchQuery
-      ? searchItems.filter((item) =>
-          [item.label, item.note, item.section]
-            .filter(Boolean)
-            .some((value) => value.toLowerCase().includes(normalizedSearchQuery))
-        )
-      : searchItems;
-
-    return items.slice(0, 7);
-  }, [normalizedSearchQuery, searchItems]);
+  const filteredSearchItems = normalizedSearchQuery
+    ? searchItems.filter((item) =>
+        [item.label, item.note, item.section]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedSearchQuery))
+      )
+    : searchItems;
+  const searchResults = filteredSearchItems.slice(0, 7);
   const showSearchResults = isSearchFocused || Boolean(normalizedSearchQuery);
 
   const handleSearchSelect = (to) => {
     setSearchQuery('');
     setIsSearchFocused(false);
+    setHighlightedSearchIndex(0);
     navigate(to);
   };
 
   const handleSearchKeyDown = (event) => {
     if (event.key === 'Escape') {
       setIsSearchFocused(false);
+      setHighlightedSearchIndex(0);
       return;
     }
 
-    if (event.key === 'Enter' && searchResults[0]) {
+    if (event.key === 'ArrowDown' && searchResults.length) {
       event.preventDefault();
-      handleSearchSelect(searchResults[0].to);
+      setIsSearchFocused(true);
+      setHighlightedSearchIndex((current) =>
+        current >= searchResults.length - 1 ? 0 : current + 1
+      );
+      return;
+    }
+
+    if (event.key === 'ArrowUp' && searchResults.length) {
+      event.preventDefault();
+      setIsSearchFocused(true);
+      setHighlightedSearchIndex((current) =>
+        current <= 0 ? searchResults.length - 1 : current - 1
+      );
+      return;
+    }
+
+    if (event.key === 'Enter' && searchResults[highlightedSearchIndex]) {
+      event.preventDefault();
+      handleSearchSelect(searchResults[highlightedSearchIndex].to);
     }
   };
 
@@ -411,30 +467,48 @@ function FinanceLayout({
               <SidebarIcon type="search" />
             </span>
             <input
+              ref={searchInputRef}
+              aria-activedescendant={
+                showSearchResults && searchResults[highlightedSearchIndex]
+                  ? `workspace-search-result-${highlightedSearchIndex}`
+                  : undefined
+              }
               aria-autocomplete="list"
               aria-expanded={showSearchResults}
               aria-label="Search pages and actions"
-              placeholder="Search pages or actions"
+              placeholder="Search pages, actions, and workspace commands"
               type="search"
               value={searchQuery}
               onBlur={() => {
                 window.setTimeout(() => setIsSearchFocused(false), 120);
               }}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setHighlightedSearchIndex(0);
+              }}
+              onFocus={() => {
+                setIsSearchFocused(true);
+                setHighlightedSearchIndex(0);
+              }}
               onKeyDown={handleSearchKeyDown}
             />
+            <span className="ref-search-shortcut" aria-hidden="true">
+              {searchShortcutLabel}
+            </span>
 
             {showSearchResults ? (
               <div className="ref-search-panel" role="listbox" aria-label="Workspace search results">
                 {searchResults.length ? (
                   <div className="ref-search-list">
-                    {searchResults.map((item) => (
+                    {searchResults.map((item, index) => (
                       <button
                         key={`${item.section}-${item.label}-${item.to}`}
-                        className="ref-search-item"
+                        aria-selected={highlightedSearchIndex === index}
+                        className={`ref-search-item${highlightedSearchIndex === index ? ' is-active' : ''}`}
+                        id={`workspace-search-result-${index}`}
                         type="button"
                         onMouseDown={(event) => event.preventDefault()}
+                        onMouseEnter={() => setHighlightedSearchIndex(index)}
                         onClick={() => handleSearchSelect(item.to)}
                       >
                         <span className="ref-search-item-icon">
@@ -451,7 +525,7 @@ function FinanceLayout({
                 ) : (
                   <div className="ref-search-empty">
                     <strong>No matching results</strong>
-                    <span>Try wallets, transactions, budgets, reports, billing, or help.</span>
+                    <span>Try wallets, transactions, budgets, reports, billing, or help. You can reopen this anytime with {searchShortcutLabel}.</span>
                   </div>
                 )}
               </div>

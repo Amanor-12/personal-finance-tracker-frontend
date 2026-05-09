@@ -2,9 +2,11 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import AppShellState from './components/AppShellState';
 import { BillingAccessProvider } from './context/BillingAccessContext.jsx';
 import { ServiceCapabilitiesProvider } from './context/ServiceCapabilitiesProvider.jsx';
 import LandingPage from './components/LandingPage';
+import NotFoundPage from './components/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { authStore } from './utils/authStore';
 import { API_UNAUTHORIZED_EVENT } from './utils/apiClient';
@@ -71,18 +73,31 @@ const withProtectedWorkspace = (currentUser, onLogout, element) => (
 
 function AppServiceState({ message, onRetry }) {
   return (
-    <main className="app-shell-state">
-      <section className="app-shell-card" role="alert" aria-live="polite">
-        <span className="app-shell-eyebrow">Service unavailable</span>
-        <h1>Rivo cannot load your workspace right now.</h1>
-        <p>{message}</p>
-        <div className="app-shell-actions">
-          <button className="app-shell-primary" type="button" onClick={onRetry}>
-            Retry
-          </button>
-        </div>
-      </section>
-    </main>
+    <AppShellState
+      body={message}
+      eyebrow="Service unavailable"
+      primaryAction={{
+        label: 'Retry',
+        onClick: onRetry,
+      }}
+      title="Rivo cannot load your workspace right now."
+    />
+  );
+}
+
+function AppLoadingState({ currentUser, isWorkspace }) {
+  return (
+    <AppShellState
+      body={
+        isWorkspace
+          ? 'We are reconnecting your workspace, syncing preferences, and restoring session state.'
+          : 'We are checking for an existing secure session so the public shell can route you correctly.'
+      }
+      eyebrow={currentUser ? 'Restoring session' : 'Preparing access'}
+      loading
+      note={isWorkspace ? 'This should only take a moment.' : ''}
+      title={isWorkspace ? 'Opening your workspace.' : 'Preparing Rivo.'}
+    />
   );
 }
 
@@ -204,8 +219,10 @@ function App() {
     return result;
   };
 
-  if (isAuthLoading) {
-    return <main className="app-loading-state">Loading your workspace...</main>;
+  const shouldBlockForAuth = isAuthLoading && (Boolean(currentUser) || isProtectedWorkspacePath);
+
+  if (shouldBlockForAuth) {
+    return <AppLoadingState currentUser={currentUser} isWorkspace={isProtectedWorkspacePath} />;
   }
 
   if (authBootstrapError && !currentUser && isProtectedWorkspacePath) {
@@ -215,7 +232,7 @@ function App() {
   return (
     <ServiceCapabilitiesProvider>
       <AppErrorBoundary>
-        <Suspense fallback={<main className="app-loading-state">Loading workspace...</main>}>
+        <Suspense fallback={<AppLoadingState currentUser={currentUser} isWorkspace={Boolean(currentUser)} />}>
           <Routes>
             <Route path="/" element={<LandingPage currentUser={currentUser} />} />
 
@@ -400,7 +417,7 @@ function App() {
             }
           />
 
-            <Route path="*" element={<Navigate to={currentUser ? '/dashboard' : '/login'} replace />} />
+            <Route path="*" element={<NotFoundPage currentUser={currentUser} />} />
           </Routes>
         </Suspense>
       </AppErrorBoundary>

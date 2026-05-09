@@ -62,7 +62,7 @@ function TransactionDetailDrawer({ onClose, onDelete, onEdit, transaction }) {
 
         <div className="ledger-detail-note">
           <span>Notes</span>
-          <p>{transaction.notes || 'No notes field is connected in the API yet.'}</p>
+          <p>{transaction.notes || 'No private note has been saved for this transaction.'}</p>
         </div>
 
         <div className="ledger-detail-actions">

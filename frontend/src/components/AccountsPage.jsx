@@ -46,11 +46,11 @@ const getAccountTheme = (accountType) => {
 
 const getAccountPreviewTitle = (account) => account?.institutionName?.trim() || 'Rivo';
 const getAccountPreviewLabel = (account) =>
-  account ? `${getAccountTypeLabel(account.accountType)} account` : 'Choose a primary account';
+  account ? `${getAccountTypeLabel(account.accountType)} account` : 'No primary account yet';
 const getAccountPreviewNote = (account) =>
   account
     ? `${getAccountTypeLabel(account.accountType)} is ready to use across transactions, budgets, goals, and reports.`
-    : 'Add one account to power transactions, budgets, goals, and reports.';
+    : 'Add a checking, savings, cash, or credit account so the workspace can use a real money source.';
 
 function AccountPreviewCard({ account, depth = 0, placeholder = false, stacked = true, compact = false }) {
   const accountType = placeholder ? 'Preview account' : getAccountTypeLabel(account.accountType);
@@ -318,19 +318,19 @@ function AccountsPage({ currentUser, onLogout }) {
 
     try {
       await accountStore.createBankConnection({
-        institutionName: 'Northwind Sandbox Bank',
-        label: 'Primary sandbox feed',
+        institutionName: 'Northwind Test Institution',
+        label: 'Primary test feed',
         provider: 'sandbox',
       });
       setRefreshKey((value) => value + 1);
-      setBankSyncMessage('Sandbox bank connection created.');
+      setBankSyncMessage('Test institution connected.');
     } catch (error) {
       if (error.status === 401) {
         await onLogout();
         return;
       }
 
-      setBankSyncMessage(error.message || 'Sandbox bank connection could not be created.');
+      setBankSyncMessage(error.message || 'The test institution could not be connected.');
     } finally {
       setIsCreatingBankConnection(false);
     }
@@ -343,14 +343,14 @@ function AccountsPage({ currentUser, onLogout }) {
     try {
       const result = await accountStore.syncBankConnection(connectionId);
       setRefreshKey((value) => value + 1);
-      setBankSyncMessage(result.message || 'Sandbox bank sync completed.');
+      setBankSyncMessage(result.message || 'Transaction sync completed.');
     } catch (error) {
       if (error.status === 401) {
         await onLogout();
         return;
       }
 
-      setBankSyncMessage(error.message || 'Sandbox bank sync could not complete.');
+      setBankSyncMessage(error.message || 'Transaction sync could not complete.');
     } finally {
       setSyncingConnectionId(null);
     }
@@ -437,7 +437,14 @@ function AccountsPage({ currentUser, onLogout }) {
                   return <AccountPreviewCard key={account.id} account={account} depth={depth} />;
                 })
               ) : (
-                <AccountPreviewCard placeholder />
+                <div className="accounts-wallet-preview-empty">
+                  <span>Account setup</span>
+                  <strong>No accounts connected yet</strong>
+                  <p>Add your first account to anchor transactions, budgets, goals, and reporting to a real money source.</p>
+                  <button className="ref-secondary-button" type="button" onClick={openAddDialog}>
+                    Add first account
+                  </button>
+                </div>
               )}
             </div>
             <div className="accounts-wallet-preview-note">
@@ -541,15 +548,19 @@ function AccountsPage({ currentUser, onLogout }) {
                       onClick={connectSandboxBank}
                       disabled={isCreatingBankConnection}
                     >
-                      {isCreatingBankConnection ? 'Connecting...' : 'Connect sandbox bank'}
+                      {isCreatingBankConnection ? 'Connecting...' : 'Connect test institution'}
                     </button>
                   ) : null}
                 </div>
                 <span>
                   {bankSyncMessage ||
                     (plaidProvider?.status === 'available'
-                      ? 'Connect a live institution with Plaid or keep using the sandbox feed for deterministic QA.'
-                      : 'Live institution sync is ready for Plaid once credentials are configured. Sandbox sync remains available for QA.')}
+                      ? sandboxProvider
+                        ? 'Connect a live institution with Plaid or use the controlled test feed while you finish setup.'
+                        : 'Connect a live institution with Plaid, then review imported activity before it reaches the rest of the workspace.'
+                      : sandboxProvider
+                        ? 'Plaid can be enabled later. A controlled test feed is still available while setup is in progress.'
+                        : 'Live institution sync will appear here once Plaid credentials are configured.')}
                 </span>
               </div>
 
@@ -611,7 +622,7 @@ function AccountsPage({ currentUser, onLogout }) {
                           <strong>{item.reconciliationStatus}</strong>
                         </div>
                         <h3>{item.merchantName || item.description}</h3>
-                        <p>{item.accountName} · {item.categoryName}</p>
+                        <p>{item.accountName} - {item.categoryName}</p>
                         <b>{formatAccountCurrency(item.amount)}</b>
                         <small>Posted {item.postedAt || item.transactionDate}</small>
                       </div>
@@ -633,7 +644,7 @@ function AccountsPage({ currentUser, onLogout }) {
               {!isLoadingBankSync && hasReconciliationWorkbench && !reconciliationQueue.length ? (
                 <PremiumEmpty
                   title="Reconciliation queue is clear"
-                  body="Imported transactions will appear here after a sync so the review flow stays ready for both live institutions and deterministic sandbox feeds."
+                  body="Imported transactions will appear here after a sync so every linked institution can be reviewed before activity flows through the workspace."
                 />
               ) : null}
             </>

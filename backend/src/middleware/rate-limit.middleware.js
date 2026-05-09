@@ -17,6 +17,14 @@ const pruneExpiredBuckets = (now) => {
   }
 };
 
+const setRateLimitHeaders = (res, { count, maxAttempts, resetAt }) => {
+  const remaining = Math.max(0, maxAttempts - count);
+
+  res.setHeader('X-RateLimit-Limit', String(maxAttempts));
+  res.setHeader('X-RateLimit-Remaining', String(remaining));
+  res.setHeader('X-RateLimit-Reset', String(Math.ceil(resetAt / 1000)));
+ };
+
 const createRateLimit = ({
   keyPrefix = 'default',
   message = 'Too many requests. Please wait and try again.',
@@ -31,9 +39,15 @@ const createRateLimit = ({
     const existingBucket = requestBuckets.get(bucketKey);
 
     if (!existingBucket || existingBucket.resetAt <= now) {
-      requestBuckets.set(bucketKey, {
+      const nextBucket = {
         count: 1,
         resetAt: now + windowMs,
+      };
+      requestBuckets.set(bucketKey, nextBucket);
+      setRateLimitHeaders(res, {
+        count: nextBucket.count,
+        maxAttempts,
+        resetAt: nextBucket.resetAt,
       });
 
       return next();
@@ -42,6 +56,11 @@ const createRateLimit = ({
     if (existingBucket.count >= maxAttempts) {
       const retryAfterSeconds = Math.max(1, Math.ceil((existingBucket.resetAt - now) / 1000));
 
+      setRateLimitHeaders(res, {
+        count: existingBucket.count,
+        maxAttempts,
+        resetAt: existingBucket.resetAt,
+      });
       res.setHeader('Retry-After', String(retryAfterSeconds));
       return res.status(429).json({
         message,
@@ -51,6 +70,11 @@ const createRateLimit = ({
 
     existingBucket.count += 1;
     requestBuckets.set(bucketKey, existingBucket);
+    setRateLimitHeaders(res, {
+      count: existingBucket.count,
+      maxAttempts,
+      resetAt: existingBucket.resetAt,
+    });
 
     return next();
   };

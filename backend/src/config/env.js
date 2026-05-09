@@ -49,6 +49,8 @@ const parseAllowedOrigins = (value) =>
     .map(normalizeOrigin);
 
 const isProduction = process.env.NODE_ENV === 'production';
+const enableSandboxBankProvider =
+  process.env.ENABLE_SANDBOX_BANK_PROVIDER === 'true' || !isProduction;
 const appBaseUrl = normalizeUrl(process.env.APP_BASE_URL || '');
 const parseListEnv = (value, fallback = []) => {
   const normalizedItems = String(value || '')
@@ -90,6 +92,7 @@ module.exports = {
   emailFromAddress: process.env.EMAIL_FROM_ADDRESS || '',
   emailProvider: (process.env.EMAIL_PROVIDER || '').trim().toLowerCase(),
   emailVerificationTokenTtlHours: getPositiveNumberEnv('EMAIL_VERIFICATION_TOKEN_TTL_HOURS', 48),
+  enableSandboxBankProvider,
   isProduction,
   jwtSecret: getRequiredEnv('JWT_SECRET'),
   logLevel: (process.env.LOG_LEVEL || 'info').trim().toLowerCase(),

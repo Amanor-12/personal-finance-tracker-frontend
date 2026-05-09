@@ -34,6 +34,10 @@
   color: #1d2545;
 }
 
+.app-shell-brand {
+  margin-bottom: 1.1rem;
+}
+
 .app-shell-eyebrow {
   display: inline-flex;
   margin-bottom: 0.9rem;
@@ -95,6 +99,42 @@
   margin-top: 1rem;
   color: #7a8398;
   font-size: 0.9rem;
+}
+
+.app-shell-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.35rem;
+}
+
+.app-shell-loading span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2d4beb, #39b8db);
+  animation: app-shell-pulse 1s ease-in-out infinite;
+}
+
+.app-shell-loading span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.app-shell-loading span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes app-shell-pulse {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 
 *,
@@ -329,10 +369,29 @@ body,
 
 .ref-search input {
   width: 100%;
+  min-width: 0;
   border: 0;
   outline: none;
   color: #7d8699;
   background: transparent;
+}
+
+.ref-search-shortcut {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(202, 210, 216, 0.78);
+  color: #7c879c;
+  background: rgba(248, 250, 253, 0.96);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .ref-search.is-open {
@@ -379,6 +438,12 @@ body,
   transform: translateY(-1px);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(238, 243, 255, 0.96));
   box-shadow: 0 16px 28px rgba(76, 108, 244, 0.08);
+}
+
+.ref-search-item.is-active {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(232, 240, 255, 0.97));
+  box-shadow: 0 16px 32px rgba(45, 75, 235, 0.12);
 }
 
 .ref-search-item-icon {
@@ -1299,6 +1364,11 @@ body,
   font: inherit;
 }
 
+.ref-card-search input:disabled {
+  cursor: not-allowed;
+  color: #98a3b6;
+}
+
 .ref-card-search input::placeholder {
   color: #98a3b6;
 }
@@ -1306,6 +1376,15 @@ body,
 .ref-card-stack {
   position: relative;
   min-height: 214px;
+}
+
+.ref-wallet-stack-empty {
+  min-height: 214px;
+  padding: 24px;
+}
+
+.ref-wallet-stack-empty .ref-inline-filter {
+  margin-top: 6px;
 }
 
 .ref-wallet-card {
@@ -13480,6 +13559,41 @@ textarea:focus-visible,
 .accounts-wallet-preview-stack {
   position: relative;
   min-height: 216px;
+}
+
+.accounts-wallet-preview-empty {
+  position: relative;
+  z-index: 2;
+  min-height: 216px;
+  padding: 24px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+  border-radius: 24px;
+  border: 1px dashed rgba(109, 136, 255, 0.34);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 247, 252, 0.92));
+}
+
+.accounts-wallet-preview-empty span {
+  color: #5b6eb6;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.accounts-wallet-preview-empty strong {
+  color: var(--ref-navy);
+  font-size: 1.2rem;
+  letter-spacing: -0.04em;
+}
+
+.accounts-wallet-preview-empty p {
+  margin: 0;
+  max-width: 320px;
+  color: #6f7a90;
+  line-height: 1.58;
 }
 
 .accounts-wallet-preview-card {

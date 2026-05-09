@@ -660,10 +660,11 @@ function DashboardPage({ currentUser, onLogout }) {
         <label className="ref-card-search" aria-label="Search cards">
           <CardSearchIcon />
           <input
+            disabled={!totalCards}
             type="search"
             value={cardSearch}
             onChange={(event) => setCardSearch(event.target.value)}
-            placeholder="Search cards"
+            placeholder={totalCards ? 'Search cards' : 'Cards appear here after setup'}
           />
         </label>
 
@@ -682,7 +683,15 @@ function DashboardPage({ currentUser, onLogout }) {
                   />
                 );
               })
-            : <WalletStackCard placeholder depth={0} />}
+            : (
+              <div className="ref-empty-card ref-wallet-stack-empty">
+                <strong>No saved cards yet</strong>
+                <p>Add cards from Wallets once you want faster card-level views in the overview workspace.</p>
+                <Link className="ref-inline-filter" to="/accounts">
+                  Open wallets
+                </Link>
+              </div>
+            )}
         </div>
 
         {cardPickerCards.length ? (
@@ -707,7 +716,7 @@ function DashboardPage({ currentUser, onLogout }) {
               ? 'No card found.'
               : totalCards
                 ? `${totalCards} saved to your workspace`
-                : 'Your wallet setup in Accounts will show here.'}
+                : 'Open Wallets to add cards or connect the accounts you use every day.'}
           </p>
         </div>
 

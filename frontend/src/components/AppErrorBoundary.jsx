@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import AppShellState from './AppShellState';
 import { captureFrontendError } from '../utils/observability';
 
 class AppErrorBoundaryInner extends Component {
@@ -42,35 +43,25 @@ class AppErrorBoundaryInner extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <main className="app-shell-state">
-          <section className="app-shell-card" role="alert" aria-live="assertive">
-            <span className="app-shell-eyebrow">Runtime error</span>
-            <h1>Rivo hit an unexpected problem.</h1>
-            <p>
-              The current screen could not finish rendering. Reload the app or move back to a safer page
-              before continuing.
-            </p>
-            <div className="app-shell-actions">
-              <button
-                className="app-shell-primary"
-                type="button"
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.reload();
-                  }
-                }}
-              >
-                Reload app
-              </button>
-              <Link className="app-shell-secondary" to="/">
-                Go to home
-              </Link>
-            </div>
-            {this.state.error?.message ? (
-              <p className="app-shell-note">Technical detail: {this.state.error.message}</p>
-            ) : null}
-          </section>
-        </main>
+        <AppShellState
+          body="The current screen could not finish rendering. Reload the app or move back to a safer page before continuing."
+          eyebrow="Runtime error"
+          note={this.state.error?.message ? `Technical detail: ${this.state.error.message}` : ''}
+          primaryAction={{
+            label: 'Reload app',
+            onClick: () => {
+              if (typeof window !== 'undefined') {
+                window.location.reload();
+              }
+            },
+          }}
+          secondaryAction={{
+            component: Link,
+            label: 'Go to home',
+            to: '/',
+          }}
+          title="Rivo hit an unexpected problem."
+        />
       );
     }
 

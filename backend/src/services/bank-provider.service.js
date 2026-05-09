@@ -9,6 +9,7 @@ const {
 } = require('plaid');
 
 const {
+  enableSandboxBankProvider,
   bankTokenEncryptionSecret,
   plaidClientId,
   plaidCountryCodes,
@@ -124,29 +125,43 @@ const toCountryCode = (value) => {
   return CountryCode[normalizedValue] || normalizedValue;
 };
 
-const listBankProviders = () => [
-  {
-    description: 'Deterministic imported transactions for QA, demos, and regression coverage.',
-    id: 'sandbox',
-    mode: 'sandbox',
-    name: 'Sandbox feed',
-    status: 'available',
-    supportsLink: false,
-  },
-  {
-    description: isPlaidConfigured()
-      ? 'Live institution linking and transaction sync through Plaid Link.'
-      : 'Configure Plaid credentials to unlock live institution linking.',
-    id: 'plaid',
-    mode: plaidEnv,
-    name: 'Plaid',
-    status: isPlaidConfigured() ? 'available' : 'unconfigured',
-    supportsLink: true,
-  },
-];
+const listBankProviders = () => {
+  const providers = [
+    {
+      description: isPlaidConfigured()
+        ? 'Live institution linking and transaction sync through Plaid Link.'
+        : 'Configure Plaid credentials to unlock live institution linking.',
+      id: 'plaid',
+      mode: plaidEnv,
+      name: 'Plaid',
+      status: isPlaidConfigured() ? 'available' : 'unconfigured',
+      supportsLink: true,
+    },
+  ];
+
+  if (enableSandboxBankProvider) {
+    providers.unshift({
+      description:
+        'A controlled import feed for validating account setup and reconciliation before live banking is connected.',
+      id: 'sandbox',
+      mode: 'sandbox',
+      name: 'Test institution',
+      status: 'available',
+      supportsLink: false,
+    });
+  }
+
+  return providers;
+};
 
 const assertProviderAvailable = (provider) => {
   if (provider === 'sandbox') {
+    if (!enableSandboxBankProvider) {
+      throw new AppError('The selected bank connection provider is not enabled in this environment.', 501, {
+        provider: 'sandbox',
+      });
+    }
+
     return;
   }
 
