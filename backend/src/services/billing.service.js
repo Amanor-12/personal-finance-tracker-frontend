@@ -501,7 +501,11 @@ const listInvoices = async (stripe, customerId) => {
     amountPaid: formatMoney(invoice.amount_paid, invoice.currency),
     hostedInvoiceUrl: invoice.hosted_invoice_url,
     id: invoice.id,
+    issuedAt: invoice.created ? new Date(invoice.created * 1000).toISOString() : null,
     number: invoice.number || invoice.id,
+    paidAt: invoice.status_transitions?.paid_at
+      ? new Date(invoice.status_transitions.paid_at * 1000).toISOString()
+      : null,
     status: invoice.status || 'open',
   }));
 };

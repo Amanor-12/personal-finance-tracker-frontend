@@ -9789,6 +9789,15 @@ textarea:focus-visible,
   color: #248066;
 }
 
+.billing-plan-head em {
+  font-style: normal;
+  color: #1f8d74;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .billing-plan-card h3,
 .pricing-card h2 {
   margin: 20px 0 0;
@@ -9945,6 +9954,60 @@ textarea:focus-visible,
   align-items: center;
   border-radius: 16px;
   background: #f8fafc;
+}
+
+.billing-invoice-copy,
+.billing-invoice-meta {
+  display: grid;
+  gap: 4px;
+}
+
+.billing-invoice-copy small,
+.billing-invoice-meta a {
+  color: #748096;
+  font-size: 0.76rem;
+}
+
+.billing-invoice-meta {
+  justify-items: end;
+}
+
+.billing-invoice-meta a {
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.billing-invoice-status {
+  min-height: 32px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #687388;
+  background: rgba(226, 232, 240, 0.7);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.billing-invoice-status-paid {
+  color: #117a64;
+  background: rgba(33, 197, 144, 0.12);
+}
+
+.billing-invoice-status-open,
+.billing-invoice-status-draft {
+  color: #9a6a12;
+  background: rgba(246, 165, 59, 0.14);
+}
+
+.billing-invoice-status-uncollectible,
+.billing-invoice-status-void,
+.billing-invoice-status-unpaid {
+  color: #b42318;
+  background: rgba(217, 45, 32, 0.1);
 }
 
 .billing-rail-stack {
@@ -12079,7 +12142,7 @@ textarea:focus-visible,
 
 .billing-control-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -12234,6 +12297,13 @@ textarea:focus-visible,
 .activity-results-meta span {
   color: #7a8599;
   font-size: 0.84rem;
+}
+
+.activity-inline-link {
+  color: #4d63f0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
 }
 
 .activity-timeline {

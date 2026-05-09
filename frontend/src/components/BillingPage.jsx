@@ -26,15 +26,17 @@ function BillingSkeleton() {
   );
 }
 
-function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout, plan }) {
+function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout, onManageCurrentPlan, plan, recommendedPlanId }) {
   const isCurrent = currentPlanId === plan.id || currentPlanId === plan.checkoutPlanId;
   const isFree = plan.id === 'free';
+  const isRecommended = plan.id === recommendedPlanId;
 
   return (
     <article className={`billing-plan-card${isCurrent ? ' is-current' : ''}`}>
       <div className="billing-plan-head">
         <span>{plan.eyebrow}</span>
         {isCurrent ? <strong>Current</strong> : null}
+        {!isCurrent && isRecommended ? <em>Recommended</em> : null}
       </div>
       <h3>{plan.name}</h3>
       <p>{plan.description}</p>
@@ -47,7 +49,17 @@ function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout,
           <li key={feature}>{feature}</li>
         ))}
       </ul>
-      {isFree ? (
+      {isCurrent ? (
+        isFree ? (
+          <button className="billing-secondary-action" type="button" disabled>
+            Current plan
+          </button>
+        ) : (
+          <button className="billing-secondary-action" type="button" disabled={!isAvailable || isProcessing} onClick={onManageCurrentPlan}>
+            {isProcessing ? 'Opening...' : 'Manage current plan'}
+          </button>
+        )
+      ) : isFree ? (
         <Link className="billing-secondary-action" to="/dashboard">
           Keep Free
         </Link>
@@ -117,6 +129,8 @@ function BillingPage({ currentUser, onLogout }) {
   const statusLabel = subscriptionStatusCopy[status] || status;
   const stripeConfigured = Boolean(billing?.provider?.configured);
   const activeTier = billing?.access?.tier || 'free';
+  const currentPlanId = billing?.currentPlan?.id || 'free';
+  const recommendedPlanId = activeTier === 'free' ? 'plus_monthly' : activeTier === 'plus' ? 'pro_annual' : '';
   const tierHighlights =
     activeTier === 'pro'
       ? ['Cash forecasting is available', 'AI transaction review is available', 'Expanded milestone guidance is available', 'Paid workspace limits are lifted']
@@ -277,17 +291,30 @@ function BillingPage({ currentUser, onLogout }) {
                   : `Free includes ${billing?.access?.limits?.accounts ?? 0} accounts, ${billing?.access?.limits?.budgets ?? 0} budgets, and ${billing?.access?.limits?.goals ?? 0} goals.`}
               </p>
             </article>
+            <article>
+              <span>Next step</span>
+              <strong>{activeTier === 'pro' ? 'Stay on Pro' : activeTier === 'plus' ? 'Consider Pro' : 'Start with Plus'}</strong>
+              <p>
+                {activeTier === 'pro'
+                  ? 'Your highest-control plan is already active.'
+                  : activeTier === 'plus'
+                    ? 'Move to Pro when forecasting, AI ledger review, and milestone guidance start saving real time.'
+                    : 'Move to Plus when recurring bills, exports, and reporting become part of the weekly workflow.'}
+              </p>
+            </article>
           </section>
 
           <section className="billing-plan-grid" aria-label="Rivo plans">
             {plans.map((plan) => (
               <BillingPlanCard
                 key={plan.id}
-                currentPlanId={billing?.currentPlan?.id}
+                currentPlanId={currentPlanId}
                 isAvailable={stripeConfigured}
-                isProcessing={processingPlanId === plan.id}
+                isProcessing={processingPlanId === plan.id || (isOpeningPortal && currentPlanId === plan.id)}
                 onCheckout={handleCheckout}
+                onManageCurrentPlan={handlePortal}
                 plan={plan}
+                recommendedPlanId={recommendedPlanId}
               />
             ))}
           </section>
@@ -313,9 +340,27 @@ function BillingPage({ currentUser, onLogout }) {
               <div className="billing-invoice-table">
                 {billing.invoices.map((invoice) => (
                   <div key={invoice.id} className="billing-invoice-row">
-                    <span>{invoice.number}</span>
-                    <strong>{invoice.amountPaid}</strong>
-                    <em>{invoice.status}</em>
+                    <div className="billing-invoice-copy">
+                      <span>{invoice.number}</span>
+                      <small>
+                        {invoice.paidAt
+                          ? `Paid ${formatDate(invoice.paidAt)}`
+                          : invoice.issuedAt
+                            ? `Issued ${formatDate(invoice.issuedAt)}`
+                            : 'Billing receipt'}
+                      </small>
+                    </div>
+                    <em className={`billing-invoice-status billing-invoice-status-${invoice.status || 'open'}`}>
+                      {invoice.status}
+                    </em>
+                    <div className="billing-invoice-meta">
+                      <strong>{invoice.amountPaid}</strong>
+                      {invoice.hostedInvoiceUrl ? (
+                        <a href={invoice.hostedInvoiceUrl} rel="noreferrer" target="_blank">
+                          View receipt
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 ))}
               </div>

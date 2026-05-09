@@ -199,6 +199,7 @@ function ActivityPage({ currentUser, onLogout }) {
     [records]
   );
   const latestEvent = visibleEvents[0] || events[0] || null;
+  const latestEventMeta = latestEvent ? activityTypes[latestEvent.type] : null;
 
   const isPlus = isPlusTier(tier);
   const rail = (
@@ -263,6 +264,9 @@ function ActivityPage({ currentUser, onLogout }) {
                 ? `${activityTypes[latestEvent.type]?.label || 'Record'} updated ${formatEventDate(latestEvent.date)}.`
                 : 'The timeline stays quiet until real accounts, transactions, budgets, goals, or renewals are saved.'}
             </p>
+            <Link className="activity-inline-link" to={latestEventMeta?.route || '/accounts'}>
+              {latestEventMeta ? `Open ${latestEventMeta.label.toLowerCase()}` : 'Set up accounts'}
+            </Link>
           </article>
           <article>
             <span>Best next move</span>
