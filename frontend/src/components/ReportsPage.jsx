@@ -19,6 +19,14 @@ import { isProTier } from '../utils/tierAccess';
 const safePercent = (value) => `${Math.round(Number(value) || 0)}%`;
 const EMPTY_LIST = Object.freeze([]);
 
+const getAiRunLabel = (meta = {}) => {
+  const provider = meta.provider === 'openai' ? `OpenAI ${meta.model || ''}`.trim() : 'Deterministic fallback';
+  const qualityScore = Number(meta.quality?.finalScore || meta.quality?.score || 0);
+  const quality = qualityScore ? ` / ${Math.round(qualityScore * 100)}% quality gate` : '';
+
+  return `${provider}${quality}`;
+};
+
 const getRangeDays = (startDate, endDate) => {
   if (!startDate || !endDate) {
     return 0;
@@ -615,6 +623,7 @@ function ReportsPage({ currentUser, onLogout }) {
                       <span>Headline</span>
                       <strong>{aiBriefing.headline}</strong>
                       <p>{aiBriefing.body || 'The AI route returned a headline but no narrative body.'}</p>
+                      {aiBriefing.meta ? <small>{getAiRunLabel(aiBriefing.meta)}</small> : null}
                     </article>
                     {(aiBriefing.actions.length ? aiBriefing.actions : []).slice(0, 3).map((action) => (
                       <article className="reports-insight-item" key={action.id}>

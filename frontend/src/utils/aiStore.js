@@ -43,6 +43,7 @@ const normalizeBriefing = (payload) => {
       source.title ||
       source.label ||
       'AI finance briefing',
+    meta: payload?.meta || payload?.metadata || source.meta || {},
   };
 };
 
@@ -67,6 +68,7 @@ const normalizeSuggestion = (suggestion, index) => ({
     suggestion?.explanation ||
     suggestion?.body ||
     '',
+  source: suggestion?.source || suggestion?.provider || '',
   transactionId: (() => {
     const value =
       suggestion?.transactionId ||
@@ -137,6 +139,11 @@ export const aiStore = {
       }
     );
 
-    return normalizeBriefing(payload?.guidance || payload);
+    const guidance = normalizeBriefing(payload?.guidance || payload);
+
+    return {
+      ...guidance,
+      meta: payload?.meta || guidance.meta || {},
+    };
   },
 };

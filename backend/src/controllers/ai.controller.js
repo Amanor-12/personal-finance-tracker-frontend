@@ -17,6 +17,7 @@ const getTransactionSuggestions = asyncHandler(async (req, res) => {
       category_type: suggestion.categoryType,
       confidence: suggestion.confidence,
       reason: suggestion.reason,
+      source: suggestion.source || null,
       transaction_id: suggestion.transactionId,
     })),
   });

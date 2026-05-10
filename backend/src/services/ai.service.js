@@ -7,6 +7,14 @@ const { getGoalById, getGoals } = require('./goal.service');
 const reportsService = require('./reports.service');
 
 const MAX_TRANSACTION_SUGGESTIONS = 50;
+const AI_PROMPT_VERSION = 'rivo-ai-quality-v2-2026-05-10';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.5';
+const DEFAULT_OPENAI_REASONING_EFFORT = 'high';
+const DEFAULT_OPENAI_MAX_OUTPUT_TOKENS = 1400;
+const MIN_PROVIDER_BRIEFING_SCORE = 0.58;
+const MIN_FINAL_BRIEFING_SCORE = 0.74;
+const MIN_PROVIDER_SUGGESTION_CONFIDENCE = 0.55;
+const MIN_HEURISTIC_SUGGESTION_CONFIDENCE = 0.5;
 const STOP_WORDS = new Set([
   'a',
   'an',
@@ -113,6 +121,15 @@ const createActionId = (title, index = 0) => {
   return slug || `action-${index + 1}`;
 };
 
+const normalizeReasoningEffort = (value) => {
+  const effort = normalizeKey(value).replace(/\s+/g, '');
+  const allowedEfforts = new Set(['none', 'minimal', 'low', 'medium', 'high', 'xhigh']);
+
+  return allowedEfforts.has(effort) ? effort : DEFAULT_OPENAI_REASONING_EFFORT;
+};
+
+const supportsReasoningEffort = (model) => /^gpt-5(?:[-.\s]|$)/i.test(String(model || ''));
+
 const getAiConfig = () => {
   const configuredProvider = normalizeKey(
     process.env.AI_PROVIDER || (process.env.OPENAI_API_KEY ? 'openai' : 'heuristic')
@@ -124,9 +141,29 @@ const getAiConfig = () => {
     apiKey: process.env.OPENAI_API_KEY || '',
     baseUrl: String(process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/+$/, ''),
     configuredProvider: configuredProvider || 'heuristic',
-    model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+    maxOutputTokens: Math.round(
+      clamp(Number(process.env.AI_MAX_OUTPUT_TOKENS) || DEFAULT_OPENAI_MAX_OUTPUT_TOKENS, 500, 4000)
+    ),
+    model: normalizeWhitespace(process.env.OPENAI_MODEL || process.env.AI_MODEL || DEFAULT_OPENAI_MODEL),
     provider,
-    timeoutMs: Math.max(3000, Number(process.env.AI_REQUEST_TIMEOUT_MS) || 15000),
+    reasoningEffort: normalizeReasoningEffort(
+      process.env.OPENAI_REASONING_EFFORT || process.env.AI_REASONING_EFFORT || DEFAULT_OPENAI_REASONING_EFFORT
+    ),
+    timeoutMs: Math.max(3000, Number(process.env.AI_REQUEST_TIMEOUT_MS) || 25000),
+  };
+};
+
+const getAiRuntimeStatus = () => {
+  const config = getAiConfig();
+
+  return {
+    activeProvider: config.provider,
+    configuredProvider: config.configuredProvider,
+    defaultModel: DEFAULT_OPENAI_MODEL,
+    model: config.provider === 'openai' ? config.model : null,
+    promptVersion: AI_PROMPT_VERSION,
+    qualityGates: true,
+    structuredOutputs: true,
   };
 };
 
@@ -151,6 +188,20 @@ const getResponseText = (payload = {}) => {
   });
 
   return segments.join('\n').trim();
+};
+
+const getResponseRefusal = (payload = {}) => {
+  const refusals = [];
+
+  (payload.output || []).forEach((outputItem) => {
+    (outputItem.content || []).forEach((contentItem) => {
+      if (typeof contentItem?.refusal === 'string' && contentItem.refusal.trim()) {
+        refusals.push(contentItem.refusal.trim());
+      }
+    });
+  });
+
+  return refusals.join(' ').trim();
 };
 
 const ensureAiSchema = async () => {
@@ -245,6 +296,76 @@ const normalizeBriefing = (briefing = {}) => ({
   body: normalizeWhitespace(briefing.body).slice(0, 700),
   headline: normalizeWhitespace(briefing.headline).slice(0, 160) || 'AI finance briefing',
 });
+
+const getBriefingText = (briefing) =>
+  [briefing?.headline, briefing?.body, ...(briefing?.actions || []).flatMap((action) => [action.title, action.body])]
+    .filter(Boolean)
+    .join(' ');
+
+const hasUnsupportedFinancialAdvice = (text) =>
+  [
+    /\b(buy|sell|hold)\s+(stocks?|bonds?|crypto|etfs?|funds?|securities)\b/i,
+    /\bguaranteed?\s+(return|profit|gain|outcome|approval)\b/i,
+    /\b(tax|legal)\s+advice\b/i,
+  ].some((pattern) => pattern.test(text));
+
+const dedupeBriefingActions = (actions) => {
+  const seen = new Set();
+
+  return actions
+    .filter((action) => action?.body)
+    .filter((action) => {
+      const key = normalizeKey(action.id || action.title || action.body);
+
+      if (!key || seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 4);
+};
+
+const mergeBriefings = (providerBriefing, fallbackBriefing) => {
+  const normalizedProvider = normalizeBriefing(providerBriefing);
+  const normalizedFallback = normalizeBriefing(fallbackBriefing);
+
+  return normalizeBriefing({
+    actions: dedupeBriefingActions([
+      ...normalizedProvider.actions,
+      ...normalizedFallback.actions,
+    ]),
+    body: normalizedProvider.body || normalizedFallback.body,
+    headline:
+      normalizedProvider.headline && normalizedProvider.headline !== 'AI finance briefing'
+        ? normalizedProvider.headline
+        : normalizedFallback.headline,
+  });
+};
+
+const evaluateBriefingQuality = ({ briefing, hasData, minimumActions = 1 }) => {
+  const normalized = normalizeBriefing(briefing);
+  const text = getBriefingText(normalized);
+  const checks = {
+    actionCoverage: normalized.actions.length >= minimumActions,
+    groundedNumbers: !hasData || /(?:\d|[$%])/.test(text),
+    hasBody: normalized.body.length >= (hasData ? 90 : 50),
+    hasHeadline: normalized.headline.length >= 12 && normalized.headline !== 'AI finance briefing',
+    safeAdvice: !hasUnsupportedFinancialAdvice(text),
+  };
+  const score =
+    (checks.hasHeadline ? 0.18 : 0) +
+    (checks.hasBody ? 0.24 : 0) +
+    (checks.actionCoverage ? 0.24 : 0) +
+    (checks.groundedNumbers ? 0.22 : 0) +
+    (checks.safeAdvice ? 0.12 : 0);
+
+  return {
+    checks,
+    score: Number(score.toFixed(2)),
+  };
+};
 
 const buildHeuristicReportBriefing = ({ currency, overview }) => {
   const summary = overview.summary;
@@ -657,6 +778,10 @@ const chooseHeuristicSuggestion = ({ categoryLookup, categoryIntentMap, historic
     return null;
   }
 
+  if (bestSuggestion.confidence < MIN_HEURISTIC_SUGGESTION_CONFIDENCE) {
+    return null;
+  }
+
   return bestSuggestion;
 };
 
@@ -664,22 +789,29 @@ const callOpenAiStructuredOutput = async ({ config, input, schema }) => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), config.timeoutMs);
   const startedAt = Date.now();
+  const requestBody = {
+    input,
+    max_output_tokens: config.maxOutputTokens,
+    model: config.model,
+    text: {
+      format: {
+        name: schema.name,
+        schema: schema.schema,
+        strict: true,
+        type: 'json_schema',
+      },
+    },
+  };
+
+  if (supportsReasoningEffort(config.model)) {
+    requestBody.reasoning = {
+      effort: config.reasoningEffort,
+    };
+  }
 
   try {
     const response = await fetch(`${config.baseUrl}/responses`, {
-      body: JSON.stringify({
-        input,
-        max_output_tokens: 900,
-        model: config.model,
-        text: {
-          format: {
-            name: schema.name,
-            schema: schema.schema,
-            strict: true,
-            type: 'json_schema',
-          },
-        },
-      }),
+      body: JSON.stringify(requestBody),
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
@@ -697,15 +829,29 @@ const callOpenAiStructuredOutput = async ({ config, input, schema }) => {
       );
     }
 
+    const refusal = getResponseRefusal(payload);
+
+    if (refusal) {
+      throw new AppError(`The AI provider refused the request: ${refusal}`, 502);
+    }
+
     const outputText = getResponseText(payload);
 
     if (!outputText) {
       throw new AppError('The AI provider returned an empty response.', 502);
     }
 
+    let parsed;
+
+    try {
+      parsed = JSON.parse(outputText);
+    } catch {
+      throw new AppError('The AI provider returned malformed structured output.', 502);
+    }
+
     return {
       latencyMs: Date.now() - startedAt,
-      parsed: JSON.parse(outputText),
+      parsed,
       usage: getUsageStats(payload),
     };
   } finally {
@@ -764,7 +910,14 @@ const buildReportPrompt = ({ currency, overview }) => [
   {
     content: [
       {
-        text: 'You are a finance operations analyst. Turn structured workspace data into a concise customer-facing briefing. Never invent facts or numbers. Do not give legal, tax, or investment advice. Only use the provided data.',
+        text: [
+          'You are Rivo\'s senior finance operations analyst for a production personal finance app.',
+          'Return only JSON that satisfies the provided schema.',
+          'Use only the structured workspace data. Never invent balances, dates, categories, merchants, or counts.',
+          'Every numeric claim must be directly supported by the input values. If the data is thin, say that clearly instead of pretending certainty.',
+          'Write for a real customer: concise, specific, operational, and calm. No legal, tax, investment, or debt product advice.',
+          `Prompt version: ${AI_PROMPT_VERSION}.`,
+        ].join(' '),
         type: 'input_text',
       },
     ],
@@ -780,7 +933,9 @@ const buildReportPrompt = ({ currency, overview }) => [
             response_rules: {
               actions_max: 4,
               body_style: '2-4 compact sentences',
+              required_quality: 'Include the strongest cash-flow signal, the evidence behind it, and concrete next actions.',
               headline_style: 'One short sentence with the strongest finding',
+              unsupported: ['generic motivation', 'invented advice', 'claims not visible in the input'],
             },
           },
           null,
@@ -851,7 +1006,16 @@ const buildTransactionsPrompt = ({ categories, heuristicSuggestions, transaction
     {
       content: [
         {
-          text: 'You are a bookkeeping assistant. Choose only from the provided categories, preserve the transaction type, and avoid returning suggestions when the current category already looks correct. Use the heuristic hint when it is strong, but override it if the evidence clearly points elsewhere.',
+          text: [
+            'You are Rivo\'s senior bookkeeping review assistant.',
+            'Return only JSON that satisfies the provided schema.',
+            'Choose only from the provided categories and preserve the transaction type exactly.',
+            `Return a suggestion only when confidence is at least ${MIN_PROVIDER_SUGGESTION_CONFIDENCE}.`,
+            'Do not return a suggestion when the current category already looks correct or when evidence is weak.',
+            'Use heuristic hints as evidence, but override them only when merchant wording, notes, or history clearly support a better category.',
+            'Reasons must cite the evidence in the selected transaction, not generic bookkeeping language.',
+            `Prompt version: ${AI_PROMPT_VERSION}.`,
+          ].join(' '),
           type: 'input_text',
         },
       ],
@@ -929,11 +1093,19 @@ const normalizeProviderSuggestions = ({ categoryLookup, suggestions, transaction
         return null;
       }
 
+      const confidence = clamp(Number(suggestion.confidence) || 0, 0, 1);
+      const reason = normalizeWhitespace(suggestion.reason);
+
+      if (confidence < MIN_PROVIDER_SUGGESTION_CONFIDENCE || reason.length < 12) {
+        return null;
+      }
+
       return {
         categoryName: matchingCategory.name,
         categoryType: matchingCategory.type,
-        confidence: clamp(Number(suggestion.confidence) || 0, 0, 1),
-        reason: normalizeWhitespace(suggestion.reason),
+        confidence,
+        reason,
+        source: 'openai',
         transactionId,
       };
     })
@@ -1085,7 +1257,15 @@ const buildGoalsPrompt = ({ currency, focusGoal, goals, reportOverview }) => [
   {
     content: [
       {
-        text: 'You are a finance planning analyst. Turn structured goal portfolio data into a concise milestone guidance briefing. Do not invent dates, balances, or goals. Keep recommendations operational and concrete.',
+        text: [
+          'You are Rivo\'s senior milestone planning analyst for a production personal finance app.',
+          'Return only JSON that satisfies the provided schema.',
+          'Use only the provided goal and report snapshot data. Never invent goals, balances, target dates, or contribution amounts.',
+          'Prioritize the next operational decision: what target needs attention, why, and what the customer can review next.',
+          'If cash-flow evidence is weak, say that directly and avoid overconfident contribution advice.',
+          'No legal, tax, investment, or credit advice.',
+          `Prompt version: ${AI_PROMPT_VERSION}.`,
+        ].join(' '),
         type: 'input_text',
       },
     ],
@@ -1100,6 +1280,11 @@ const buildGoalsPrompt = ({ currency, focusGoal, goals, reportOverview }) => [
             focus_goal_id: focusGoal ? Number(focusGoal.id) : null,
             goals: goals.map(normalizeGoal),
             report_snapshot: summarizeReportSnapshot(reportOverview),
+            response_rules: {
+              actions_max: 4,
+              body_style: '2-4 compact sentences',
+              required_quality: 'Name the goal evidence that supports each recommendation.',
+            },
           },
           null,
           2
@@ -1120,6 +1305,7 @@ const getReportBriefing = async (userId, payload = {}) => {
   const config = getAiConfig();
   let meta = {
     model: config.provider === 'openai' ? config.model : null,
+    promptVersion: AI_PROMPT_VERSION,
     provider: config.provider,
     usedFallback: config.provider !== 'openai',
   };
@@ -1131,13 +1317,39 @@ const getReportBriefing = async (userId, payload = {}) => {
         input: buildReportPrompt({ currency, overview }),
         schema: reportBriefingSchema,
       });
-      const briefing = normalizeBriefing(providerResponse.parsed);
+      const providerBriefing = normalizeBriefing(providerResponse.parsed);
+      const hasReportData = Number(overview?.summary?.transactionCount) > 0;
+      const minimumActions = hasReportData ? 2 : 1;
+      const providerQuality = evaluateBriefingQuality({
+        briefing: providerBriefing,
+        hasData: hasReportData,
+        minimumActions,
+      });
+      const mergedBriefing =
+        providerQuality.score >= MIN_PROVIDER_BRIEFING_SCORE
+          ? mergeBriefings(providerBriefing, fallbackBriefing)
+          : fallbackBriefing;
+      const finalQuality = evaluateBriefingQuality({
+        briefing: mergedBriefing,
+        hasData: hasReportData,
+        minimumActions,
+      });
+      const usedQualityFallback =
+        providerQuality.score < MIN_PROVIDER_BRIEFING_SCORE ||
+        finalQuality.score < MIN_FINAL_BRIEFING_SCORE;
+      const briefing = usedQualityFallback ? fallbackBriefing : mergedBriefing;
 
       meta = {
         ...meta,
         latencyMs: providerResponse.latencyMs,
         provider: 'openai',
-        usedFallback: false,
+        quality: {
+          checks: finalQuality.checks,
+          finalScore: finalQuality.score,
+          providerScore: providerQuality.score,
+        },
+        reasoningEffort: config.reasoningEffort,
+        usedFallback: usedQualityFallback,
       };
 
       await recordAiRequest({
@@ -1151,8 +1363,10 @@ const getReportBriefing = async (userId, payload = {}) => {
         responseSummary: {
           actionCount: briefing.actions.length,
           headline: briefing.headline,
+          promptVersion: AI_PROMPT_VERSION,
+          quality: meta.quality,
         },
-        usedFallback: false,
+        usedFallback: usedQualityFallback,
         userId,
       }).catch(() => null);
 
@@ -1178,6 +1392,7 @@ const getReportBriefing = async (userId, payload = {}) => {
     responseSummary: {
       actionCount: fallbackBriefing.actions.length,
       headline: fallbackBriefing.headline,
+      promptVersion: AI_PROMPT_VERSION,
     },
     usedFallback: true,
     userId,
@@ -1251,13 +1466,14 @@ const getTransactionSuggestions = async (userId, payload = {}) => {
     )
     .filter(Boolean);
   const config = getAiConfig();
-  let suggestions = heuristicSuggestions.map(({ source, ...suggestion }) => {
-    void source;
-    return suggestion;
-  });
+  let suggestions = heuristicSuggestions.map((suggestion) => ({
+    ...suggestion,
+    source: suggestion.source || 'heuristic',
+  }));
   let meta = {
     heuristicCount: heuristicSuggestions.length,
     model: config.provider === 'openai' ? config.model : null,
+    promptVersion: AI_PROMPT_VERSION,
     provider: config.provider,
     usedFallback: config.provider !== 'openai',
   };
@@ -1282,10 +1498,22 @@ const getTransactionSuggestions = async (userId, payload = {}) => {
         providerSuggestions.map((suggestion) => [suggestion.transactionId, suggestion])
       );
       const mergedSuggestions = transactions
-        .map((transaction) =>
-          providerMap.get(transaction.id) ||
-          suggestions.find((item) => item.transactionId === transaction.id)
-        )
+        .map((transaction) => {
+          const providerSuggestion = providerMap.get(transaction.id);
+          const heuristicSuggestion = suggestions.find((item) => item.transactionId === transaction.id);
+
+          if (!providerSuggestion) {
+            return heuristicSuggestion;
+          }
+
+          if (!heuristicSuggestion) {
+            return providerSuggestion;
+          }
+
+          return providerSuggestion.confidence >= heuristicSuggestion.confidence - 0.05
+            ? providerSuggestion
+            : heuristicSuggestion;
+        })
         .filter(Boolean);
 
       suggestions = mergedSuggestions;
@@ -1294,6 +1522,7 @@ const getTransactionSuggestions = async (userId, payload = {}) => {
         heuristicCount: heuristicSuggestions.length,
         latencyMs: providerResponse.latencyMs,
         provider: 'openai',
+        reasoningEffort: config.reasoningEffort,
         usedFallback: providerSuggestions.length === 0,
       };
 
@@ -1310,6 +1539,8 @@ const getTransactionSuggestions = async (userId, payload = {}) => {
         },
         responseSummary: {
           heuristicCount: heuristicSuggestions.length,
+          promptVersion: AI_PROMPT_VERSION,
+          providerSuggestionCount: providerSuggestions.length,
           suggestionCount: suggestions.length,
         },
         usedFallback: providerSuggestions.length === 0,
@@ -1340,6 +1571,7 @@ const getTransactionSuggestions = async (userId, payload = {}) => {
     },
     responseSummary: {
       heuristicCount: heuristicSuggestions.length,
+      promptVersion: AI_PROMPT_VERSION,
       suggestionCount: suggestions.length,
     },
     usedFallback: true,
@@ -1372,6 +1604,7 @@ const getGoalGuidance = async (userId, payload = {}) => {
   const config = getAiConfig();
   let meta = {
     model: config.provider === 'openai' ? config.model : null,
+    promptVersion: AI_PROMPT_VERSION,
     provider: config.provider,
     usedFallback: config.provider !== 'openai',
   };
@@ -1388,13 +1621,39 @@ const getGoalGuidance = async (userId, payload = {}) => {
         }),
         schema: goalGuidanceSchema,
       });
-      const guidance = normalizeBriefing(providerResponse.parsed);
+      const providerGuidance = normalizeBriefing(providerResponse.parsed);
+      const hasGoalData = goals.length > 0;
+      const minimumActions = hasGoalData ? 2 : 1;
+      const providerQuality = evaluateBriefingQuality({
+        briefing: providerGuidance,
+        hasData: hasGoalData,
+        minimumActions,
+      });
+      const mergedGuidance =
+        providerQuality.score >= MIN_PROVIDER_BRIEFING_SCORE
+          ? mergeBriefings(providerGuidance, fallbackGuidance)
+          : fallbackGuidance;
+      const finalQuality = evaluateBriefingQuality({
+        briefing: mergedGuidance,
+        hasData: hasGoalData,
+        minimumActions,
+      });
+      const usedQualityFallback =
+        providerQuality.score < MIN_PROVIDER_BRIEFING_SCORE ||
+        finalQuality.score < MIN_FINAL_BRIEFING_SCORE;
+      const guidance = usedQualityFallback ? fallbackGuidance : mergedGuidance;
 
       meta = {
         ...meta,
         latencyMs: providerResponse.latencyMs,
         provider: 'openai',
-        usedFallback: false,
+        quality: {
+          checks: finalQuality.checks,
+          finalScore: finalQuality.score,
+          providerScore: providerQuality.score,
+        },
+        reasoningEffort: config.reasoningEffort,
+        usedFallback: usedQualityFallback,
       };
 
       await recordAiRequest({
@@ -1412,8 +1671,10 @@ const getGoalGuidance = async (userId, payload = {}) => {
         responseSummary: {
           actionCount: guidance.actions.length,
           headline: guidance.headline,
+          promptVersion: AI_PROMPT_VERSION,
+          quality: meta.quality,
         },
-        usedFallback: false,
+        usedFallback: usedQualityFallback,
         userId,
       }).catch(() => null);
 
@@ -1443,6 +1704,7 @@ const getGoalGuidance = async (userId, payload = {}) => {
     responseSummary: {
       actionCount: fallbackGuidance.actions.length,
       headline: fallbackGuidance.headline,
+      promptVersion: AI_PROMPT_VERSION,
     },
     usedFallback: true,
     userId,
@@ -1456,6 +1718,7 @@ const getGoalGuidance = async (userId, payload = {}) => {
 
 module.exports = {
   ensureAiSchema,
+  getAiRuntimeStatus,
   getGoalGuidance,
   getReportBriefing,
   getTransactionSuggestions,

@@ -27,6 +27,16 @@ import { isPlusTier, isProTier } from '../utils/tierAccess';
 
 const TransactionFormDialog = lazy(loadTransactionFormDialog);
 
+const formatAiSuggestionEvidence = (suggestion) => {
+  const confidence = Number.isFinite(Number(suggestion.confidence))
+    ? `${Math.round(Number(suggestion.confidence) * 100)}%`
+    : '';
+  const source = suggestion.source === 'openai' ? 'AI' : suggestion.source ? 'Rules' : '';
+  const prefix = [source, confidence].filter(Boolean).join(' / ');
+
+  return [prefix, suggestion.reason].filter(Boolean).join(' - ');
+};
+
 function TransactionsPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
   const { access } = useBillingAccess();
@@ -844,7 +854,7 @@ function TransactionsPage({ currentUser, onLogout }) {
                               </button>
                               <span>
                                 {suggestion.categoryName}
-                                {suggestion.reason ? ` - ${suggestion.reason}` : ''}
+                                {formatAiSuggestionEvidence(suggestion) ? ` - ${formatAiSuggestionEvidence(suggestion)}` : ''}
                               </span>
                             </div>
                           );

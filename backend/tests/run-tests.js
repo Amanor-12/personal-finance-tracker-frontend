@@ -255,6 +255,78 @@ const tests = [
     },
   },
   {
+    name: 'AI transaction review returns grounded heuristic suggestions when provider is offline',
+    async run() {
+      const previousAiProvider = process.env.AI_PROVIDER;
+      const previousOpenAiKey = process.env.OPENAI_API_KEY;
+      const agent = request.agent(app);
+      const email = `ai-review-${crypto.randomUUID()}@flowledger.dev`;
+      const password = 'TierOnePass123!';
+
+      process.env.AI_PROVIDER = 'heuristic';
+      delete process.env.OPENAI_API_KEY;
+
+      try {
+        const register = await agent.post('/api/auth/register').send({
+          name: 'AI Review User',
+          email,
+          password,
+        });
+
+        assert.equal(register.statusCode, 201);
+
+        await pool.query(
+          `
+            UPDATE users
+            SET
+              current_plan_id = 'premium_annual',
+              subscription_status = 'active'
+            WHERE email = $1
+          `,
+          [email]
+        );
+
+        const response = await agent
+          .post('/api/ai/transactions/suggestions')
+          .send({
+            transactions: [
+              {
+                amount: 42.15,
+                category_name: 'Housing',
+                description: 'Shell fuel station',
+                id: 90101,
+                notes: 'weekly gas refill',
+                transaction_date: '2026-05-01',
+                type: 'expense',
+              },
+            ],
+          })
+          .expect(200);
+
+        assert.equal(response.body.meta.provider, 'heuristic');
+        assert.equal(response.body.meta.usedFallback, true);
+        assert.equal(response.body.meta.promptVersion, 'rivo-ai-quality-v2-2026-05-10');
+        assert.equal(response.body.suggestions.length, 1);
+        assert.equal(response.body.suggestions[0].category_name, 'Transport');
+        assert.equal(response.body.suggestions[0].category_type, 'expense');
+        assert.ok(response.body.suggestions[0].confidence >= 0.5);
+        assert.ok(response.body.suggestions[0].reason.length >= 12);
+      } finally {
+        if (previousAiProvider === undefined) {
+          delete process.env.AI_PROVIDER;
+        } else {
+          process.env.AI_PROVIDER = previousAiProvider;
+        }
+
+        if (previousOpenAiKey === undefined) {
+          delete process.env.OPENAI_API_KEY;
+        } else {
+          process.env.OPENAI_API_KEY = previousOpenAiKey;
+        }
+      }
+    },
+  },
+  {
     name: 'expired pro trials close paid feature gates',
     async run() {
       const agent = request.agent(app);

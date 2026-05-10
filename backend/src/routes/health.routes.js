@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('../config/db');
+const { getAiRuntimeStatus } = require('../services/ai.service');
 
 const router = express.Router();
 
@@ -7,7 +8,10 @@ router.get('/', async (req, res) => {
   const payload = {
     capabilities: {
       accounts: true,
-      ai: true,
+      ai: {
+        available: true,
+        ...getAiRuntimeStatus(),
+      },
       auth: {
         deleteAccount: true,
         emailVerification: true,

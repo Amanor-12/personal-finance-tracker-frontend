@@ -14,6 +14,14 @@ import { financeStore } from '../utils/financeStore';
 
 const GoalFormDialog = lazy(loadGoalFormDialog);
 
+const getAiRunLabel = (meta = {}) => {
+  const provider = meta.provider === 'openai' ? `OpenAI ${meta.model || ''}`.trim() : 'Deterministic fallback';
+  const qualityScore = Number(meta.quality?.finalScore || meta.quality?.score || 0);
+  const quality = qualityScore ? ` / ${Math.round(qualityScore * 100)}% quality gate` : '';
+
+  return `${provider}${quality}`;
+};
+
 const summarizeGoals = (goals) =>
   goals.reduce(
     (summary, goal) => {
@@ -510,6 +518,7 @@ function GoalsPage({ currentUser, onLogout }) {
                 <article className="finance-intelligence-row tone-healthy">
                   <strong>{goalGuidance.headline}</strong>
                   <p>{goalGuidance.body}</p>
+                  {goalGuidance.meta ? <small>{getAiRunLabel(goalGuidance.meta)}</small> : null}
                 </article>
                 {goalGuidance.actions.slice(0, 3).map((action) => (
                   <article className="finance-intelligence-row tone-neutral" key={action.id}>

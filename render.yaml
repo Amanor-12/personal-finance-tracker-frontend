@@ -20,6 +20,18 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: AI_PROVIDER
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.5
+      - key: OPENAI_REASONING_EFFORT
+        value: high
+      - key: AI_REQUEST_TIMEOUT_MS
+        value: 25000
+      - key: AI_MAX_OUTPUT_TOKENS
+        value: 1400
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: LEDGR_STRIPE_PRICE_PREMIUM_MONTHLY
