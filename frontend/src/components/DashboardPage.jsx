@@ -670,12 +670,6 @@ function DashboardPage({ currentUser, onLogout }) {
   const cardPickerCards = filteredCards.slice(0, 6);
   const totalCards = cards.length;
 
-  const heroPills = [
-    totalCards ? `${totalCards} cards` : 'No cards',
-    recentPayments.length ? `${recentPayments.length} payments` : '0 payments',
-    workspaceSignals.accounts ? `${workspaceSignals.accounts} accounts` : '0 accounts',
-  ];
-
   const workspaceModules = [
     {
       label: 'Accounts',
@@ -735,6 +729,37 @@ function DashboardPage({ currentUser, onLogout }) {
         actionLabel: `Open ${nextWorkspaceModule.label.toLowerCase()}`,
         actionRoute: nextWorkspaceModule.route,
       };
+  const netCashFlow = moneyFlowTotals.income - moneyFlowTotals.expenses;
+  const latestPayment = recentPayments[0] || null;
+  const dashboardFocusCards = [
+    {
+      label: 'Cash flow',
+      value: formatCurrency(netCashFlow),
+      helper:
+        moneyFlowMode === 'planned'
+          ? 'Projected from budgets and recurring commitments.'
+          : netCashFlow >= 0
+            ? 'Income is ahead of expense activity in this view.'
+            : 'Expenses are outrunning income in this view.',
+      tone: netCashFlow >= 0 ? 'positive' : 'warning',
+    },
+    {
+      label: 'Latest movement',
+      value: latestPayment ? 'Recent payment' : 'No activity yet',
+      helper: latestPayment
+        ? `${latestPayment.paymentSource || 'Expense'} - ${formatShortDate(latestPayment.date)}`
+        : 'Add a transaction to make the overview useful.',
+      tone: latestPayment ? 'neutral' : 'empty',
+      to: latestPayment ? '/transactions' : '/transactions',
+    },
+    {
+      label: 'Next action',
+      value: workspaceSummary.actionLabel,
+      helper: workspaceSummary.copy,
+      tone: connectedModules === accessibleModules.length ? 'positive' : 'action',
+      to: workspaceSummary.actionRoute,
+    },
+  ];
 
   const flowState = recentPayments.length
     ? {
@@ -894,32 +919,33 @@ function DashboardPage({ currentUser, onLogout }) {
         <article className="ref-hero-card">
           <div className="ref-hero-copy">
             <span className="ref-section-chip">Workspace</span>
-            <h2>Your wallet, ready.</h2>
-            <p>Review cards, payments, and setup progress from one clear control center.</p>
+            <h2>Start with the three things that matter.</h2>
+            <p>The overview should answer cash direction, latest activity, and the next useful action before anything else.</p>
 
-            <div className="ref-hero-pill-row">
-              {heroPills.map((item) => (
-                <span key={item} className="ref-hero-pill">
-                  {item}
-                </span>
-              ))}
-            </div>
+            <div className="ref-focus-card-grid" aria-label="Dashboard priorities">
+              {dashboardFocusCards.map((card) => {
+                const Element = card.to ? Link : 'article';
 
-            <div className="ref-hero-actions">
-              <Link className="ref-secondary-link" to="/accounts">
-                Open wallets
-              </Link>
-              <Link className="ref-secondary-link" to="/transactions">
-                Open transactions
-              </Link>
+                return (
+                  <Element
+                    key={card.label}
+                    className={`ref-focus-card tone-${card.tone}${card.to ? ' is-clickable' : ''}`}
+                    to={card.to}
+                  >
+                    <span>{card.label}</span>
+                    <strong>{card.value}</strong>
+                    <p>{card.helper}</p>
+                  </Element>
+                );
+              })}
             </div>
           </div>
 
-          <div className="ref-hero-visual" aria-hidden="true">
-            <span className="ref-hero-orbit ref-hero-orbit-one" />
-            <span className="ref-hero-orbit ref-hero-orbit-two" />
-            <span className="ref-hero-glow" />
-            <span className="ref-hero-glass" />
+          <div className="ref-hero-decision-stack" aria-label="Workspace summary">
+            <span>{workspaceSummary.kicker}</span>
+            <strong>{workspaceSummary.title}</strong>
+            <p>{workspaceSummary.copy}</p>
+            <Link to={workspaceSummary.actionRoute}>{workspaceSummary.actionLabel}</Link>
           </div>
         </article>
 

@@ -16042,3 +16042,217 @@ textarea:focus-visible,
     display: grid;
   }
 }
+
+/* Product editing pass: fewer simultaneous panels, stronger page intent */
+.ref-focus-card-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ref-focus-card,
+.ref-hero-decision-stack {
+  position: relative;
+  min-height: 132px;
+  padding: 18px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.ref-focus-card::before {
+  content: '';
+  width: 38px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.ref-focus-card.tone-positive::before {
+  background: #6ee7bf;
+}
+
+.ref-focus-card.tone-warning::before {
+  background: #ffd27a;
+}
+
+.ref-focus-card.tone-action::before {
+  background: #8ee8ff;
+}
+
+.ref-focus-card span,
+.ref-hero-decision-stack span {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ref-focus-card strong,
+.ref-hero-decision-stack strong {
+  color: #ffffff;
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  line-height: 1.18;
+  letter-spacing: -0.04em;
+}
+
+.ref-focus-card p,
+.ref-hero-decision-stack p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.ref-focus-card.is-clickable {
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ref-focus-card.is-clickable:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.12));
+  transform: translateY(-2px);
+}
+
+.ref-hero-decision-stack {
+  min-height: 100%;
+  align-self: stretch;
+  padding: 24px;
+  align-content: center;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(110, 231, 191, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(13, 24, 72, 0.36), rgba(255, 255, 255, 0.09));
+}
+
+.ref-hero-decision-stack a {
+  justify-self: start;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #0f1d44;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.reports-workflow-switcher,
+.transactions-tool-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.transactions-tool-switcher {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.reports-workflow-switcher button,
+.transactions-tool-switcher button {
+  min-height: 98px;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  text-align: left;
+  border: 1px solid rgba(202, 210, 216, 0.74);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(76, 108, 244, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 254, 0.95));
+  box-shadow: 0 14px 28px rgba(17, 27, 66, 0.05);
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.reports-workflow-switcher button:hover,
+.transactions-tool-switcher button:hover {
+  border-color: rgba(90, 100, 230, 0.3);
+  transform: translateY(-1px);
+}
+
+.reports-workflow-switcher button.is-active,
+.transactions-tool-switcher button.is-active {
+  border-color: rgba(69, 91, 222, 0.48);
+  background:
+    radial-gradient(circle at 92% 12%, rgba(31, 186, 200, 0.12), transparent 26%),
+    linear-gradient(180deg, #ffffff, #f2f6ff);
+  box-shadow:
+    0 18px 34px rgba(45, 65, 180, 0.12),
+    inset 0 3px 0 rgba(44, 195, 184, 0.82);
+}
+
+.reports-workflow-switcher span,
+.transactions-tool-switcher span {
+  color: #8791a6;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.reports-workflow-switcher strong,
+.transactions-tool-switcher strong {
+  color: var(--ref-navy);
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.reports-workflow-switcher small,
+.transactions-tool-switcher small {
+  color: #748097;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.transactions-tool-console {
+  display: grid;
+  gap: 18px;
+}
+
+.transactions-tool-stage .transactions-power-card {
+  min-height: 0;
+}
+
+.transactions-tool-stage .transactions-power-card,
+.reports-command-deck {
+  animation: workspace-panel-in 0.22s ease both;
+}
+
+@keyframes workspace-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .ref-focus-card-grid,
+  .reports-workflow-switcher,
+  .transactions-tool-switcher {
+    grid-template-columns: 1fr;
+  }
+}

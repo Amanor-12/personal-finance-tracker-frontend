@@ -57,6 +57,7 @@ function TransactionsPage({ currentUser, onLogout }) {
   const [saveError, setSaveError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [activeTool, setActiveTool] = useState('views');
   const warmTransactionDialog = () => {
     void loadTransactionFormDialog();
   };
@@ -159,6 +160,32 @@ function TransactionsPage({ currentUser, onLogout }) {
     Boolean(visibleTransactions.length) &&
     visibleTransactions.every((transaction) => selectedIds.includes(transaction.id));
   const accountOptions = accounts.map((account) => ({ id: String(account.id), name: account.name }));
+  const transactionTools = [
+    {
+      id: 'views',
+      label: 'Saved views',
+      metric: `${savedViews.length}/6`,
+      note: 'Return to the same filtered ledger slice.',
+    },
+    {
+      id: 'bulk',
+      label: 'Bulk cleanup',
+      metric: isPro ? `${selectedTransactions.length} selected` : 'Pro',
+      note: 'Apply one category across selected records.',
+    },
+    {
+      id: 'ai',
+      label: 'AI review',
+      metric: aiSuggestions.length ? `${aiSuggestions.length} ready` : 'Review',
+      note: 'Generate category suggestions for selected rows.',
+    },
+    {
+      id: 'export',
+      label: 'Export',
+      metric: selectedTransactions.length ? 'Selection' : 'View',
+      note: 'Download the current view or selected rows.',
+    },
+  ];
 
   const clearFilters = () => {
     setFilters(EMPTY_TRANSACTION_FILTERS);
@@ -639,199 +666,224 @@ function TransactionsPage({ currentUser, onLogout }) {
 
         {isPlus ? (
           <PremiumPanel eyebrow={isPro ? 'Pro tools' : 'Plus tools'} title="Faster ledger operations">
-            <section className="transactions-power-grid">
-              <article className="transactions-power-card">
-                <div className="transactions-power-head">
-                  <div>
-                    <span>Saved views</span>
-                    <strong>Return to the same ledger slice instantly.</strong>
-                  </div>
-                    <small>{savedViews.length}/6 saved</small>
-                </div>
-
-                <div className="transactions-power-save">
-                  <input
-                    type="text"
-                    placeholder="Quarterly review"
-                    value={savedViewName}
-                    onChange={(event) => setSavedViewName(event.target.value)}
-                    disabled={isManagingViews}
-                  />
-                  <button type="button" onClick={handleSaveView} disabled={isManagingViews}>
-                    {isManagingViews ? 'Saving...' : 'Save current view'}
-                  </button>
-                </div>
-
-                <div className="transactions-view-list">
-                  {savedViews.length ? (
-                    savedViews.map((view) => (
-                      <div className="transactions-view-chip" key={view.id}>
-                        <button type="button" onClick={() => handleApplyView(view)}>
-                          {view.name}
-                        </button>
-                        <button
-                          className="is-danger"
-                          type="button"
-                          onClick={() => handleDeleteView(view.id)}
-                          disabled={isManagingViews}
-                          aria-label={`Delete ${view.name}`}
-                        >
-                          x
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="transactions-power-empty">Save a filtered ledger view for month-end review, tax prep, or category cleanup.</p>
-                  )}
-                </div>
-              </article>
-
-              <article className="transactions-power-card">
-                <div className="transactions-power-head">
-                  <div>
-                    <span>Bulk categorize</span>
-                    <strong>{isPro ? 'Clean up multiple records without opening each row.' : 'Bulk cleanup sits in Pro for higher-volume transaction work.'}</strong>
-                  </div>
-                  <small>{selectedTransactions.length} selected</small>
-                </div>
-
-                <div className="transactions-bulk-status">
-                  <strong>
-                    {selectedTransactions.length
-                      ? isPro
-                        ? selectedType
-                          ? `${selectedTransactions.length} ${selectedType} record${selectedTransactions.length === 1 ? '' : 's'} ready`
-                          : 'Selection mixes income and expense records'
-                        : 'Move to Pro for bulk categorization'
-                      : 'Select rows in the ledger to start'}
-                  </strong>
-                  <p>
-                    {isPro
-                      ? selectedTransactions.length
-                        ? selectedType
-                          ? 'Choose one matching category and apply it to the selected records.'
-                          : 'Use a single transaction type in one selection before applying a bulk category.'
-                        : 'Selection stays scoped to the current visible view.'
-                      : 'Plus keeps export and saved views available. Pro adds bulk categorization for faster cleanup across larger ledgers.'}
-                  </p>
-                </div>
-
-                <div className="transactions-power-save">
-                  <select
-                    value={bulkCategoryId}
-                    onChange={(event) => setBulkCategoryId(event.target.value)}
-                    disabled={!isPro || !selectedTransactions.length || !selectedType || isBulkSaving}
+            <section className="transactions-tool-console">
+              <div className="transactions-tool-switcher" aria-label="Transaction tool modes">
+                {transactionTools.map((tool) => (
+                  <button
+                    key={tool.id}
+                    className={activeTool === tool.id ? 'is-active' : ''}
+                    type="button"
+                    onClick={() => setActiveTool(tool.id)}
                   >
-                    <option value="">
-                      {!isPro
-                        ? 'Move to Pro to unlock bulk categorize'
-                        : !selectedTransactions.length
-                        ? 'Select transactions first'
-                        : !selectedType
-                          ? 'Single transaction type required'
-                          : 'Choose category'}
-                    </option>
-                    {bulkCategoryOptions.map((category) => (
-                      <option key={category.id} value={String(category.id)}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="button" onClick={isPro ? handleBulkCategorize : () => {}} disabled={!isPro || !selectedTransactions.length || !selectedType || !bulkCategoryId || isBulkSaving}>
-                    {isPro ? (isBulkSaving ? 'Applying...' : 'Apply category') : 'Pro feature'}
+                    <span>{tool.label}</span>
+                    <strong>{tool.metric}</strong>
+                    <small>{tool.note}</small>
                   </button>
-                </div>
+                ))}
+              </div>
 
-                {isPro ? (
-                  <button className="transactions-selection-clear" type="button" onClick={() => setSelectedIds([])} disabled={!selectedTransactions.length}>
-                    Clear selection
-                  </button>
-                ) : (
-                  <button className="transactions-selection-clear" type="button" onClick={() => navigate('/pricing')}>
-                    See Pro
-                  </button>
-                )}
-              </article>
+              <div className="transactions-tool-stage">
+                {activeTool === 'views' ? (
+                  <article className="transactions-power-card">
+                    <div className="transactions-power-head">
+                      <div>
+                        <span>Saved views</span>
+                        <strong>Return to the same ledger slice instantly.</strong>
+                      </div>
+                      <small>{savedViews.length}/6 saved</small>
+                    </div>
 
-              <article className="transactions-power-card">
-                <div className="transactions-power-head">
-                  <div>
-                    <span>AI category review</span>
-                    <strong>{isPro ? 'Generate category suggestions for the selected records.' : 'AI suggestions sit inside Pro so heavier cleanup stays deliberate.'}</strong>
-                  </div>
-                  <small>{aiSuggestions.length ? `${aiSuggestions.length} ready` : 'No suggestions yet'}</small>
-                </div>
+                    <div className="transactions-power-save">
+                      <input
+                        type="text"
+                        placeholder="Quarterly review"
+                        value={savedViewName}
+                        onChange={(event) => setSavedViewName(event.target.value)}
+                        disabled={isManagingViews}
+                      />
+                      <button type="button" onClick={handleSaveView} disabled={isManagingViews}>
+                        {isManagingViews ? 'Saving...' : 'Save current view'}
+                      </button>
+                    </div>
 
-                <div className="transactions-export-card">
-                  <strong>
-                    {selectedTransactions.length
-                      ? `${selectedTransactions.length} selected record${selectedTransactions.length === 1 ? '' : 's'}`
-                      : 'Select ledger rows first'}
-                  </strong>
-                  <p>
-                    {isPro
-                      ? 'Rivo reviews the selected ledger slice on a secure server route, then lets you apply only categories that already exist in this workspace.'
-                      : 'Upgrade to Pro to generate AI category suggestions for the selected transactions.'}
-                  </p>
-                </div>
-
-                <div className="transactions-power-save">
-                  <button type="button" onClick={isPro ? handleGenerateAiSuggestions : () => {}} disabled={!isPro || !selectedTransactions.length || isAiSuggesting || isApplyingAiSuggestions}>
-                    {isAiSuggesting ? 'Generating...' : 'Generate suggestions'}
-                  </button>
-                  <button type="button" onClick={isPro ? handleApplyAiSuggestions : () => {}} disabled={!isPro || !aiSuggestions.length || isApplyingAiSuggestions || isAiSuggesting}>
-                    {isApplyingAiSuggestions ? 'Applying...' : 'Apply matched suggestions'}
-                  </button>
-                </div>
-
-                {aiSuggestions.length ? (
-                  <div className="transactions-view-list">
-                    {aiSuggestions.slice(0, 4).map((suggestion) => {
-                      const targetTransaction = transactions.find((transaction) => transaction.id === suggestion.transactionId);
-
-                      return (
-                        <div className="transactions-view-chip" key={`${suggestion.transactionId}-${suggestion.categoryName}`}>
-                          <button type="button" onClick={() => targetTransaction && setDetailTransaction(targetTransaction)}>
-                            {targetTransaction ? getTransactionTitle(targetTransaction) : `Transaction #${suggestion.transactionId}`}
-                          </button>
-                          <span>
-                            {suggestion.categoryName}
-                            {suggestion.reason ? ` - ${suggestion.reason}` : ''}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                    <div className="transactions-view-list">
+                      {savedViews.length ? (
+                        savedViews.map((view) => (
+                          <div className="transactions-view-chip" key={view.id}>
+                            <button type="button" onClick={() => handleApplyView(view)}>
+                              {view.name}
+                            </button>
+                            <button
+                              className="is-danger"
+                              type="button"
+                              onClick={() => handleDeleteView(view.id)}
+                              disabled={isManagingViews}
+                              aria-label={`Delete ${view.name}`}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="transactions-power-empty">Save a filtered ledger view for month-end review, tax prep, or category cleanup.</p>
+                      )}
+                    </div>
+                  </article>
                 ) : null}
-              </article>
 
-              <article className="transactions-power-card">
-                <div className="transactions-power-head">
-                  <div>
-                    <span>Export</span>
-                    <strong>Take the current view or selection into CSV.</strong>
-                  </div>
-                  <small>{selectedTransactions.length ? 'Selected rows' : 'Current view'}</small>
-                </div>
+                {activeTool === 'bulk' ? (
+                  <article className="transactions-power-card">
+                    <div className="transactions-power-head">
+                      <div>
+                        <span>Bulk categorize</span>
+                        <strong>{isPro ? 'Clean up multiple records without opening each row.' : 'Bulk cleanup sits in Pro for higher-volume transaction work.'}</strong>
+                      </div>
+                      <small>{selectedTransactions.length} selected</small>
+                    </div>
 
-                <div className="transactions-export-card">
-                  <strong>
-                    {selectedTransactions.length
-                      ? `${selectedTransactions.length} selected row${selectedTransactions.length === 1 ? '' : 's'} ready`
-                      : `${visibleTransactions.length} visible row${visibleTransactions.length === 1 ? '' : 's'} ready`}
-                  </strong>
-                  <p>Exports include merchant, category, account, amount, date, status, recurrence, and notes.</p>
-                </div>
+                    <div className="transactions-bulk-status">
+                      <strong>
+                        {selectedTransactions.length
+                          ? isPro
+                            ? selectedType
+                              ? `${selectedTransactions.length} ${selectedType} record${selectedTransactions.length === 1 ? '' : 's'} ready`
+                              : 'Selection mixes income and expense records'
+                            : 'Move to Pro for bulk categorization'
+                          : 'Select rows in the ledger to start'}
+                      </strong>
+                      <p>
+                        {isPro
+                          ? selectedTransactions.length
+                            ? selectedType
+                              ? 'Choose one matching category and apply it to the selected records.'
+                              : 'Use a single transaction type in one selection before applying a bulk category.'
+                            : 'Selection stays scoped to the current visible view.'
+                          : 'Plus keeps export and saved views available. Pro adds bulk categorization for faster cleanup across larger ledgers.'}
+                      </p>
+                    </div>
 
-                <button
-                  className="transactions-export-button"
-                  type="button"
-                  onClick={handleExport}
-                  disabled={isExporting}
-                >
-                  {isExporting ? 'Exporting...' : 'Export CSV'}
-                </button>
-              </article>
+                    <div className="transactions-power-save">
+                      <select
+                        value={bulkCategoryId}
+                        onChange={(event) => setBulkCategoryId(event.target.value)}
+                        disabled={!isPro || !selectedTransactions.length || !selectedType || isBulkSaving}
+                      >
+                        <option value="">
+                          {!isPro
+                            ? 'Move to Pro to unlock bulk categorize'
+                            : !selectedTransactions.length
+                            ? 'Select transactions first'
+                            : !selectedType
+                              ? 'Single transaction type required'
+                              : 'Choose category'}
+                        </option>
+                        {bulkCategoryOptions.map((category) => (
+                          <option key={category.id} value={String(category.id)}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button type="button" onClick={isPro ? handleBulkCategorize : () => {}} disabled={!isPro || !selectedTransactions.length || !selectedType || !bulkCategoryId || isBulkSaving}>
+                        {isPro ? (isBulkSaving ? 'Applying...' : 'Apply category') : 'Pro feature'}
+                      </button>
+                    </div>
+
+                    {isPro ? (
+                      <button className="transactions-selection-clear" type="button" onClick={() => setSelectedIds([])} disabled={!selectedTransactions.length}>
+                        Clear selection
+                      </button>
+                    ) : (
+                      <button className="transactions-selection-clear" type="button" onClick={() => navigate('/pricing')}>
+                        See Pro
+                      </button>
+                    )}
+                  </article>
+                ) : null}
+
+                {activeTool === 'ai' ? (
+                  <article className="transactions-power-card">
+                    <div className="transactions-power-head">
+                      <div>
+                        <span>AI category review</span>
+                        <strong>{isPro ? 'Generate category suggestions for the selected records.' : 'AI suggestions sit inside Pro so heavier cleanup stays deliberate.'}</strong>
+                      </div>
+                      <small>{aiSuggestions.length ? `${aiSuggestions.length} ready` : 'No suggestions yet'}</small>
+                    </div>
+
+                    <div className="transactions-export-card">
+                      <strong>
+                        {selectedTransactions.length
+                          ? `${selectedTransactions.length} selected record${selectedTransactions.length === 1 ? '' : 's'}`
+                          : 'Select ledger rows first'}
+                      </strong>
+                      <p>
+                        {isPro
+                          ? 'Rivo reviews the selected ledger slice on a secure server route, then lets you apply only categories that already exist in this workspace.'
+                          : 'Upgrade to Pro to generate AI category suggestions for the selected transactions.'}
+                      </p>
+                    </div>
+
+                    <div className="transactions-power-save">
+                      <button type="button" onClick={isPro ? handleGenerateAiSuggestions : () => {}} disabled={!isPro || !selectedTransactions.length || isAiSuggesting || isApplyingAiSuggestions}>
+                        {isAiSuggesting ? 'Generating...' : 'Generate suggestions'}
+                      </button>
+                      <button type="button" onClick={isPro ? handleApplyAiSuggestions : () => {}} disabled={!isPro || !aiSuggestions.length || isApplyingAiSuggestions || isAiSuggesting}>
+                        {isApplyingAiSuggestions ? 'Applying...' : 'Apply matched suggestions'}
+                      </button>
+                    </div>
+
+                    {aiSuggestions.length ? (
+                      <div className="transactions-view-list">
+                        {aiSuggestions.slice(0, 4).map((suggestion) => {
+                          const targetTransaction = transactions.find((transaction) => transaction.id === suggestion.transactionId);
+
+                          return (
+                            <div className="transactions-view-chip" key={`${suggestion.transactionId}-${suggestion.categoryName}`}>
+                              <button type="button" onClick={() => targetTransaction && setDetailTransaction(targetTransaction)}>
+                                {targetTransaction ? getTransactionTitle(targetTransaction) : `Transaction #${suggestion.transactionId}`}
+                              </button>
+                              <span>
+                                {suggestion.categoryName}
+                                {suggestion.reason ? ` - ${suggestion.reason}` : ''}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </article>
+                ) : null}
+
+                {activeTool === 'export' ? (
+                  <article className="transactions-power-card">
+                    <div className="transactions-power-head">
+                      <div>
+                        <span>Export</span>
+                        <strong>Take the current view or selection into CSV.</strong>
+                      </div>
+                      <small>{selectedTransactions.length ? 'Selected rows' : 'Current view'}</small>
+                    </div>
+
+                    <div className="transactions-export-card">
+                      <strong>
+                        {selectedTransactions.length
+                          ? `${selectedTransactions.length} selected row${selectedTransactions.length === 1 ? '' : 's'} ready`
+                          : `${visibleTransactions.length} visible row${visibleTransactions.length === 1 ? '' : 's'} ready`}
+                      </strong>
+                      <p>Exports include merchant, category, account, amount, date, status, recurrence, and notes.</p>
+                    </div>
+
+                    <button
+                      className="transactions-export-button"
+                      type="button"
+                      onClick={handleExport}
+                      disabled={isExporting}
+                    >
+                      {isExporting ? 'Exporting...' : 'Export CSV'}
+                    </button>
+                  </article>
+                ) : null}
+              </div>
             </section>
 
             <div className="transactions-power-footer">

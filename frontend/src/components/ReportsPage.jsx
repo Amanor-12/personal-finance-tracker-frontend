@@ -49,10 +49,17 @@ function ReportsPage({ currentUser, onLogout }) {
   const [aiBriefing, setAiBriefing] = useState(null);
   const [aiError, setAiError] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [activeReportMode, setActiveReportMode] = useState('analysis');
 
   const hasReportsAccess = hasFeature('reports');
   const hasForecastingAccess = hasFeature('forecasting');
   const isPro = isProTier(access.tier);
+
+  useEffect(() => {
+    if (!hasForecastingAccess && activeReportMode === 'forecast') {
+      setActiveReportMode('analysis');
+    }
+  }, [activeReportMode, hasForecastingAccess]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -280,6 +287,30 @@ function ReportsPage({ currentUser, onLogout }) {
       helper: rangeDays ? `Average expense burn over ${rangeDays} day${rangeDays === 1 ? '' : 's'}.` : 'Choose a valid reporting range.',
     },
   ];
+  const reportModes = [
+    {
+      id: 'analysis',
+      label: 'Analyze',
+      metric: selectedPresetLabel,
+      note: 'Date range, concentration, and decision summary.',
+    },
+    {
+      id: 'ai',
+      label: 'AI brief',
+      metric: aiBriefing ? 'Ready' : 'Generate',
+      note: 'Turn the selected range into a written readout.',
+    },
+    ...(hasForecastingAccess
+      ? [
+          {
+            id: 'forecast',
+            label: 'Forecast',
+            metric: forecastSummary.riskLevel || 'Projection',
+            note: 'Project the next few months from cash and commitments.',
+          },
+        ]
+      : []),
+  ];
 
   const decisionSupport = useMemo(() => {
     const cards = [];
@@ -471,6 +502,22 @@ function ReportsPage({ currentUser, onLogout }) {
             </div>
           </section>
 
+          <section className="reports-workflow-switcher" aria-label="Insight work modes">
+            {reportModes.map((mode) => (
+              <button
+                key={mode.id}
+                className={activeReportMode === mode.id ? 'is-active' : ''}
+                type="button"
+                onClick={() => setActiveReportMode(mode.id)}
+              >
+                <span>{mode.label}</span>
+                <strong>{mode.metric}</strong>
+                <small>{mode.note}</small>
+              </button>
+            ))}
+          </section>
+
+          {activeReportMode === 'analysis' ? (
           <PremiumPanel eyebrow="Analysis controls" title="Ask a real finance question">
             <section className="reports-command-deck">
                 <div className="reports-command-head">
@@ -523,7 +570,9 @@ function ReportsPage({ currentUser, onLogout }) {
               </div>
             </section>
           </PremiumPanel>
+          ) : null}
 
+          {activeReportMode === 'ai' ? (
           <PremiumPanel eyebrow="AI briefing" title="Generate a narrative read of this range">
             <section className="reports-command-deck">
               <div className="reports-command-head">
@@ -579,8 +628,9 @@ function ReportsPage({ currentUser, onLogout }) {
               ) : null}
             </section>
           </PremiumPanel>
+          ) : null}
 
-          {hasForecastingAccess ? (
+          {activeReportMode === 'forecast' && hasForecastingAccess ? (
             <PremiumPanel eyebrow="Forecast" title="Project the next few months with account-level cash math">
               <section className="reports-command-deck">
                 <div className="reports-command-head">
