@@ -25,6 +25,14 @@ const createPortalSession = asyncHandler(async (req, res) => {
   });
 });
 
+const startProTrial = asyncHandler(async (req, res) => {
+  const billing = await billingService.startProTrial(req.user.id);
+
+  res.status(201).json({
+    billing,
+  });
+});
+
 const handleWebhook = asyncHandler(async (req, res) => {
   const result = await billingService.handleWebhook(req.body, req.headers['stripe-signature']);
 
@@ -36,4 +44,5 @@ module.exports = {
   createPortalSession,
   getSubscriptionOverview,
   handleWebhook,
+  startProTrial,
 };

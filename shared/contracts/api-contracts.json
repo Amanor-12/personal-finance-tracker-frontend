@@ -48,6 +48,30 @@
       "responseFields": ["accepted", "event_id", "request_id"]
     }
   },
+  "billing": {
+    "subscription": {
+      "method": "GET",
+      "path": "/api/billing/subscription",
+      "responseFields": ["billing"]
+    },
+    "proTrial": {
+      "method": "POST",
+      "path": "/api/billing/pro-trial",
+      "responseFields": ["billing"]
+    },
+    "checkout": {
+      "method": "POST",
+      "path": "/api/billing/checkout",
+      "requestFields": ["plan_id", "return_url"],
+      "responseFields": ["session"]
+    },
+    "portal": {
+      "method": "POST",
+      "path": "/api/billing/portal",
+      "requestFields": ["return_url"],
+      "responseFields": ["session"]
+    }
+  },
   "accounts": {
     "bankProviders": {
       "method": "GET",

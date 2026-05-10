@@ -213,6 +213,83 @@ const tests = [
       assert.equal(reconcile.body.message, 'Imported transaction reconciled successfully.');
     },
   },
+  {
+    name: 'pro trial grants temporary pro access and cannot be reused',
+    async run() {
+      const agent = request.agent(app);
+      const email = `pro-trial-${crypto.randomUUID()}@flowledger.dev`;
+      const password = 'TierOnePass123!';
+
+      const register = await agent.post('/api/auth/register').send({
+        name: 'Pro Trial User',
+        email,
+        password,
+      });
+
+      assert.equal(register.statusCode, 201);
+
+      await agent.get('/api/accounts/reconciliation-queue').expect(403);
+
+      const trial = await agent.post('/api/billing/pro-trial').send({}).expect(201);
+      assert.equal(trial.body.billing.access.tier, 'pro');
+      assert.equal(trial.body.billing.subscription.status, 'trialing');
+      assert.ok(new Date(trial.body.billing.subscription.trialEndsAt).getTime() > Date.now());
+
+      await agent.get('/api/accounts/reconciliation-queue').expect(200);
+
+      await pool.query(
+        `
+          UPDATE users
+          SET
+            current_plan_id = 'free',
+            subscription_status = 'none',
+            subscription_current_period_end = NULL,
+            subscription_trial_ends_at = NULL
+          WHERE email = $1
+        `,
+        [email]
+      );
+
+      const reusedTrial = await agent.post('/api/billing/pro-trial').send({}).expect(409);
+      assert.equal(reusedTrial.body.details.code, 'trial_already_used');
+    },
+  },
+  {
+    name: 'expired pro trials close paid feature gates',
+    async run() {
+      const agent = request.agent(app);
+      const email = `expired-trial-${crypto.randomUUID()}@flowledger.dev`;
+      const password = 'TierOnePass123!';
+
+      const register = await agent.post('/api/auth/register').send({
+        name: 'Expired Trial User',
+        email,
+        password,
+      });
+
+      assert.equal(register.statusCode, 201);
+
+      await pool.query(
+        `
+          UPDATE users
+          SET
+            current_plan_id = 'premium_annual',
+            subscription_status = 'trialing',
+            subscription_current_period_end = NOW() - INTERVAL '1 hour',
+            subscription_trial_ends_at = NOW() - INTERVAL '1 hour',
+            pro_trial_started_at = NOW() - INTERVAL '11 days'
+          WHERE email = $1
+        `,
+        [email]
+      );
+
+      const overview = await agent.get('/api/billing/subscription').expect(200);
+      assert.equal(overview.body.billing.access.tier, 'free');
+      assert.equal(overview.body.billing.currentPlan.id, 'free');
+
+      await agent.get('/api/accounts/reconciliation-queue').expect(403);
+    },
+  },
 ];
 
 const run = async () => {

@@ -18,7 +18,7 @@ const requireBillingFeature = (featureKey, featureLabel) => {
       }
 
       return next(
-        new AppError(`Ledgr Premium is required to access ${featureLabel}.`, 403, {
+        new AppError(`Rivo Plus or Pro is required to access ${featureLabel}.`, 403, {
           code: 'feature_locked',
           currentPlanId: access.currentPlanId,
           feature: featureKey,

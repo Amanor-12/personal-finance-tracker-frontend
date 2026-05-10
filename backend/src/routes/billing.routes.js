@@ -11,6 +11,8 @@ router.use(authenticate);
 
 router.get('/subscription', billingController.getSubscriptionOverview);
 
+router.post('/pro-trial', billingController.startProTrial);
+
 router.post(
   '/checkout',
   validate({

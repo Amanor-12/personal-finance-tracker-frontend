@@ -38,6 +38,7 @@ export const billingPlans = [
     suffix: '/ year',
     description: 'The highest-control workspace for heavier finance workflows and AI-assisted review.',
     features: [
+      '10-day free Pro trial',
       'Everything in Plus',
       'Cash forecasting',
       'Bulk transaction categorization',
@@ -106,7 +107,7 @@ export const defaultBillingAccess = {
     budgets: 6,
     goals: 3,
   },
-    upgradePlanId: 'plus_monthly',
+  upgradePlanId: 'plus_monthly',
   usage: {
     accounts: 0,
     budgets: 0,
@@ -115,12 +116,21 @@ export const defaultBillingAccess = {
   },
 };
 
+const isBillingTrialExpired = (billing) => {
+  if (billing?.subscription?.status !== 'trialing' || !billing.subscription.trialEndsAt) {
+    return false;
+  }
+
+  return new Date(billing.subscription.trialEndsAt).getTime() <= Date.now();
+};
+
 const getFallbackAccess = (billing) => {
   const currentPlanId = billing?.currentPlan?.id || 'free';
   const status = billing?.subscription?.status || 'none';
   const hasPaidAccess =
     currentPlanId !== 'free' &&
-    ['active', 'trialing', 'past_due', 'incomplete', 'unpaid'].includes(status);
+    ['active', 'trialing', 'past_due'].includes(status) &&
+    !isBillingTrialExpired(billing);
 
   if (hasPaidAccess) {
     const isPro = currentPlanId === 'pro_annual' || currentPlanId === 'premium_annual';
@@ -156,6 +166,16 @@ const getFallbackAccess = (billing) => {
 };
 
 export const resolveBillingAccess = (billing) => {
+  if (isBillingTrialExpired(billing)) {
+    return {
+      ...defaultBillingAccess,
+      usage: {
+        ...defaultBillingAccess.usage,
+        ...(billing?.access?.usage || {}),
+      },
+    };
+  }
+
   if (billing?.access) {
     const currentPlanId = billing.access.currentPlanId || billing?.currentPlan?.id || defaultBillingAccess.currentPlanId;
     const normalizedTier = normalizeTier(
@@ -240,6 +260,13 @@ export const billingStore = {
     });
 
     return payload.session;
+  },
+  async startProTrial() {
+    const payload = await apiClient.post('/api/billing/pro-trial', {});
+    return {
+      ...payload.billing,
+      access: resolveBillingAccess(payload.billing),
+    };
   },
   async createPortalSession() {
     const payload = await apiClient.post('/api/billing/portal', {

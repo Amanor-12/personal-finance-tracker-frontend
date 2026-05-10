@@ -4,6 +4,8 @@ const pool = require('../config/db');
 const AppError = require('../utils/AppError');
 
 const stripeApiVersion = '2026-02-25.clover';
+const proTrialDays = 10;
+const proTrialPlanId = 'premium_annual';
 
 const plans = [
   {
@@ -35,7 +37,7 @@ const plans = [
   },
 ];
 
-const paidSubscriptionStatuses = new Set(['active', 'trialing', 'past_due', 'incomplete', 'unpaid']);
+const paidSubscriptionStatuses = new Set(['active', 'trialing', 'past_due']);
 const planAccessMatrix = {
   free: {
     tier: 'free',
@@ -162,7 +164,8 @@ const ensureBillingSchema = async () => {
         ADD COLUMN IF NOT EXISTS current_plan_id VARCHAR(80),
         ADD COLUMN IF NOT EXISTS subscription_current_period_end TIMESTAMPTZ,
         ADD COLUMN IF NOT EXISTS subscription_cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE,
-        ADD COLUMN IF NOT EXISTS subscription_trial_ends_at TIMESTAMPTZ
+        ADD COLUMN IF NOT EXISTS subscription_trial_ends_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS pro_trial_started_at TIMESTAMPTZ
       `);
 
       await pool.query(
@@ -210,13 +213,37 @@ const getPlanPriceId = (planId) => {
 const getPlanByPriceId = (priceId) =>
   plans.find((plan) => plan.id !== 'free' && getPlanPriceId(plan.id) === priceId) || plans[0];
 
-const getEffectivePlanId = (currentPlanId, subscriptionStatus) => {
+const toIsoDate = (value) => (value ? new Date(value).toISOString() : null);
+
+const isExpiredTrial = (subscriptionStatus, trialEndsAt, now = new Date()) =>
+  subscriptionStatus === 'trialing' &&
+  trialEndsAt &&
+  new Date(trialEndsAt).getTime() <= now.getTime();
+
+const getEffectivePlanId = (currentPlanId, subscriptionStatus, trialEndsAt = null) => {
+  if (isExpiredTrial(subscriptionStatus, trialEndsAt)) {
+    return 'free';
+  }
+
   if (currentPlanId && currentPlanId !== 'free' && paidSubscriptionStatuses.has(subscriptionStatus)) {
     return currentPlanId;
   }
 
   return 'free';
 };
+
+const isActiveLocalProTrial = (user) =>
+  user.current_plan_id === proTrialPlanId &&
+  user.subscription_status === 'trialing' &&
+  !user.stripe_subscription_id &&
+  !isExpiredTrial(user.subscription_status, user.subscription_trial_ends_at);
+
+const buildTrialState = (user, effectivePlanId = 'free') => ({
+  eligible: !user.pro_trial_started_at && effectivePlanId === 'free',
+  proTrialDays,
+  startedAt: toIsoDate(user.pro_trial_started_at),
+  trialEndsAt: isActiveLocalProTrial(user) ? toIsoDate(user.subscription_trial_ends_at) : null,
+});
 
 const formatMoney = (amountInCents, currency = 'USD') => {
   const normalizedCurrency = String(currency || 'USD').toUpperCase();
@@ -280,7 +307,8 @@ const getBillingUser = async (userId) => {
         current_plan_id,
         subscription_current_period_end,
         subscription_cancel_at_period_end,
-        subscription_trial_ends_at
+        subscription_trial_ends_at,
+        pro_trial_started_at
       FROM users
       WHERE id = $1
     `,
@@ -309,7 +337,8 @@ const getBillingUserByCustomerId = async (customerId) => {
         current_plan_id,
         subscription_current_period_end,
         subscription_cancel_at_period_end,
-        subscription_trial_ends_at
+        subscription_trial_ends_at,
+        pro_trial_started_at
       FROM users
       WHERE stripe_customer_id = $1
       LIMIT 1
@@ -318,6 +347,37 @@ const getBillingUserByCustomerId = async (customerId) => {
   );
 
   return result.rows[0] || null;
+};
+
+const settleExpiredLocalTrial = async (user) => {
+  if (!user || !isExpiredTrial(user.subscription_status, user.subscription_trial_ends_at)) {
+    return user;
+  }
+
+  if (user.stripe_subscription_id) {
+    return user;
+  }
+
+  await pool.query(
+    `
+      UPDATE users
+      SET
+        current_plan_id = 'free',
+        subscription_status = 'none',
+        subscription_current_period_end = NULL,
+        subscription_cancel_at_period_end = FALSE
+      WHERE id = $1
+    `,
+    [user.id]
+  );
+
+  return {
+    ...user,
+    current_plan_id: 'free',
+    subscription_cancel_at_period_end: false,
+    subscription_current_period_end: null,
+    subscription_status: 'none',
+  };
 };
 
 const updateCustomerReference = async (userId, customerId) => {
@@ -522,7 +582,11 @@ const getUsageSnapshot = async (userId) => {
 };
 
 const buildAccessState = async (user) => {
-  const effectivePlanId = getEffectivePlanId(user.current_plan_id, user.subscription_status);
+  const effectivePlanId = getEffectivePlanId(
+    user.current_plan_id,
+    user.subscription_status,
+    user.subscription_trial_ends_at
+  );
   const matrix = planAccessMatrix[effectivePlanId] || planAccessMatrix.free;
   const usage = await getUsageSnapshot(user.id);
 
@@ -532,18 +596,23 @@ const buildAccessState = async (user) => {
     isPremium: effectivePlanId !== 'free',
     limits: matrix.limits,
     tier: matrix.tier || 'free',
-    upgradePlanId: 'premium_monthly',
+    upgradePlanId: effectivePlanId === 'premium_monthly' ? 'premium_annual' : 'premium_monthly',
     usage,
   };
 };
 
 const buildOverview = async (stripe, user, customer = null) => {
   const stripeConfig = getStripeConfig();
+  const localTrialActive = isActiveLocalProTrial(user);
 
   if (!stripe || !customer) {
     const fallbackStatus =
       user.subscription_status || (stripeConfig.configured ? 'none' : 'not_configured');
-    const effectivePlanId = getEffectivePlanId(user.current_plan_id, fallbackStatus);
+    const effectivePlanId = getEffectivePlanId(
+      user.current_plan_id,
+      fallbackStatus,
+      user.subscription_trial_ends_at
+    );
     const currentPlan = plans.find((plan) => plan.id === effectivePlanId) || plans[0];
     const access = await buildAccessState({
       ...user,
@@ -570,16 +639,54 @@ const buildOverview = async (stripe, user, customer = null) => {
       invoices: [],
       plans,
       subscription: {
-        cancelAtPeriodEnd: false,
-        currentPeriodEnd: null,
-        id: null,
+        cancelAtPeriodEnd: user.subscription_cancel_at_period_end || false,
+        currentPeriodEnd: localTrialActive
+          ? toIsoDate(user.subscription_current_period_end || user.subscription_trial_ends_at)
+          : null,
+        id: user.stripe_subscription_id || null,
         status: fallbackStatus,
-        trialEndsAt: null,
+        trialEndsAt: localTrialActive ? toIsoDate(user.subscription_trial_ends_at) : null,
       },
+      trial: buildTrialState(user, effectivePlanId),
     };
   }
 
   const subscription = await getCustomerSubscription(stripe, customer.id);
+
+  if (!subscription && localTrialActive) {
+    const currentPlan = plans.find((plan) => plan.id === proTrialPlanId) || plans[0];
+    const invoices = await listInvoices(stripe, customer.id);
+    const access = await buildAccessState(user);
+
+    return {
+      access,
+      provider: {
+        configured: stripeConfig.configured,
+        missing: stripeConfig.missing,
+        mode: stripeConfig.mode,
+        name: 'stripe',
+      },
+      currentPlan: {
+        id: currentPlan.id,
+        interval: currentPlan.interval,
+        name: currentPlan.name,
+        price: currentPlan.price,
+        priceLabel: currentPlan.priceLabel,
+        status: 'trialing',
+      },
+      invoices,
+      plans,
+      subscription: {
+        cancelAtPeriodEnd: false,
+        currentPeriodEnd: toIsoDate(user.subscription_current_period_end || user.subscription_trial_ends_at),
+        id: null,
+        status: 'trialing',
+        trialEndsAt: toIsoDate(user.subscription_trial_ends_at),
+      },
+      trial: buildTrialState(user, proTrialPlanId),
+    };
+  }
+
   const currentPlan = subscription
     ? getPlanByPriceId(subscription.items.data[0]?.price?.id)
     : plans[0];
@@ -588,6 +695,9 @@ const buildOverview = async (stripe, user, customer = null) => {
     ...user,
     current_plan_id: currentPlan.id,
     subscription_status: subscription?.status || 'none',
+    subscription_trial_ends_at: subscription?.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : null,
   });
 
   await syncSubscriptionRecord(user.id, customer.id, subscription, currentPlan.id);
@@ -617,12 +727,13 @@ const buildOverview = async (stripe, user, customer = null) => {
       status: subscription?.status || 'none',
       trialEndsAt: formatStripeDate(subscription?.trial_end),
     },
+    trial: buildTrialState(user, access.currentPlanId),
   };
 };
 
 const getSubscriptionOverview = async (userId) => {
   const stripeConfig = getStripeConfig();
-  const user = await getBillingUser(userId);
+  const user = await settleExpiredLocalTrial(await getBillingUser(userId));
 
   if (!stripeConfig.secretKey) {
     return buildOverview(null, user, null);
@@ -639,7 +750,7 @@ const getSubscriptionOverview = async (userId) => {
 };
 
 const getBillingAccess = async (userId) => {
-  const user = await getBillingUser(userId);
+  const user = await settleExpiredLocalTrial(await getBillingUser(userId));
   return buildAccessState(user);
 };
 
@@ -709,6 +820,112 @@ const handleWebhook = async (rawBody, signatureHeader) => {
     received: true,
     type: event.type,
   };
+};
+
+const startProTrial = async (userId) => {
+  await ensureBillingSchema();
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const result = await client.query(
+      `
+        SELECT
+          id,
+          name,
+          email,
+          stripe_customer_id,
+          stripe_subscription_id,
+          subscription_status,
+          current_plan_id,
+          subscription_current_period_end,
+          subscription_cancel_at_period_end,
+          subscription_trial_ends_at,
+          pro_trial_started_at
+        FROM users
+        WHERE id = $1
+        FOR UPDATE
+      `,
+      [userId]
+    );
+
+    if (result.rowCount === 0) {
+      throw new AppError('User account could not be found.', 404);
+    }
+
+    let user = result.rows[0];
+
+    if (isExpiredTrial(user.subscription_status, user.subscription_trial_ends_at) && !user.stripe_subscription_id) {
+      await client.query(
+        `
+          UPDATE users
+          SET
+            current_plan_id = 'free',
+            subscription_status = 'none',
+            subscription_current_period_end = NULL,
+            subscription_cancel_at_period_end = FALSE
+          WHERE id = $1
+        `,
+        [user.id]
+      );
+
+      user = {
+        ...user,
+        current_plan_id: 'free',
+        subscription_cancel_at_period_end: false,
+        subscription_current_period_end: null,
+        subscription_status: 'none',
+      };
+    }
+
+    const effectivePlanId = getEffectivePlanId(
+      user.current_plan_id,
+      user.subscription_status,
+      user.subscription_trial_ends_at
+    );
+
+    if (effectivePlanId !== 'free') {
+      throw new AppError('A paid plan or Pro trial is already active for this account.', 409, {
+        code: 'subscription_active',
+        currentPlanId: effectivePlanId,
+      });
+    }
+
+    if (user.pro_trial_started_at) {
+      throw new AppError('The free Pro trial has already been used for this account.', 409, {
+        code: 'trial_already_used',
+        trialStartedAt: toIsoDate(user.pro_trial_started_at),
+      });
+    }
+
+    const trialStartedAt = new Date();
+    const trialEndsAt = new Date(trialStartedAt.getTime() + proTrialDays * 24 * 60 * 60 * 1000);
+
+    await client.query(
+      `
+        UPDATE users
+        SET
+          current_plan_id = $1,
+          subscription_status = 'trialing',
+          subscription_current_period_end = $2,
+          subscription_cancel_at_period_end = FALSE,
+          subscription_trial_ends_at = $2,
+          pro_trial_started_at = $3
+        WHERE id = $4
+      `,
+      [proTrialPlanId, trialEndsAt, trialStartedAt, user.id]
+    );
+
+    await client.query('COMMIT');
+    return getSubscriptionOverview(user.id);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 const createCheckoutSession = async (payload, currentUser) => {
@@ -804,5 +1021,6 @@ module.exports = {
   getBillingAccess,
   getSubscriptionOverview,
   handleWebhook,
+  startProTrial,
 };
 

@@ -83,13 +83,18 @@ const pricingFaq = [
     answer: 'Plus is for active manual money management: recurring bills, exports, reporting, saved views, and AI report briefings. Pro adds cash forecasting, bulk ledger tools, AI transaction review, expanded milestone guidance, and annual billing savings.',
   },
   {
+    question: 'Can I try Pro before paying?',
+    answer: 'Yes. Signed-in users can start one free 10-day Pro trial. After it expires, paid gates close again unless a Pro subscription is active.',
+  },
+  {
     question: 'Do I lose data if I upgrade later?',
     answer: 'No. Your accounts, transactions, budgets, and goals stay in the same workspace when you move between plans.',
   },
 ];
 
-function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }) {
+function PricingCard({ currentUser, isFeatured, isProcessing, isTrialProcessing, onCheckout, onStartTrial, plan }) {
   const isFree = plan.id === 'free';
+  const isPro = plan.id === 'pro_annual';
 
   return (
     <article className={`pricing-card${isFeatured ? ' is-featured' : ''}`}>
@@ -116,9 +121,21 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
           {currentUser ? 'Open workspace' : 'Start free'}
         </Link>
       ) : currentUser ? (
-        <button className="pricing-primary-button" type="button" disabled={isProcessing} onClick={() => onCheckout(plan.id)}>
-          {isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
-        </button>
+        <div className="pricing-plan-actions">
+          {isPro ? (
+            <button className="pricing-primary-button" type="button" disabled={isTrialProcessing} onClick={onStartTrial}>
+              {isTrialProcessing ? 'Starting trial...' : 'Start 10-day free trial'}
+            </button>
+          ) : null}
+          <button
+            className={isPro ? 'pricing-secondary-button' : 'pricing-primary-button'}
+            type="button"
+            disabled={isProcessing}
+            onClick={() => onCheckout(plan.id)}
+          >
+            {isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
+          </button>
+        </div>
       ) : (
         <Link className="pricing-primary-button" to="/signup">
           Create account
@@ -130,6 +147,7 @@ function PricingCard({ currentUser, isFeatured, isProcessing, onCheckout, plan }
 
 function PricingPage({ currentUser }) {
   const navigate = useNavigate();
+  const [isTrialProcessing, setIsTrialProcessing] = useState(false);
   const [processingPlanId, setProcessingPlanId] = useState('');
   const [message, setMessage] = useState('');
 
@@ -154,6 +172,20 @@ function PricingPage({ currentUser }) {
       setMessage(error.message || 'Checkout could not start.');
     } finally {
       setProcessingPlanId('');
+    }
+  };
+
+  const handleStartTrial = async () => {
+    setIsTrialProcessing(true);
+    setMessage('');
+
+    try {
+      await billingStore.startProTrial();
+      navigate('/billing');
+    } catch (error) {
+      setMessage(error.message || 'The Pro trial could not start.');
+    } finally {
+      setIsTrialProcessing(false);
     }
   };
 
@@ -193,7 +225,9 @@ function PricingPage({ currentUser }) {
             currentUser={currentUser}
             isFeatured={plan.id !== 'free'}
             isProcessing={processingPlanId === plan.id}
+            isTrialProcessing={isTrialProcessing && plan.id === 'pro_annual'}
             onCheckout={handleCheckout}
+            onStartTrial={handleStartTrial}
             plan={plan}
           />
         ))}

@@ -9,6 +9,7 @@ const readRouteFile = (fileName) =>
 
 const authRoutes = readRouteFile('auth.routes.js');
 const accountRoutes = readRouteFile('account.routes.js');
+const billingRoutes = readRouteFile('billing.routes.js');
 const observabilityRoutes = readRouteFile('observability.routes.js');
 
 const stripPrefix = (fullPath, prefix) => fullPath.replace(prefix, '');
@@ -37,5 +38,10 @@ assert.ok(
     stripPrefix(contracts.observability.frontendErrorReport.path, '/api/observability')
   )
 );
+
+assert.ok(billingRoutes.includes(stripPrefix(contracts.billing.subscription.path, '/api/billing')));
+assert.ok(billingRoutes.includes(stripPrefix(contracts.billing.proTrial.path, '/api/billing')));
+assert.ok(billingRoutes.includes(stripPrefix(contracts.billing.checkout.path, '/api/billing')));
+assert.ok(billingRoutes.includes(stripPrefix(contracts.billing.portal.path, '/api/billing')));
 
 console.log(`Contracts validated against route definitions (${contracts.version}).`);

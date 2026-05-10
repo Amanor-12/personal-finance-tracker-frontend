@@ -26,10 +26,23 @@ function BillingSkeleton() {
   );
 }
 
-function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout, onManageCurrentPlan, plan, recommendedPlanId }) {
+function BillingPlanCard({
+  currentPlanId,
+  isAvailable,
+  isProcessing,
+  isTrialProcessing,
+  onCheckout,
+  onManageCurrentPlan,
+  onStartTrial,
+  plan,
+  recommendedPlanId,
+  trial,
+}) {
   const isCurrent = currentPlanId === plan.id || currentPlanId === plan.checkoutPlanId;
   const isFree = plan.id === 'free';
+  const isPro = plan.id === 'pro_annual' || plan.checkoutPlanId === 'premium_annual';
   const isRecommended = plan.id === recommendedPlanId;
+  const canStartTrial = isPro && !isCurrent && trial?.eligible;
 
   return (
     <article className={`billing-plan-card${isCurrent ? ' is-current' : ''}`}>
@@ -64,9 +77,21 @@ function BillingPlanCard({ currentPlanId, isAvailable, isProcessing, onCheckout,
           Keep Free
         </Link>
       ) : (
-        <button className="billing-primary-action" type="button" disabled={isProcessing || !isAvailable} onClick={() => onCheckout(plan.id)}>
-          {!isAvailable ? 'Billing unavailable' : isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
-        </button>
+        <div className="billing-plan-actions">
+          {canStartTrial ? (
+            <button className="billing-primary-action" type="button" disabled={isTrialProcessing} onClick={onStartTrial}>
+              {isTrialProcessing ? 'Starting trial...' : 'Start 10-day free trial'}
+            </button>
+          ) : null}
+          <button
+            className={canStartTrial ? 'billing-secondary-action' : 'billing-primary-action'}
+            type="button"
+            disabled={isProcessing || !isAvailable}
+            onClick={() => onCheckout(plan.id)}
+          >
+            {!isAvailable ? 'Billing unavailable' : isProcessing ? 'Starting checkout...' : `Choose ${plan.name}`}
+          </button>
+        </div>
       )}
     </article>
   );
@@ -77,6 +102,7 @@ function BillingPage({ currentUser, onLogout }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [actionMessage, setActionMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [processingPlanId, setProcessingPlanId] = useState('');
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const { isLoading: isCapabilitiesLoading, supports } = useServiceCapabilities();
@@ -130,6 +156,7 @@ function BillingPage({ currentUser, onLogout }) {
   const stripeConfigured = Boolean(billing?.provider?.configured);
   const activeTier = billing?.access?.tier || 'free';
   const currentPlanId = billing?.currentPlan?.id || 'free';
+  const isProTrial = activeTier === 'pro' && status === 'trialing';
   const recommendedPlanId = activeTier === 'free' ? 'plus_monthly' : activeTier === 'plus' ? 'pro_annual' : '';
   const tierHighlights =
     activeTier === 'pro'
@@ -175,6 +202,26 @@ function BillingPage({ currentUser, onLogout }) {
       setActionMessage(error.message || 'Billing portal could not open.');
     } finally {
       setIsOpeningPortal(false);
+    }
+  };
+
+  const handleStartTrial = async () => {
+    setIsStartingTrial(true);
+    setActionMessage('');
+
+    try {
+      const overview = await billingStore.startProTrial();
+      setBilling(overview);
+      setActionMessage('Your 10-day Pro trial is active. Paid gates are unlocked only until the trial expires.');
+    } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
+      setActionMessage(error.message || 'The Pro trial could not start.');
+    } finally {
+      setIsStartingTrial(false);
     }
   };
 
@@ -230,7 +277,11 @@ function BillingPage({ currentUser, onLogout }) {
         <div className="billing-status-card">
           <span>Status</span>
           <strong>{statusLabel}</strong>
-          <p>Renewal: {formatDate(billing?.subscription?.currentPeriodEnd)}</p>
+          <p>
+            {isProTrial
+              ? `Trial ends: ${formatDate(billing?.subscription?.trialEndsAt)}`
+              : `Renewal: ${formatDate(billing?.subscription?.currentPeriodEnd)}`}
+          </p>
         </div>
       </section>
 
@@ -311,10 +362,13 @@ function BillingPage({ currentUser, onLogout }) {
                 currentPlanId={currentPlanId}
                 isAvailable={stripeConfigured}
                 isProcessing={processingPlanId === plan.id || (isOpeningPortal && currentPlanId === plan.id)}
+                isTrialProcessing={isStartingTrial && plan.id === 'pro_annual'}
                 onCheckout={handleCheckout}
                 onManageCurrentPlan={handlePortal}
+                onStartTrial={handleStartTrial}
                 plan={plan}
                 recommendedPlanId={recommendedPlanId}
+                trial={billing?.trial}
               />
             ))}
           </section>
