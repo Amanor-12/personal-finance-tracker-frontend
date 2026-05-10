@@ -1,11 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import BrandLogo from './BrandLogo';
 import { accountStore } from '../utils/accountStore';
 import { settingsStore } from '../utils/settingsStore';
+import { useManagedForm } from '../utils/useManagedForm';
 
 const steps = [
   { id: 'welcome', label: 'Welcome' },
@@ -15,20 +13,62 @@ const steps = [
   { id: 'finish', label: 'Finish' },
 ];
 
-const preferenceSchema = z.object({
-  currency: z.enum(['USD', 'CAD', 'GBP', 'EUR']),
-  weekStart: z.enum(['Monday', 'Sunday']),
-  workspaceName: z.string().trim().min(2, 'Workspace name must be at least 2 characters.').max(80),
-});
+const onboardingCurrencyOptions = ['USD', 'CAD', 'GBP', 'EUR'];
+const onboardingWeekStartOptions = ['Monday', 'Sunday'];
+const onboardingAccountTypeOptions = ['checking', 'savings', 'credit_card', 'cash', 'investment', 'other'];
 
-const accountSchema = z.object({
-  accountType: z.enum(['checking', 'savings', 'credit_card', 'cash', 'investment', 'other']),
-  currency: z.string().trim().regex(/^[A-Z]{3}$/, 'Use a 3-letter currency code.'),
-  institutionName: z.string().trim().max(120, 'Keep institution under 120 characters.').optional(),
-  isPrimary: z.boolean(),
-  name: z.string().trim().min(2, 'Account name is required.').max(120),
-  openingBalance: z.coerce.number().min(0, 'Opening balance cannot be negative.'),
-});
+const validatePreferenceForm = (values) => {
+  const errors = {};
+  const workspaceName = String(values.workspaceName || '').trim();
+
+  if (workspaceName.length < 2) {
+    errors.workspaceName = 'Workspace name must be at least 2 characters.';
+  } else if (workspaceName.length > 80) {
+    errors.workspaceName = 'Keep workspace under 80 characters.';
+  }
+
+  if (!onboardingCurrencyOptions.includes(values.currency)) {
+    errors.currency = 'Choose a supported currency.';
+  }
+
+  if (!onboardingWeekStartOptions.includes(values.weekStart)) {
+    errors.weekStart = 'Choose a supported week start.';
+  }
+
+  return errors;
+};
+
+const validateAccountForm = (values) => {
+  const errors = {};
+  const name = String(values.name || '').trim();
+  const institutionName = String(values.institutionName || '').trim();
+  const currency = String(values.currency || '').trim().toUpperCase();
+  const openingBalance = Number(values.openingBalance);
+
+  if (name.length < 2) {
+    errors.name = 'Account name is required.';
+  } else if (name.length > 120) {
+    errors.name = 'Keep account name under 120 characters.';
+  }
+
+  if (!onboardingAccountTypeOptions.includes(values.accountType)) {
+    errors.accountType = 'Choose a supported account type.';
+  }
+
+  if (!Number.isFinite(openingBalance) || openingBalance < 0) {
+    errors.openingBalance = 'Opening balance cannot be negative.';
+  }
+
+  if (!/^[A-Z]{3}$/.test(currency)) {
+    errors.currency = 'Use a 3-letter currency code.';
+  }
+
+  if (institutionName.length > 120) {
+    errors.institutionName = 'Keep institution under 120 characters.';
+  }
+
+  return errors;
+};
 
 function OnboardingFieldError({ message }) {
   if (!message) {
@@ -49,15 +89,15 @@ function OnboardingPage({ currentUser, onLogout }) {
   const [isSavingAccount, setIsSavingAccount] = useState(false);
   const [isSyncingSettings, setIsSyncingSettings] = useState(false);
 
-  const preferenceForm = useForm({
+  const preferenceForm = useManagedForm({
     defaultValues: {
       currency: storedSettings.currency,
       weekStart: storedSettings.weekStart,
       workspaceName: storedSettings.workspaceName,
     },
-    resolver: zodResolver(preferenceSchema),
+    validate: validatePreferenceForm,
   });
-  const accountForm = useForm({
+  const accountForm = useManagedForm({
     defaultValues: {
       accountType: 'checking',
       currency: storedSettings.currency,
@@ -66,8 +106,10 @@ function OnboardingPage({ currentUser, onLogout }) {
       name: '',
       openingBalance: 0,
     },
-    resolver: zodResolver(accountSchema),
+    validate: validateAccountForm,
   });
+  const { reset: resetPreferenceForm } = preferenceForm;
+  const { reset: resetAccountForm } = accountForm;
 
   const activeStep = steps[activeIndex];
   const progress = Math.round(((activeIndex + 1) / steps.length) * 100);
@@ -89,12 +131,12 @@ function OnboardingPage({ currentUser, onLogout }) {
           return;
         }
 
-        preferenceForm.reset({
+        resetPreferenceForm({
           currency: nextSettings.currency,
           weekStart: nextSettings.weekStart,
           workspaceName: nextSettings.workspaceName,
         });
-        accountForm.reset({
+        resetAccountForm({
           accountType: 'checking',
           currency: nextSettings.currency,
           institutionName: '',
@@ -118,7 +160,7 @@ function OnboardingPage({ currentUser, onLogout }) {
     return () => {
       isCancelled = true;
     };
-  }, [accountForm, currentUser?.fullName, currentUser?.id, preferenceForm]);
+  }, [currentUser?.fullName, currentUser?.id, resetAccountForm, resetPreferenceForm]);
 
   const goNext = () => {
     setMessage('');
@@ -137,7 +179,14 @@ function OnboardingPage({ currentUser, onLogout }) {
   };
 
   const handlePreferences = async (values) => {
-    await settingsStore.saveRemoteSettings(currentUser.id, values, currentUser.fullName);
+    await settingsStore.saveRemoteSettings(
+      currentUser.id,
+      {
+        ...values,
+        workspaceName: String(values.workspaceName || '').trim(),
+      },
+      currentUser.fullName
+    );
     goNext();
   };
 
@@ -148,8 +197,12 @@ function OnboardingPage({ currentUser, onLogout }) {
     try {
       const account = await accountStore.saveAccount(currentUser.id, {
         ...values,
+        currency: String(values.currency || '').trim().toUpperCase(),
+        institutionName: String(values.institutionName || '').trim(),
         maskedIdentifier: '',
+        name: String(values.name || '').trim(),
         notes: 'Created during onboarding.',
+        openingBalance: Number(values.openingBalance) || 0,
       });
       setCreatedAccountName(account.name);
       goNext();
@@ -240,7 +293,7 @@ function OnboardingPage({ currentUser, onLogout }) {
                 <label className="onboarding-field onboarding-field-wide">
                   <span>Workspace name</span>
                   <input type="text" {...preferenceForm.register('workspaceName')} />
-                  <OnboardingFieldError message={preferenceForm.formState.errors.workspaceName?.message} />
+                  <OnboardingFieldError message={preferenceForm.errors.workspaceName} />
                 </label>
 
                 <label className="onboarding-field">
@@ -283,7 +336,7 @@ function OnboardingPage({ currentUser, onLogout }) {
                 <label className="onboarding-field">
                   <span>Account name</span>
                   <input type="text" placeholder="Everyday checking" {...accountForm.register('name')} disabled={isSavingAccount} />
-                  <OnboardingFieldError message={accountForm.formState.errors.name?.message} />
+                  <OnboardingFieldError message={accountForm.errors.name} />
                 </label>
 
                 <label className="onboarding-field">
@@ -301,13 +354,13 @@ function OnboardingPage({ currentUser, onLogout }) {
                 <label className="onboarding-field">
                   <span>Opening balance</span>
                   <input type="number" min="0" step="0.01" {...accountForm.register('openingBalance')} disabled={isSavingAccount} />
-                  <OnboardingFieldError message={accountForm.formState.errors.openingBalance?.message} />
+                  <OnboardingFieldError message={accountForm.errors.openingBalance} />
                 </label>
 
                 <label className="onboarding-field">
                   <span>Currency</span>
                   <input type="text" maxLength="3" {...accountForm.register('currency')} disabled={isSavingAccount} />
-                  <OnboardingFieldError message={accountForm.formState.errors.currency?.message} />
+                  <OnboardingFieldError message={accountForm.errors.currency} />
                 </label>
 
                 <label className="onboarding-field onboarding-field-wide">

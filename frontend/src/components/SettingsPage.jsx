@@ -1,8 +1,5 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { z } from 'zod';
 import { useServiceCapabilities } from '../context/useServiceCapabilities';
 import { useBillingAccess } from '../context/useBillingAccess';
 import FinanceLayout from './FinanceLayout';
@@ -11,6 +8,7 @@ import { authStore } from '../utils/authStore';
 import { financeStore } from '../utils/financeStore';
 import { settingsStore } from '../utils/settingsStore';
 import { getTierLabel, isPlusTier, isProTier } from '../utils/tierAccess';
+import { useManagedForm } from '../utils/useManagedForm';
 
 const currencyOptions = ['USD', 'CAD', 'GBP', 'EUR'];
 const weekStartOptions = ['Monday', 'Sunday'];
@@ -25,43 +23,87 @@ const baseSettingsSections = [
   { id: 'data', label: 'Data', note: 'Export and deletion' },
 ];
 
-const profileSchema = z.object({
-  email: z.string().trim().email('Enter a valid email address.'),
-  fullName: z.string().trim().min(2, 'Name must be at least 2 characters.').max(120, 'Keep name under 120 characters.'),
-  workspaceName: z.string().trim().min(2, 'Workspace name must be at least 2 characters.').max(80, 'Keep workspace under 80 characters.'),
-});
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 
-const preferencesSchema = z.object({
-  amountView: z.enum(['Compact', 'Detailed']),
-  currency: z.enum(['USD', 'CAD', 'GBP', 'EUR']),
-  weekStart: z.enum(['Monday', 'Sunday']),
-});
+const validateProfileForm = (values) => {
+  const errors = {};
+  const fullName = String(values.fullName || '').trim();
+  const email = String(values.email || '').trim();
+  const workspaceName = String(values.workspaceName || '').trim();
 
-const notificationSchema = z.object({
-  loginAlerts: z.boolean(),
-  paymentReminders: z.boolean(),
-  weeklySummary: z.boolean(),
-});
+  if (fullName.length < 2) {
+    errors.fullName = 'Name must be at least 2 characters.';
+  } else if (fullName.length > 120) {
+    errors.fullName = 'Keep name under 120 characters.';
+  }
 
-const passwordSchema = z
-  .object({
-    confirmPassword: z.string().min(8, 'Confirm the new password.'),
-    currentPassword: z.string().min(1, 'Current password is required.'),
-    newPassword: z.string().min(8, 'Use at least 8 characters.').max(72, 'Keep password under 72 characters.'),
-  })
-  .superRefine((values, context) => {
-    if (values.newPassword !== values.confirmPassword) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Passwords do not match.',
-        path: ['confirmPassword'],
-      });
-    }
-  });
+  if (!isValidEmail(email)) {
+    errors.email = 'Enter a valid email address.';
+  }
 
-const deleteAccountSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required to delete the account.'),
-});
+  if (workspaceName.length < 2) {
+    errors.workspaceName = 'Workspace name must be at least 2 characters.';
+  } else if (workspaceName.length > 80) {
+    errors.workspaceName = 'Keep workspace under 80 characters.';
+  }
+
+  return errors;
+};
+
+const validatePreferencesForm = (values) => {
+  const errors = {};
+
+  if (!currencyOptions.includes(values.currency)) {
+    errors.currency = 'Choose a supported currency.';
+  }
+
+  if (!weekStartOptions.includes(values.weekStart)) {
+    errors.weekStart = 'Choose a supported week start.';
+  }
+
+  if (!amountViewOptions.includes(values.amountView)) {
+    errors.amountView = 'Choose a supported amount view.';
+  }
+
+  return errors;
+};
+
+const validateNotificationsForm = () => ({});
+
+const validatePasswordForm = (values) => {
+  const errors = {};
+  const currentPassword = String(values.currentPassword || '');
+  const newPassword = String(values.newPassword || '');
+  const confirmPassword = String(values.confirmPassword || '');
+
+  if (!currentPassword) {
+    errors.currentPassword = 'Current password is required.';
+  }
+
+  if (newPassword.length < 8) {
+    errors.newPassword = 'Use at least 8 characters.';
+  } else if (newPassword.length > 72) {
+    errors.newPassword = 'Keep password under 72 characters.';
+  }
+
+  if (confirmPassword.length < 8) {
+    errors.confirmPassword = 'Confirm the new password.';
+  } else if (newPassword !== confirmPassword) {
+    errors.confirmPassword = 'Passwords do not match.';
+  }
+
+  return errors;
+};
+
+const validateDeleteAccountForm = (values) => {
+  if (!String(values.currentPassword || '')) {
+    return {
+      currentPassword: 'Current password is required to delete the account.',
+    };
+  }
+
+  return {};
+};
 
 const emptyMfaStatus = {
   enabled: false,
@@ -131,6 +173,13 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   const { tier } = useBillingAccess();
   const { isLoading: isCapabilitiesLoading, supports } = useServiceCapabilities();
   const storedSettings = settingsStore.getSettingsForUser(currentUser?.id, currentUser?.fullName);
+  const storedAmountView = storedSettings.amountView;
+  const storedCurrency = storedSettings.currency;
+  const storedLoginAlerts = storedSettings.loginAlerts;
+  const storedPaymentReminders = storedSettings.paymentReminders;
+  const storedWeeklySummary = storedSettings.weeklySummary;
+  const storedWeekStart = storedSettings.weekStart;
+  const storedWorkspaceName = storedSettings.workspaceName;
   const [activeSection, setActiveSection] = useState('profile');
   const [workspaceStats, setWorkspaceStats] = useState({
     accounts: 0,
@@ -174,45 +223,48 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   const [isRegeneratingMfaBackupCodes, setIsRegeneratingMfaBackupCodes] = useState(false);
   const [sessions, setSessions] = useState([]);
 
-  const profileForm = useForm({
+  const profileForm = useManagedForm({
     defaultValues: {
       email: currentUser?.email || '',
       fullName: currentUser?.fullName || '',
-      workspaceName: storedSettings.workspaceName,
+      workspaceName: storedWorkspaceName,
     },
-    resolver: zodResolver(profileSchema),
+    validate: validateProfileForm,
   });
-  const preferencesForm = useForm({
+  const preferencesForm = useManagedForm({
     defaultValues: {
-      amountView: storedSettings.amountView,
-      currency: storedSettings.currency,
-      weekStart: storedSettings.weekStart,
+      amountView: storedAmountView,
+      currency: storedCurrency,
+      weekStart: storedWeekStart,
     },
-    resolver: zodResolver(preferencesSchema),
+    validate: validatePreferencesForm,
   });
-  const notificationForm = useForm({
+  const notificationForm = useManagedForm({
     defaultValues: {
-      loginAlerts: storedSettings.loginAlerts,
-      paymentReminders: storedSettings.paymentReminders,
-      weeklySummary: storedSettings.weeklySummary,
+      loginAlerts: storedLoginAlerts,
+      paymentReminders: storedPaymentReminders,
+      weeklySummary: storedWeeklySummary,
     },
-    resolver: zodResolver(notificationSchema),
+    validate: validateNotificationsForm,
   });
-  const passwordForm = useForm({
+  const passwordForm = useManagedForm({
     defaultValues: {
       confirmPassword: '',
       currentPassword: '',
       newPassword: '',
     },
-    resolver: zodResolver(passwordSchema),
+    validate: validatePasswordForm,
   });
-  const deleteAccountForm = useForm({
+  const deleteAccountForm = useManagedForm({
     defaultValues: {
       currentPassword: '',
     },
-    resolver: zodResolver(deleteAccountSchema),
+    validate: validateDeleteAccountForm,
   });
-  const notificationValues = notificationForm.watch();
+  const notificationValues = notificationForm.values;
+  const { reset: resetProfileForm } = profileForm;
+  const { reset: resetPreferencesForm } = preferencesForm;
+  const { reset: resetNotificationForm } = notificationForm;
   const supportsAccountProfile = supports('auth.profile');
   const supportsPreferences = supports('auth.preferences');
   const supportsPasswordUpdate = supports('auth.password');
@@ -311,22 +363,35 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   }, [activeSection, settingsSections]);
 
   useEffect(() => {
-    profileForm.reset({
+    resetProfileForm({
       email: currentUser?.email || '',
       fullName: currentUser?.fullName || '',
-      workspaceName: storedSettings.workspaceName,
+      workspaceName: storedWorkspaceName,
     });
-    preferencesForm.reset({
-      amountView: storedSettings.amountView,
-      currency: storedSettings.currency,
-      weekStart: storedSettings.weekStart,
+    resetPreferencesForm({
+      amountView: storedAmountView,
+      currency: storedCurrency,
+      weekStart: storedWeekStart,
     });
-    notificationForm.reset({
-      loginAlerts: storedSettings.loginAlerts,
-      paymentReminders: storedSettings.paymentReminders,
-      weeklySummary: storedSettings.weeklySummary,
+    resetNotificationForm({
+      loginAlerts: storedLoginAlerts,
+      paymentReminders: storedPaymentReminders,
+      weeklySummary: storedWeeklySummary,
     });
-  }, [currentUser?.email, currentUser?.fullName, notificationForm, preferencesForm, profileForm, storedSettings]);
+  }, [
+    currentUser?.email,
+    currentUser?.fullName,
+    resetNotificationForm,
+    resetPreferencesForm,
+    resetProfileForm,
+    storedAmountView,
+    storedCurrency,
+    storedLoginAlerts,
+    storedPaymentReminders,
+    storedWeeklySummary,
+    storedWeekStart,
+    storedWorkspaceName,
+  ]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -345,17 +410,17 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
           return;
         }
 
-        profileForm.reset({
+        resetProfileForm({
           email: currentUser?.email || '',
           fullName: currentUser?.fullName || '',
           workspaceName: nextSettings.workspaceName,
         });
-        preferencesForm.reset({
+        resetPreferencesForm({
           amountView: nextSettings.amountView,
           currency: nextSettings.currency,
           weekStart: nextSettings.weekStart,
         });
-        notificationForm.reset({
+        resetNotificationForm({
           loginAlerts: nextSettings.loginAlerts,
           paymentReminders: nextSettings.paymentReminders,
           weeklySummary: nextSettings.weeklySummary,
@@ -376,7 +441,14 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser?.email, currentUser?.fullName, currentUser?.id, notificationForm, preferencesForm, profileForm]);
+  }, [
+    currentUser?.email,
+    currentUser?.fullName,
+    currentUser?.id,
+    resetNotificationForm,
+    resetPreferencesForm,
+    resetProfileForm,
+  ]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -594,7 +666,11 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       });
       const nextSessions = await authStore.getSessions();
       setSessions(nextSessions);
-      passwordForm.reset();
+      passwordForm.reset({
+        confirmPassword: '',
+        currentPassword: '',
+        newPassword: '',
+      });
       setSecurityMessage('Password updated. Other sessions were revoked and the current device was rotated onto a fresh session.');
     } catch (error) {
       setSecurityMessage(error.message || 'Password could not be updated.');
@@ -771,7 +847,9 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       await authStore.deleteAccount({
         currentPassword: values.currentPassword,
       });
-      deleteAccountForm.reset();
+      deleteAccountForm.reset({
+        currentPassword: '',
+      });
       await onLogout();
     } catch (error) {
       setDeleteAccountMessage(error.message || 'Account could not be deleted.');
@@ -885,17 +963,17 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                   <label className="settings-field">
                     <span>Full name</span>
                     <input type="text" {...profileForm.register('fullName')} disabled={isSavingProfile} />
-                    <FieldError message={profileForm.formState.errors.fullName?.message} />
+                    <FieldError message={profileForm.errors.fullName} />
                   </label>
                   <label className="settings-field">
                     <span>Email</span>
                     <input type="email" {...profileForm.register('email')} disabled={isSavingProfile} />
-                    <FieldError message={profileForm.formState.errors.email?.message} />
+                    <FieldError message={profileForm.errors.email} />
                   </label>
                   <label className="settings-field settings-field-wide">
                     <span>Workspace name</span>
                     <input type="text" {...profileForm.register('workspaceName')} disabled={isSavingProfile} />
-                    <FieldError message={profileForm.formState.errors.workspaceName?.message} />
+                    <FieldError message={profileForm.errors.workspaceName} />
                   </label>
                 </div>
                 <button className="settings-save-button" type="submit" disabled={isSavingProfile}>
@@ -1074,7 +1152,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                         {...passwordForm.register('currentPassword')}
                         disabled={isSavingPassword}
                       />
-                      <FieldError message={passwordForm.formState.errors.currentPassword?.message} />
+                      <FieldError message={passwordForm.errors.currentPassword} />
                     </label>
                     <label className="settings-field">
                       <span>New password</span>
@@ -1084,7 +1162,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                         {...passwordForm.register('newPassword')}
                         disabled={isSavingPassword}
                       />
-                      <FieldError message={passwordForm.formState.errors.newPassword?.message} />
+                      <FieldError message={passwordForm.errors.newPassword} />
                     </label>
                     <label className="settings-field">
                       <span>Confirm password</span>
@@ -1094,7 +1172,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                         {...passwordForm.register('confirmPassword')}
                         disabled={isSavingPassword}
                       />
-                      <FieldError message={passwordForm.formState.errors.confirmPassword?.message} />
+                      <FieldError message={passwordForm.errors.confirmPassword} />
                     </label>
                   </div>
                   <button className="settings-save-button" type="submit" disabled={isSavingPassword}>
@@ -1499,7 +1577,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                       {...deleteAccountForm.register('currentPassword')}
                       disabled={isDeletingAccount}
                     />
-                    <FieldError message={deleteAccountForm.formState.errors.currentPassword?.message} />
+                    <FieldError message={deleteAccountForm.errors.currentPassword} />
                   </label>
                   <button className="settings-danger-button" type="submit" disabled={isDeletingAccount}>
                     {isDeletingAccount ? 'Deleting...' : 'Delete account permanently'}
