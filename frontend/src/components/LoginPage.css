@@ -1656,3 +1656,573 @@
     font-size: 0.88rem;
   }
 }
+
+/* Motion design system */
+.authx-page {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.authx-page::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  z-index: -3;
+  background:
+    conic-gradient(from 210deg at 62% 38%, rgba(32, 183, 176, 0.18), transparent 18%, rgba(38, 84, 232, 0.16), transparent 48%, rgba(245, 156, 19, 0.12), transparent 72%),
+    radial-gradient(circle at 28% 18%, rgba(17, 27, 66, 0.08), transparent 32%);
+  filter: blur(20px);
+  animation: authxAtmosphereDrift 22s ease-in-out infinite alternate;
+}
+
+.authx-shell {
+  position: relative;
+  z-index: 1;
+  transform-origin: 50% 58%;
+  animation: authxShellEnter 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-ambient-system {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.authx-ambient-orb,
+.authx-ambient-grid {
+  position: absolute;
+  display: block;
+}
+
+.authx-ambient-orb {
+  width: 32vw;
+  height: 32vw;
+  min-width: 260px;
+  min-height: 260px;
+  border-radius: 50%;
+  opacity: 0.62;
+  filter: blur(26px);
+  mix-blend-mode: multiply;
+  animation: authxOrbFloat 18s ease-in-out infinite;
+}
+
+.authx-ambient-orb-one {
+  top: -9%;
+  left: -7%;
+  background: rgba(38, 84, 232, 0.2);
+}
+
+.authx-ambient-orb-two {
+  right: -8%;
+  bottom: 4%;
+  background: rgba(32, 183, 176, 0.2);
+  animation-delay: -6s;
+}
+
+.authx-ambient-orb-three {
+  top: 38%;
+  left: 48%;
+  width: 22vw;
+  height: 22vw;
+  background: rgba(245, 156, 19, 0.12);
+  animation-delay: -11s;
+}
+
+.authx-ambient-grid {
+  inset: 0;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(17, 27, 66, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 27, 66, 0.08) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at 62% 50%, #000 0%, transparent 66%);
+  animation: authxGridDrift 28s linear infinite;
+}
+
+.authx-brand-row,
+.authx-mode-toggle,
+.authx-card-copy,
+.authx-feature-row,
+.authx-error,
+.authx-success,
+.authx-form,
+.authx-switch-copy {
+  animation: authxPanelRise 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-mode-toggle {
+  animation-delay: 80ms;
+}
+
+.authx-card-copy {
+  animation-delay: 150ms;
+}
+
+.authx-feature-row {
+  animation-delay: 220ms;
+}
+
+.authx-error,
+.authx-success {
+  animation-delay: 260ms;
+}
+
+.authx-form {
+  animation-delay: 300ms;
+}
+
+.authx-switch-copy {
+  animation-delay: 410ms;
+}
+
+.authx-field-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.authx-field-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 18%, rgba(32, 183, 176, 0.14), transparent 46%);
+  opacity: 0;
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.authx-field-shell:focus-within::after {
+  opacity: 1;
+  animation: authxFieldScan 1050ms ease both;
+}
+
+.authx-field-shell:focus-within .authx-field-icon {
+  color: #1f75d6;
+  animation: authxIconLift 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.authx-primary::before {
+  content: '';
+  position: absolute;
+  inset: -40% -80%;
+  z-index: 0;
+  background:
+    linear-gradient(110deg, transparent 34%, rgba(255, 255, 255, 0.3), transparent 48%),
+    linear-gradient(135deg, rgba(17, 27, 66, 0), rgba(32, 183, 176, 0.22));
+  transform: translateX(-42%);
+  animation: authxButtonSweep 3.8s ease-in-out infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.authx-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+  box-shadow: 0 26px 46px rgba(35, 78, 223, 0.24);
+}
+
+.authx-product-stage {
+  animation: authxStageReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
+}
+
+.authx-product-hero {
+  isolation: isolate;
+}
+
+.authx-product-hero::before {
+  animation: authxHeroRing 10s ease-in-out infinite;
+}
+
+.authx-product-copy,
+.authx-product-card {
+  animation: authxPanelRise 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-product-card {
+  animation-delay: 260ms;
+  transform-origin: center bottom;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.authx-product-card:hover {
+  transform: translateY(-6px) rotate(-1deg);
+}
+
+.authx-kinetic-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.authx-kinetic-ring,
+.authx-kinetic-pulse {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+}
+
+.authx-kinetic-ring {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  animation: authxKineticOrbit 18s linear infinite;
+}
+
+.authx-kinetic-ring-one {
+  width: 390px;
+  height: 390px;
+  right: -86px;
+  top: -78px;
+}
+
+.authx-kinetic-ring-two {
+  width: 260px;
+  height: 260px;
+  right: 42px;
+  top: 68px;
+  border-color: rgba(32, 183, 176, 0.28);
+  animation-duration: 14s;
+  animation-direction: reverse;
+}
+
+.authx-kinetic-ring-three {
+  width: 150px;
+  height: 150px;
+  right: 190px;
+  bottom: 34px;
+  border-color: rgba(245, 156, 19, 0.24);
+  animation-duration: 12s;
+}
+
+.authx-kinetic-pulse {
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.75);
+  animation: authxPulseNode 3.4s ease-in-out infinite;
+}
+
+.authx-kinetic-pulse-one {
+  right: 92px;
+  top: 88px;
+}
+
+.authx-kinetic-pulse-two {
+  right: 258px;
+  top: 196px;
+  background: #2dd4bf;
+  animation-delay: -1.1s;
+}
+
+.authx-kinetic-pulse-three {
+  right: 176px;
+  bottom: 72px;
+  background: #facc15;
+  animation-delay: -2.2s;
+}
+
+.authx-live-ledger {
+  position: absolute;
+  right: clamp(22px, 4vw, 44px);
+  bottom: 28px;
+  z-index: 2;
+  width: min(270px, 34%);
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.authx-live-ledger-line {
+  min-height: 48px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 16px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 18px 34px rgba(6, 18, 58, 0.18);
+  backdrop-filter: blur(18px);
+  transform: translateX(18px);
+  opacity: 0;
+  animation: authxLedgerIn 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-live-ledger-line:nth-child(1) {
+  animation-delay: 640ms;
+}
+
+.authx-live-ledger-line:nth-child(2) {
+  animation-delay: 820ms;
+}
+
+.authx-live-ledger-line:nth-child(3) {
+  animation-delay: 1000ms;
+}
+
+.authx-live-ledger-line b,
+.authx-live-ledger-line i {
+  font-size: 0.76rem;
+}
+
+.authx-live-ledger-line b {
+  letter-spacing: -0.01em;
+}
+
+.authx-live-ledger-line i {
+  padding: 0.24rem 0.48rem;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.14);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.authx-product-showcase-row span {
+  position: relative;
+  overflow: hidden;
+  animation: authxShowcaseLift 820ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authx-product-showcase-row span:nth-child(1) {
+  animation-delay: 360ms;
+}
+
+.authx-product-showcase-row span:nth-child(2) {
+  animation-delay: 480ms;
+}
+
+.authx-product-showcase-row span:nth-child(3) {
+  animation-delay: 600ms;
+}
+
+.authx-product-showcase-row span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 26%, rgba(255, 255, 255, 0.72), transparent 54%);
+  transform: translateX(-120%);
+  animation: authxSurfaceSheen 5.2s ease-in-out infinite;
+}
+
+.authx-product-showcase-row span:nth-child(2)::after {
+  animation-delay: 1s;
+}
+
+.authx-product-showcase-row span:nth-child(3)::after {
+  animation-delay: 2s;
+}
+
+@keyframes authxShellEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes authxPanelRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes authxStageReveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes authxAtmosphereDrift {
+  from {
+    transform: translate3d(-2%, -1%, 0) rotate(0deg);
+  }
+
+  to {
+    transform: translate3d(2%, 1%, 0) rotate(12deg);
+  }
+}
+
+@keyframes authxOrbFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(24px, -18px, 0) scale(1.05);
+  }
+}
+
+@keyframes authxGridDrift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 72px 72px, 72px 72px;
+  }
+}
+
+@keyframes authxFieldScan {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes authxIconLift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  45% {
+    transform: translateY(-2px) scale(1.08);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes authxButtonSweep {
+  0%,
+  52% {
+    transform: translateX(-44%);
+  }
+
+  100% {
+    transform: translateX(44%);
+  }
+}
+
+@keyframes authxHeroRing {
+  0%,
+  100% {
+    transform: rotate(-24deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(16deg) scale(1.08);
+  }
+}
+
+@keyframes authxKineticOrbit {
+  from {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: rotate(360deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes authxPulseNode {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.24);
+  }
+}
+
+@keyframes authxLedgerIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes authxShowcaseLift {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes authxSurfaceSheen {
+  0%,
+  58% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (max-width: 1280px) {
+  .authx-live-ledger {
+    width: min(240px, 36%);
+  }
+}
+
+@media (max-width: 1120px) {
+  .authx-ambient-grid {
+    opacity: 0.16;
+  }
+}
+
+@media (max-width: 640px) {
+  .authx-ambient-orb {
+    opacity: 0.38;
+  }
+
+  .authx-shell {
+    animation-duration: 560ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authx-page *,
+  .authx-page *::before,
+  .authx-page *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}

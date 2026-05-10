@@ -275,6 +275,12 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
 
   return (
     <main className="authx-page">
+      <div className="authx-ambient-system" aria-hidden="true">
+        <span className="authx-ambient-orb authx-ambient-orb-one" />
+        <span className="authx-ambient-orb authx-ambient-orb-two" />
+        <span className="authx-ambient-orb authx-ambient-orb-three" />
+        <span className="authx-ambient-grid" />
+      </div>
       <section className="authx-shell">
         <section className="authx-auth-column">
           <div className="authx-brand-row">
@@ -515,6 +521,14 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
             </div>
 
             <section className="authx-product-hero">
+              <div className="authx-kinetic-sky" aria-hidden="true">
+                <span className="authx-kinetic-ring authx-kinetic-ring-one" />
+                <span className="authx-kinetic-ring authx-kinetic-ring-two" />
+                <span className="authx-kinetic-ring authx-kinetic-ring-three" />
+                <span className="authx-kinetic-pulse authx-kinetic-pulse-one" />
+                <span className="authx-kinetic-pulse authx-kinetic-pulse-two" />
+                <span className="authx-kinetic-pulse authx-kinetic-pulse-three" />
+              </div>
               <div className="authx-product-copy">
                 <span className="authx-scene-chip">Private finance workspace</span>
                 <h2>Money feels clearer when everything has a place.</h2>
@@ -539,6 +553,21 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
                   <span />
                   <span />
                 </div>
+              </div>
+
+              <div className="authx-live-ledger" aria-hidden="true">
+                <span className="authx-live-ledger-line">
+                  <b>Budget drift</b>
+                  <i>reviewed</i>
+                </span>
+                <span className="authx-live-ledger-line">
+                  <b>Renewal queue</b>
+                  <i>sorted</i>
+                </span>
+                <span className="authx-live-ledger-line">
+                  <b>Cash signal</b>
+                  <i>steady</i>
+                </span>
               </div>
             </section>
 
