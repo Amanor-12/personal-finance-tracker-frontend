@@ -1,0 +1,787 @@
+:root {
+  --rivo-pointer-x: 50%;
+  --rivo-pointer-y: 28%;
+  --rivo-motion-ease: cubic-bezier(0.2, 0.82, 0.2, 1);
+  --rivo-motion-spring: cubic-bezier(0.18, 0.92, 0.18, 1);
+  --rivo-motion-fast: 180ms var(--rivo-motion-ease);
+  --rivo-motion-medium: 520ms var(--rivo-motion-spring);
+  --rivo-motion-slow: 1200ms var(--rivo-motion-spring);
+  --rivo-glow-a: rgba(42, 136, 255, 0.22);
+  --rivo-glow-b: rgba(89, 66, 246, 0.24);
+  --rivo-glow-c: rgba(25, 197, 188, 0.18);
+}
+
+.rivo-app-frame {
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.rivo-route-frame {
+  min-height: 100vh;
+  transform-origin: 50% 24%;
+}
+
+.rivo-motion-system {
+  --tone-a: rgba(45, 124, 255, 0.22);
+  --tone-b: rgba(105, 59, 245, 0.22);
+  --tone-c: rgba(22, 189, 177, 0.16);
+  --tone-line: rgba(41, 75, 126, 0.08);
+  background:
+    radial-gradient(circle at var(--rivo-pointer-x) var(--rivo-pointer-y), rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 22rem),
+    radial-gradient(circle at 10% 14%, var(--tone-a), transparent 28rem),
+    radial-gradient(circle at 92% 12%, var(--tone-b), transparent 31rem),
+    radial-gradient(circle at 82% 86%, var(--tone-c), transparent 32rem),
+    linear-gradient(135deg, #f8fbff 0%, #eef5ff 52%, #f7fbff 100%);
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.rivo-motion-system.tone-wallets,
+.rivo-motion-system.tone-overview {
+  --tone-a: rgba(32, 143, 255, 0.22);
+  --tone-b: rgba(53, 219, 198, 0.18);
+  --tone-c: rgba(76, 84, 245, 0.2);
+}
+
+.rivo-motion-system.tone-ledger,
+.rivo-motion-system.tone-activity {
+  --tone-a: rgba(70, 113, 255, 0.2);
+  --tone-b: rgba(30, 188, 220, 0.16);
+  --tone-c: rgba(252, 183, 64, 0.15);
+}
+
+.rivo-motion-system.tone-budget,
+.rivo-motion-system.tone-renewals {
+  --tone-a: rgba(86, 94, 244, 0.2);
+  --tone-b: rgba(255, 175, 65, 0.16);
+  --tone-c: rgba(31, 188, 161, 0.16);
+}
+
+.rivo-motion-system.tone-goals {
+  --tone-a: rgba(75, 95, 255, 0.22);
+  --tone-b: rgba(46, 204, 177, 0.18);
+  --tone-c: rgba(104, 70, 245, 0.18);
+}
+
+.rivo-motion-system.tone-insights,
+.rivo-motion-system.tone-billing,
+.rivo-motion-system.tone-settings {
+  --tone-a: rgba(87, 77, 242, 0.19);
+  --tone-b: rgba(32, 143, 255, 0.18);
+  --tone-c: rgba(26, 197, 174, 0.14);
+}
+
+.rivo-motion-system.tone-access,
+.rivo-motion-system.tone-pricing,
+.rivo-motion-system.tone-public {
+  --tone-a: rgba(32, 143, 255, 0.24);
+  --tone-b: rgba(33, 47, 145, 0.2);
+  --tone-c: rgba(31, 198, 188, 0.18);
+}
+
+.rivo-motion-system > span {
+  display: block;
+  position: absolute;
+}
+
+.rivo-motion-mesh {
+  background:
+    conic-gradient(from 126deg at 50% 50%, transparent 0deg, rgba(82, 92, 245, 0.14) 72deg, transparent 138deg, rgba(18, 191, 177, 0.12) 215deg, transparent 300deg),
+    radial-gradient(circle at 48% 46%, rgba(255, 255, 255, 0.46), transparent 30rem);
+  border-radius: 999px;
+  filter: blur(8px);
+  height: min(82vw, 820px);
+  left: 50%;
+  mix-blend-mode: multiply;
+  opacity: 0.62;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(82vw, 820px);
+  animation: rivoMeshBreathe 18s ease-in-out infinite;
+}
+
+.rivo-motion-grid {
+  background-image:
+    linear-gradient(var(--tone-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tone-line) 1px, transparent 1px);
+  background-size: 62px 62px;
+  inset: -18%;
+  mask-image: radial-gradient(circle at 50% 34%, black, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle at 50% 34%, black, transparent 68%);
+  opacity: 0.62;
+  transform: perspective(900px) rotateX(64deg) translateY(-18%);
+  transform-origin: 50% 0;
+  animation: rivoGridGlide 22s linear infinite;
+}
+
+.rivo-motion-orb {
+  border-radius: 999px;
+  filter: blur(18px);
+  opacity: 0.72;
+}
+
+.rivo-motion-orb-one {
+  background: radial-gradient(circle, var(--tone-a), transparent 68%);
+  height: 34rem;
+  left: -12rem;
+  top: 4rem;
+  width: 34rem;
+  animation: rivoFloatOne 16s ease-in-out infinite;
+}
+
+.rivo-motion-orb-two {
+  background: radial-gradient(circle, var(--tone-b), transparent 66%);
+  height: 39rem;
+  right: -14rem;
+  top: -9rem;
+  width: 39rem;
+  animation: rivoFloatTwo 20s ease-in-out infinite;
+}
+
+.rivo-motion-orb-three {
+  background: radial-gradient(circle, var(--tone-c), transparent 70%);
+  bottom: -16rem;
+  height: 40rem;
+  left: 36%;
+  width: 40rem;
+  animation: rivoFloatThree 18s ease-in-out infinite;
+}
+
+.rivo-motion-ribbon {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  border-radius: 999px;
+  filter: blur(0.5px);
+  height: 1px;
+  opacity: 0.54;
+  transform-origin: 50% 50%;
+  width: 44vw;
+}
+
+.rivo-motion-ribbon-one {
+  left: -8vw;
+  top: 22vh;
+  transform: rotate(-18deg);
+  animation: rivoRibbonSweep 8s ease-in-out infinite;
+}
+
+.rivo-motion-ribbon-two {
+  right: -10vw;
+  top: 72vh;
+  transform: rotate(-22deg);
+  animation: rivoRibbonSweep 9.5s ease-in-out infinite reverse;
+}
+
+.rivo-motion-signal {
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 999px;
+  box-shadow: 0 0 24px rgba(84, 107, 255, 0.1);
+  height: 7rem;
+  opacity: 0;
+  width: 7rem;
+}
+
+.rivo-motion-signal-one {
+  left: 16%;
+  top: 18%;
+  animation: rivoSignalPulse 7s ease-out infinite;
+}
+
+.rivo-motion-signal-two {
+  right: 18%;
+  top: 34%;
+  animation: rivoSignalPulse 8s ease-out 1.6s infinite;
+}
+
+.rivo-motion-signal-three {
+  bottom: 14%;
+  left: 56%;
+  animation: rivoSignalPulse 9s ease-out 3s infinite;
+}
+
+.ref-shell {
+  isolation: isolate;
+  position: relative;
+}
+
+.ref-shell::before {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.86), transparent 18rem),
+    radial-gradient(circle at 86% 6%, rgba(85, 92, 245, 0.12), transparent 24rem);
+  content: '';
+  inset: 0;
+  opacity: 0.78;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  animation: rivoShellAtmosphere 14s ease-in-out infinite;
+}
+
+.ref-sidebar,
+.ref-topbar,
+.ref-heading-row,
+.ref-content-grid {
+  animation: rivoSurfaceResolve 740ms var(--rivo-motion-spring) both;
+}
+
+.ref-sidebar {
+  animation-delay: 40ms;
+}
+
+.ref-topbar {
+  animation-delay: 110ms;
+}
+
+.ref-heading-row {
+  animation-delay: 170ms;
+}
+
+.ref-content-grid {
+  animation-delay: 230ms;
+}
+
+.ref-main > *,
+.ref-rail > * {
+  animation: rivoSurfaceRise 760ms var(--rivo-motion-spring) both;
+}
+
+.ref-main > *:nth-child(1),
+.ref-rail > *:nth-child(1) {
+  animation-delay: 90ms;
+}
+
+.ref-main > *:nth-child(2),
+.ref-rail > *:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.ref-main > *:nth-child(3),
+.ref-rail > *:nth-child(3) {
+  animation-delay: 230ms;
+}
+
+.ref-main > *:nth-child(4),
+.ref-rail > *:nth-child(4) {
+  animation-delay: 300ms;
+}
+
+.ref-panel,
+.ref-hero-card,
+.activity-ledger,
+.activity-ledger-card,
+.activity-timeline-card,
+.billing-hero-card,
+.billing-summary-card,
+.billing-value-card,
+.billing-plan-card,
+.budget-cockpit-filter,
+.budget-cockpit-pressure,
+.budget-cockpit-card,
+.finance-intelligence-card,
+.goal-focus-card,
+.goals-portfolio-focus,
+.goals-portfolio-card,
+.recurring-hero-card,
+.recurring-queue-card,
+.reports-filter-board,
+.reports-support-strip article,
+.reports-metric-card,
+.resource-limit-card,
+.settings-card,
+.settings-hero-panel,
+.settings-rail-card,
+.subscription-card,
+.transaction-card,
+.transactions-export-card,
+.transactions-power-card,
+.wallet-card,
+.wallets-empty-state {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition:
+    background var(--rivo-motion-medium),
+    border-color var(--rivo-motion-medium),
+    box-shadow var(--rivo-motion-medium),
+    transform var(--rivo-motion-medium);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ref-panel:hover,
+  .activity-ledger-card:hover,
+  .activity-timeline-card:hover,
+  .billing-summary-card:hover,
+  .billing-value-card:hover,
+  .billing-plan-card:hover,
+  .budget-cockpit-card:hover,
+  .finance-intelligence-card:hover,
+  .goal-focus-card:hover,
+  .goals-portfolio-card:hover,
+  .recurring-queue-card:hover,
+  .reports-metric-card:hover,
+  .reports-support-strip article:hover,
+  .resource-limit-card:hover,
+  .settings-card:hover,
+  .settings-rail-card:hover,
+  .subscription-card:hover,
+  .transaction-card:hover,
+  .transactions-export-card:hover,
+  .wallet-card:hover {
+    border-color: rgba(57, 103, 255, 0.22);
+    box-shadow: 0 26px 72px rgba(19, 38, 86, 0.14);
+    transform: translate3d(0, -5px, 0) scale(1.005);
+  }
+}
+
+.ref-hero-card,
+.activity-ledger-hero,
+.authx-product-hero,
+.billing-hero-card,
+.budget-hero,
+.goals-hero,
+.recurring-hero,
+.reports-hero,
+.settings-hero-panel,
+.transactions-hero,
+.wallet-hero {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+.ref-hero-card::after,
+.activity-ledger-hero::after,
+.authx-product-hero::after,
+.billing-hero-card::after,
+.budget-hero::after,
+.goals-hero::after,
+.recurring-hero::after,
+.reports-hero::after,
+.settings-hero-panel::after,
+.transactions-hero::after,
+.wallet-hero::after {
+  background:
+    radial-gradient(circle at 24% 28%, rgba(255, 255, 255, 0.26), transparent 18rem),
+    conic-gradient(from 210deg at 72% 42%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.28), rgba(28, 208, 193, 0.18), rgba(255, 255, 255, 0));
+  content: '';
+  inset: -42%;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  animation: rivoHeroAurora 18s ease-in-out infinite;
+}
+
+.ref-hero-card > *,
+.activity-ledger-hero > *,
+.authx-product-hero > *,
+.billing-hero-card > *,
+.budget-hero > *,
+.goals-hero > *,
+.recurring-hero > *,
+.reports-hero > *,
+.settings-hero-panel > *,
+.transactions-hero > *,
+.wallet-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.authx-shell {
+  perspective: 1400px;
+}
+
+.authx-auth-card,
+.authx-panel-shell,
+.landing-hero-card,
+.pricing-card {
+  animation: rivoPremiumCardEnter 880ms var(--rivo-motion-spring) both;
+  transform-style: preserve-3d;
+}
+
+.authx-auth-card {
+  position: relative;
+}
+
+.authx-auth-card::before {
+  background: radial-gradient(circle at var(--rivo-pointer-x) var(--rivo-pointer-y), rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 15rem);
+  border-radius: inherit;
+  content: '';
+  inset: 0;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.authx-auth-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.authx-kinetic-ring,
+.authx-orbit-ring,
+.ref-hero-orbit-one,
+.ref-hero-orbit-two,
+.recurring-visual-ring,
+.settings-visual-orbit {
+  animation: rivoPrecisionOrbit 18s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.authx-kinetic-ring-two,
+.ref-hero-orbit-two {
+  animation-direction: reverse;
+  animation-duration: 24s;
+}
+
+.authx-primary,
+.authx-secondary-button,
+.billing-primary-action,
+.feature-gate-primary,
+.finance-upgrade-action,
+.ref-primary-button,
+.ref-secondary-button,
+.settings-action,
+button[type='submit'] {
+  position: relative;
+  transition:
+    box-shadow var(--rivo-motion-fast),
+    transform var(--rivo-motion-fast),
+    filter var(--rivo-motion-fast);
+}
+
+.authx-primary::after,
+.billing-primary-action::after,
+.feature-gate-primary::after,
+.finance-upgrade-action::after,
+.ref-primary-button::after,
+button[type='submit']::after {
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.36) 42%, transparent 68%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-120%);
+  transition: transform 700ms var(--rivo-motion-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .authx-primary:hover,
+  .authx-secondary-button:hover,
+  .billing-primary-action:hover,
+  .feature-gate-primary:hover,
+  .finance-upgrade-action:hover,
+  .ref-primary-button:hover,
+  .ref-secondary-button:hover,
+  .settings-action:hover,
+  button[type='submit']:hover {
+    filter: saturate(1.08);
+    transform: translateY(-2px);
+  }
+
+  .authx-primary:hover::after,
+  .billing-primary-action:hover::after,
+  .feature-gate-primary:hover::after,
+  .finance-upgrade-action:hover::after,
+  .ref-primary-button:hover::after,
+  button[type='submit']:hover::after {
+    transform: translateX(120%);
+  }
+}
+
+.ref-sidebar-link,
+.ref-search-trigger,
+.ref-topbar-icon,
+.ref-user-menu-trigger,
+.tab-button,
+.billing-tab-button,
+.settings-tab-button {
+  transition:
+    background var(--rivo-motion-fast),
+    border-color var(--rivo-motion-fast),
+    box-shadow var(--rivo-motion-fast),
+    color var(--rivo-motion-fast),
+    transform var(--rivo-motion-fast);
+}
+
+.ref-sidebar-link.active,
+.ref-sidebar-link[aria-current='page'],
+.tab-button.active,
+.billing-tab-button.is-active,
+.settings-tab-button.is-active {
+  animation: rivoActiveGlow 3.2s ease-in-out infinite;
+}
+
+.ref-search-panel,
+.ref-user-menu-panel,
+.dialog-load-card,
+[role='dialog'] {
+  animation: rivoPanelDrop 360ms var(--rivo-motion-spring) both;
+}
+
+.authx-live-ledger-card,
+.authx-studio-chip,
+.ref-notification-item,
+.ref-search-result,
+.settings-toggle-row {
+  transition:
+    background var(--rivo-motion-fast),
+    border-color var(--rivo-motion-fast),
+    box-shadow var(--rivo-motion-fast),
+    transform var(--rivo-motion-fast);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .authx-live-ledger-card:hover,
+  .authx-studio-chip:hover,
+  .ref-notification-item:hover,
+  .ref-search-result:hover,
+  .settings-toggle-row:hover {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes rivoMeshBreathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.94);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) rotate(14deg) scale(1.08);
+  }
+}
+
+@keyframes rivoGridGlide {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 124px 124px;
+  }
+}
+
+@keyframes rivoFloatOne {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(6vw, 4vh, 0) scale(1.08);
+  }
+}
+
+@keyframes rivoFloatTwo {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-6vw, 7vh, 0) scale(0.94);
+  }
+}
+
+@keyframes rivoFloatThree {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(4vw, -6vh, 0) scale(1.05);
+  }
+}
+
+@keyframes rivoRibbonSweep {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: translateX(-12%) rotate(-18deg);
+  }
+
+  50% {
+    opacity: 0.62;
+    transform: translateX(28%) rotate(-18deg);
+  }
+}
+
+@keyframes rivoSignalPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.58);
+  }
+
+  18% {
+    opacity: 0.42;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+@keyframes rivoRouteResolve {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.988);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes rivoSurfaceResolve {
+  from {
+    filter: blur(12px);
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.985);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes rivoSurfaceRise {
+  from {
+    filter: blur(8px);
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.988);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes rivoShellAtmosphere {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes rivoHeroAurora {
+  0%,
+  100% {
+    opacity: 0.56;
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: rotate(16deg) scale(1.08);
+  }
+}
+
+@keyframes rivoPremiumCardEnter {
+  from {
+    filter: blur(16px);
+    opacity: 0;
+    transform: rotateX(7deg) translate3d(0, 28px, -18px) scale(0.985);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: rotateX(0deg) translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes rivoPrecisionOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rivoActiveGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(52, 102, 255, 0);
+  }
+
+  50% {
+    box-shadow: 0 14px 34px rgba(52, 102, 255, 0.16);
+  }
+}
+
+@keyframes rivoPanelDrop {
+  from {
+    filter: blur(10px);
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.98);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rivo-route-frame {
+    animation: rivoRouteResolve 680ms var(--rivo-motion-spring) both;
+  }
+}
+
+@media (max-width: 720px) {
+  .rivo-motion-grid,
+  .rivo-motion-ribbon,
+  .rivo-motion-signal {
+    display: none;
+  }
+
+  .rivo-motion-orb {
+    opacity: 0.48;
+  }
+
+  .ref-sidebar,
+  .ref-topbar,
+  .ref-heading-row,
+  .ref-content-grid,
+  .ref-main > *,
+  .ref-rail > * {
+    animation-duration: 520ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .rivo-motion-system {
+    display: none;
+  }
+}

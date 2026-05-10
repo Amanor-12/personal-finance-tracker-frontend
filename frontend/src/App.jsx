@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AppShellState from './components/AppShellState';
+import ProductMotionSystem from './components/ProductMotionSystem';
 import { authStore } from './utils/authStore';
 import { API_UNAUTHORIZED_EVENT, getSupportReferenceLabel } from './utils/apiClient';
 import {
@@ -253,9 +254,15 @@ function App() {
 
   return (
     <AppErrorBoundary>
-      <Suspense fallback={<AppLoadingState currentUser={currentUser} isWorkspace={Boolean(currentUser)} />}>
-        <Routes>
-          <Route path="/" element={<LandingPage currentUser={currentUser} />} />
+      <ProductMotionSystem
+        isWorkspace={Boolean(currentUser) || isProtectedWorkspacePath}
+        routePath={location.pathname}
+      />
+      <div className="rivo-app-frame">
+        <Suspense fallback={<AppLoadingState currentUser={currentUser} isWorkspace={Boolean(currentUser)} />}>
+          <div className="rivo-route-frame" key={`${location.pathname}-${currentUser ? 'session' : 'public'}`}>
+            <Routes>
+              <Route path="/" element={<LandingPage currentUser={currentUser} />} />
 
         <Route
           path="/login"
@@ -438,9 +445,11 @@ function App() {
           }
         />
 
-          <Route path="*" element={<NotFoundPage currentUser={currentUser} />} />
-        </Routes>
-      </Suspense>
+              <Route path="*" element={<NotFoundPage currentUser={currentUser} />} />
+            </Routes>
+          </div>
+        </Suspense>
+      </div>
     </AppErrorBoundary>
   );
 }
