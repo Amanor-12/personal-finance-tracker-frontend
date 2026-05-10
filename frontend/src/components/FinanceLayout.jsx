@@ -220,16 +220,6 @@ function FinanceLayout({
   }, [location.pathname]);
 
   useEffect(() => {
-    setHighlightedSearchIndex((current) => {
-      if (!searchResults.length) {
-        return 0;
-      }
-
-      return Math.min(current, searchResults.length - 1);
-    });
-  }, [searchResults]);
-
-  useEffect(() => {
     const handleSettingsUpdate = () => {
       setSettingsVersion((current) => current + 1);
     };
@@ -353,6 +343,17 @@ function FinanceLayout({
     : searchItems;
   const searchResults = filteredSearchItems.slice(0, 7);
   const showSearchResults = isSearchFocused || Boolean(normalizedSearchQuery);
+
+  useEffect(() => {
+    setHighlightedSearchIndex((current) => {
+      if (!searchResults.length) {
+        return 0;
+      }
+
+      return Math.min(current, searchResults.length - 1);
+    });
+  }, [searchResults]);
+
   const warmRoute = (path) => {
     if (path) {
       prefetchRoute(path);

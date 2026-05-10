@@ -1061,10 +1061,19 @@ body,
 
 .ref-flow-copy {
   display: grid;
-  gap: 12px;
+  gap: 8px;
+}
+
+.ref-flow-note {
+  max-width: 34rem;
+  margin: 0;
+  color: #677087;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .ref-flow-tabs {
+  margin-top: 4px;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;

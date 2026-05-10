@@ -201,7 +201,14 @@ const fulfillJson = (route, payload, status = 200) =>
 
 const mockAuthenticatedWorkspace = async (
   page,
-  { capabilities = fullCapabilitiesPayload, seedSession = true } = {}
+  {
+    budgets = [],
+    categories = [],
+    capabilities = fullCapabilitiesPayload,
+    recurringPayments = [],
+    seedSession = true,
+    transactions = [],
+  } = {}
 ) => {
   if (seedSession) {
     await page.addInitScript(() => {
@@ -269,12 +276,17 @@ const mockAuthenticatedWorkspace = async (
     }
 
     if (pathname === '/api/transactions' && method === 'GET') {
-      await fulfillJson(route, { transactions: [] });
+      await fulfillJson(route, { transactions });
+      return;
+    }
+
+    if (pathname === '/api/categories' && method === 'GET') {
+      await fulfillJson(route, { categories });
       return;
     }
 
     if (pathname === '/api/budgets' && method === 'GET') {
-      await fulfillJson(route, { budgets: [] });
+      await fulfillJson(route, { budgets });
       return;
     }
 
@@ -284,7 +296,7 @@ const mockAuthenticatedWorkspace = async (
     }
 
     if (pathname === '/api/recurring-payments' && method === 'GET') {
-      await fulfillJson(route, { recurringPayments: [] });
+      await fulfillJson(route, { recurringPayments });
       return;
     }
 
@@ -398,6 +410,47 @@ const mockAuthenticatedWorkspace = async (
   });
 };
 
+test('dashboard renders a projected money flow graph from real plan data', async ({ page }) => {
+  await mockAuthenticatedWorkspace(page, {
+    budgets: [
+      {
+        amount_limit: 1200,
+        category_id: 20,
+        category_name: 'Housing',
+        category_type: 'expense',
+        id: 501,
+        month: 5,
+        year: 2026,
+      },
+    ],
+    categories: [
+      {
+        id: 20,
+        name: 'Housing',
+        type: 'expense',
+      },
+    ],
+    recurringPayments: [
+      {
+        amount: 300,
+        billing_frequency: 'monthly',
+        category_id: 20,
+        category_name: 'Housing',
+        id: 701,
+        name: 'Insurance',
+        next_payment_date: '2026-05-15',
+        status: 'active',
+      },
+    ],
+  });
+  await page.goto('/dashboard');
+
+  await expect(page.getByText('Projected from your budgets and active recurring payments until transactions arrive.')).toBeVisible();
+  await expect(page.locator('.ref-flow-legend').getByText(/Planned expenses/)).toBeVisible();
+  await expect(page.locator('.ref-chart-stage.is-empty')).toHaveCount(0);
+  await expect(page.locator('.ref-chart-line-expense')).toBeVisible();
+});
+
 test('security workspace shows MFA, sessions, and recent activity', async ({ page }) => {
   await mockAuthenticatedWorkspace(page);
   await page.goto('/settings');
@@ -421,7 +474,7 @@ test('security workspace hides advanced controls when deployment capability is o
 
   await expect(page.getByRole('button', { name: 'Update password' })).toBeVisible();
   await expect(page.getByText('Advanced security controls')).toBeVisible();
-  await expect(page.getByText('Multi-factor authentication, session revocation, and security activity are intentionally hidden until real backend security services are in place.')).toBeVisible();
+  await expect(page.getByText('Multi-factor authentication, session revocation, and security activity remain hidden until the full security layer is enabled.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Enable MFA' })).toHaveCount(0);
   await expect(page.getByText('Current device')).toHaveCount(0);
   await expect(page.locator('.settings-session-header').filter({ hasText: 'Security activity' })).toHaveCount(0);
@@ -435,7 +488,7 @@ test('billing page shows a not-enabled state when billing capability is off', as
   await page.goto('/billing');
 
   await expect(page.getByText('Billing not enabled')).toBeVisible();
-  await expect(page.getByText('This deployment does not have a live billing backend yet.')).toBeVisible();
+  await expect(page.getByText('Use pricing to review plans. In-app billing management appears once checkout, invoices, and the billing portal are active.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open pricing' })).toBeVisible();
 });
 
@@ -445,7 +498,7 @@ test('accounts workspace shows live and sandbox bank sync controls', async ({ pa
 
   await expect(page.getByText('Connected imports and reconciliation')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Connect live institution' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Connect sandbox bank' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Connect test institution' })).toBeVisible();
   await expect(page.getByText('plaid', { exact: true })).toBeVisible();
   await expect(page.getByText('North Market')).toBeVisible();
 });
@@ -492,8 +545,8 @@ test('accounts workspace can add a sandbox bank connection', async ({ page }) =>
   await mockAuthenticatedWorkspace(page);
   await page.goto('/accounts');
 
-  await page.getByRole('button', { name: 'Connect sandbox bank' }).click();
+  await page.getByRole('button', { name: 'Connect test institution' }).click();
 
-  await expect(page.getByText('Sandbox bank connection created.')).toBeVisible();
-  await expect(page.getByText('Primary sandbox feed')).toBeVisible();
+  await expect(page.getByText('Test institution connected.')).toBeVisible();
+  await expect(page.getByText('Primary test feed')).toBeVisible();
 });

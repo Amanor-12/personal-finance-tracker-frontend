@@ -159,6 +159,66 @@ const normalizeMoneyFlowSeries = (monthlyTrend = [], transactions = []) => {
   return buildTransactionFlowSeries(transactions);
 };
 
+const getRecurringMonthlyAmount = (payment) => {
+  const monthlyAmount = Number(payment.monthlyAmount) || 0;
+
+  if (monthlyAmount > 0) {
+    return monthlyAmount;
+  }
+
+  const annualAmount = Number(payment.annualAmount) || 0;
+
+  if (annualAmount > 0) {
+    return annualAmount / 12;
+  }
+
+  const amount = Number(payment.amount) || 0;
+
+  if (!amount) {
+    return 0;
+  }
+
+  switch (payment.billingFrequency) {
+    case 'weekly':
+      return (amount * 52) / 12;
+    case 'biweekly':
+      return (amount * 26) / 12;
+    case 'quarterly':
+      return amount / 3;
+    case 'annual':
+      return amount / 12;
+    case 'monthly':
+    case 'custom':
+    default:
+      return amount;
+  }
+};
+
+const buildPlannedMoneyFlowSeries = (budgets = [], recurringPayments = []) => {
+  const series = createRollingMonthWindow(new Date());
+  const budgetTotals = budgets.reduce((totals, budget) => {
+    const month = Number(budget.month);
+    const year = Number(budget.year);
+
+    if (!Number.isInteger(month) || !Number.isInteger(year)) {
+      return totals;
+    }
+
+    const monthKey = `${year}-${padValue(month)}`;
+    totals.set(monthKey, (totals.get(monthKey) || 0) + (Number(budget.amountLimit) || 0));
+    return totals;
+  }, new Map());
+  const recurringTotal = recurringPayments
+    .filter((payment) => payment.status === 'active')
+    .reduce((total, payment) => total + getRecurringMonthlyAmount(payment), 0);
+
+  return series.map((point) => ({
+    ...point,
+    expenses: (budgetTotals.get(point.monthKey) || 0) + recurringTotal,
+    income: 0,
+  }));
+};
+
 const getRoundedChartScale = (maxValue) => {
   if (!maxValue) {
     return DEFAULT_CHART_SCALE;
@@ -307,9 +367,11 @@ function DashboardPage({ currentUser, onLogout }) {
   const { hasFeature } = useBillingAccess();
   const [isLoading, setIsLoading] = useState(true);
   const [activeCardId, setActiveCardId] = useState('');
+  const [budgets, setBudgets] = useState([]);
   const [cardSearch, setCardSearch] = useState('');
   const [cards, setCards] = useState([]);
   const [expenseCategories, setExpenseCategories] = useState([]);
+  const [recurringPayments, setRecurringPayments] = useState([]);
   const [snapshot, setSnapshot] = useState(defaultSnapshot);
   const [transactions, setTransactions] = useState([]);
   const [workspaceSignals, setWorkspaceSignals] = useState(defaultWorkspaceSignals);
@@ -323,8 +385,10 @@ function DashboardPage({ currentUser, onLogout }) {
 
     const loadWorkspaceData = async () => {
       if (!currentUser?.id) {
+        setBudgets([]);
         setCards([]);
         setExpenseCategories([]);
+        setRecurringPayments([]);
         setSnapshot(defaultSnapshot);
         setTransactions([]);
         setWorkspaceSignals(defaultWorkspaceSignals);
@@ -378,6 +442,9 @@ function DashboardPage({ currentUser, onLogout }) {
         const nextCategories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
         const nextTransactions =
           transactionsResult.status === 'fulfilled' ? transactionsResult.value : [];
+        const nextBudgets = budgetsResult.status === 'fulfilled' ? budgetsResult.value : [];
+        const nextRecurringPayments =
+          recurringResult.status === 'fulfilled' ? recurringResult.value : [];
         const nextExpenseCategories = nextCategories.filter((category) => category.type === 'expense');
         const issues = [
           snapshotResult.status === 'rejected'
@@ -391,21 +458,20 @@ function DashboardPage({ currentUser, onLogout }) {
             : '',
         ].filter(Boolean);
 
+        setBudgets(nextBudgets);
         setCards(nextCards);
         setSnapshot(nextSnapshot);
         setTransactions(nextTransactions);
+        setRecurringPayments(nextRecurringPayments);
         setExpenseCategories(nextExpenseCategories);
         setWorkspaceSignals({
           accounts:
             accountsResult.status === 'fulfilled'
               ? accountsResult.value.filter((account) => account.status === 'active').length
               : 0,
-          budgets: budgetsResult.status === 'fulfilled' ? budgetsResult.value.length : 0,
+          budgets: nextBudgets.length,
           goals: goalsResult.status === 'fulfilled' ? goalsResult.value.length : 0,
-          recurring:
-            recurringResult.status === 'fulfilled'
-              ? recurringResult.value.filter((payment) => payment.status === 'active').length
-              : 0,
+          recurring: nextRecurringPayments.filter((payment) => payment.status === 'active').length,
         });
         setActiveCardId((currentActiveCardId) =>
           nextCards.some((card) => card.id === currentActiveCardId) ? currentActiveCardId : nextCards[0]?.id || ''
@@ -422,7 +488,9 @@ function DashboardPage({ currentUser, onLogout }) {
         }
 
         setCards([]);
+        setBudgets([]);
         setExpenseCategories([]);
+        setRecurringPayments([]);
         setSnapshot(defaultSnapshot);
         setTransactions([]);
         setWorkspaceSignals(defaultWorkspaceSignals);
@@ -476,24 +544,60 @@ function DashboardPage({ currentUser, onLogout }) {
         title: transaction.description || transaction.categoryName,
       }));
   }, [snapshot.recentTransactions, transactions]);
-  const moneyFlowSeries = useMemo(
+  const actualMoneyFlowSeries = useMemo(
     () => normalizeMoneyFlowSeries(snapshot.monthlyTrend, transactions),
     [snapshot.monthlyTrend, transactions]
   );
-  const moneyFlowTotals = useMemo(
-    () => ({
-      expenses:
-        snapshot.totalExpenses ||
-        moneyFlowSeries.reduce((total, point) => total + point.expenses, 0),
-      income:
-        snapshot.totalIncome ||
-        moneyFlowSeries.reduce((total, point) => total + point.income, 0),
-    }),
-    [moneyFlowSeries, snapshot.totalExpenses, snapshot.totalIncome]
+  const plannedMoneyFlowSeries = useMemo(
+    () => buildPlannedMoneyFlowSeries(budgets, recurringPayments),
+    [budgets, recurringPayments]
   );
-  const hasMoneyFlowData = moneyFlowSeries.some(
+  const hasActualMoneyFlowData = actualMoneyFlowSeries.some(
     (point) => point.income > 0 || point.expenses > 0
   );
+  const hasPlannedMoneyFlowData = plannedMoneyFlowSeries.some(
+    (point) => point.income > 0 || point.expenses > 0
+  );
+  const moneyFlowMode = hasActualMoneyFlowData
+    ? 'actual'
+    : hasPlannedMoneyFlowData
+      ? 'planned'
+      : 'empty';
+  const moneyFlowSeries =
+    moneyFlowMode === 'actual'
+      ? actualMoneyFlowSeries
+      : moneyFlowMode === 'planned'
+        ? plannedMoneyFlowSeries
+        : actualMoneyFlowSeries;
+  const moneyFlowTotals = useMemo(
+    () => {
+      const seriesTotals = moneyFlowSeries.reduce(
+        (totals, point) => ({
+          expenses: totals.expenses + point.expenses,
+          income: totals.income + point.income,
+        }),
+        { expenses: 0, income: 0 }
+      );
+
+      if (moneyFlowMode !== 'actual') {
+        return seriesTotals;
+      }
+
+      return {
+        expenses: snapshot.totalExpenses || seriesTotals.expenses,
+        income: snapshot.totalIncome || seriesTotals.income,
+      };
+    },
+    [moneyFlowMode, moneyFlowSeries, snapshot.totalExpenses, snapshot.totalIncome]
+  );
+  const hasMoneyFlowData = moneyFlowMode !== 'empty';
+  const moneyFlowSummaryCopy =
+    moneyFlowMode === 'planned'
+      ? 'Projected from your budgets and active recurring payments until transactions arrive.'
+      : hasMoneyFlowData
+        ? 'Built from recorded income and spending activity.'
+        : 'Records a live trend as soon as transaction activity exists.';
+  const expenseLegendLabel = moneyFlowMode === 'planned' ? 'Planned expenses' : 'Expenses';
   const moneyFlowScaleMax = useMemo(() => {
     const maxValue = Math.max(
       ...moneyFlowSeries.map((point) => Math.max(point.income, point.expenses)),
@@ -823,6 +927,7 @@ function DashboardPage({ currentUser, onLogout }) {
           <div className="ref-flow-header">
             <div className="ref-flow-copy">
               <h3>Money Flow</h3>
+              <p className="ref-flow-note">{moneyFlowSummaryCopy}</p>
               <nav className="ref-flow-tabs" aria-label="Money flow routes">
                 {chartTabs.map((tab, index) => (
                   <Link
@@ -841,7 +946,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 Income {formatCurrency(moneyFlowTotals.income)}
               </span>
               <span className="ref-flow-legend-item expense">
-                Expenses {formatCurrency(moneyFlowTotals.expenses)}
+                {expenseLegendLabel} {formatCurrency(moneyFlowTotals.expenses)}
               </span>
             </div>
           </div>
@@ -945,7 +1050,7 @@ function DashboardPage({ currentUser, onLogout }) {
                           {formatCurrency(highlightedMoneyFlowPoint.income)}
                         </text>
                         <text className="value-label" x={flowTooltipX + 16} y={flowTooltipY + 54}>
-                          Expenses
+                          {expenseLegendLabel}
                         </text>
                         <text className="value-number" x={flowTooltipX + tooltipWidth - 16} y={flowTooltipY + 54}>
                           {formatCurrency(highlightedMoneyFlowPoint.expenses)}
