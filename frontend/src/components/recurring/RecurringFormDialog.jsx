@@ -1,26 +1,50 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import RecurringIcon from './RecurringIcon';
 import { buildRecurringPayload, createRecurringForm, recurringFrequencyOptions } from './recurringUtils';
+import { useManagedForm } from '../../utils/useManagedForm';
 
-const recurringSchema = z.object({
-  accountId: z.string().optional(),
-  amount: z
-    .string()
-    .min(1, 'Enter an amount.')
-    .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, {
-      message: 'Amount must be greater than zero.',
-    }),
-  billingFrequency: z.enum(['weekly', 'biweekly', 'monthly', 'quarterly', 'annual', 'custom']),
-  categoryId: z.string().min(1, 'Choose an expense category.'),
-  id: z.string().optional(),
-  name: z.string().trim().min(2, 'Name must be at least 2 characters.').max(120, 'Keep name under 120 characters.'),
-  nextPaymentDate: z.string().min(1, 'Choose the next payment date.'),
-  notes: z.string().max(500, 'Keep notes under 500 characters.').optional(),
-  status: z.enum(['active', 'inactive']),
-});
+const recurringFrequencyValues = recurringFrequencyOptions.map((option) => option.value);
+
+const validateRecurringForm = (values) => {
+  const errors = {};
+  const amount = Number(values.amount);
+  const name = String(values.name || '').trim();
+  const notes = String(values.notes || '');
+
+  if (!String(values.amount || '')) {
+    errors.amount = 'Enter an amount.';
+  } else if (!Number.isFinite(amount) || amount <= 0) {
+    errors.amount = 'Amount must be greater than zero.';
+  }
+
+  if (!recurringFrequencyValues.includes(values.billingFrequency)) {
+    errors.billingFrequency = 'Choose a supported frequency.';
+  }
+
+  if (!values.categoryId) {
+    errors.categoryId = 'Choose an expense category.';
+  }
+
+  if (name.length < 2) {
+    errors.name = 'Name must be at least 2 characters.';
+  } else if (name.length > 120) {
+    errors.name = 'Keep name under 120 characters.';
+  }
+
+  if (!values.nextPaymentDate) {
+    errors.nextPaymentDate = 'Choose the next payment date.';
+  }
+
+  if (notes.length > 500) {
+    errors.notes = 'Keep notes under 500 characters.';
+  }
+
+  if (!['active', 'inactive'].includes(values.status)) {
+    errors.status = 'Choose a supported status.';
+  }
+
+  return errors;
+};
 
 function FieldError({ message }) {
   if (!message) {
@@ -32,14 +56,9 @@ function FieldError({ message }) {
 
 function RecurringFormDialog({ accounts, categories, isSaving, onClose, onSubmit, payment, saveError }) {
   const defaultValues = useMemo(() => createRecurringForm(payment, categories), [categories, payment]);
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-  } = useForm({
+  const { errors, handleSubmit, register, reset } = useManagedForm({
     defaultValues,
-    resolver: zodResolver(recurringSchema),
+    validate: validateRecurringForm,
   });
 
   useEffect(() => {
@@ -86,13 +105,13 @@ function RecurringFormDialog({ accounts, categories, isSaving, onClose, onSubmit
                 disabled={isSaving}
                 autoFocus
               />
-              <FieldError message={errors.name?.message} />
+              <FieldError message={errors.name} />
             </label>
 
             <label className="ledger-form-field">
               <span>Amount</span>
               <input min="0" placeholder="0.00" step="0.01" type="number" {...register('amount')} disabled={isSaving} />
-              <FieldError message={errors.amount?.message} />
+              <FieldError message={errors.amount} />
             </label>
 
             <label className="ledger-form-field">
@@ -104,6 +123,7 @@ function RecurringFormDialog({ accounts, categories, isSaving, onClose, onSubmit
                   </option>
                 ))}
               </select>
+              <FieldError message={errors.billingFrequency} />
             </label>
 
             <label className="ledger-form-field">
@@ -116,13 +136,13 @@ function RecurringFormDialog({ accounts, categories, isSaving, onClose, onSubmit
                   </option>
                 ))}
               </select>
-              <FieldError message={errors.categoryId?.message} />
+              <FieldError message={errors.categoryId} />
             </label>
 
             <label className="ledger-form-field">
               <span>Next payment date</span>
               <input type="date" {...register('nextPaymentDate')} disabled={isSaving} />
-              <FieldError message={errors.nextPaymentDate?.message} />
+              <FieldError message={errors.nextPaymentDate} />
             </label>
 
             <label className="ledger-form-field">
@@ -143,12 +163,18 @@ function RecurringFormDialog({ accounts, categories, isSaving, onClose, onSubmit
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
+              <FieldError message={errors.status} />
             </label>
 
             <label className="ledger-form-field ledger-form-field-wide">
               <span>Notes</span>
-              <textarea placeholder="Optional private note" {...register('notes')} disabled={isSaving} />
-              <FieldError message={errors.notes?.message} />
+              <textarea
+                placeholder="Optional private note"
+                maxLength="500"
+                {...register('notes')}
+                disabled={isSaving}
+              />
+              <FieldError message={errors.notes} />
             </label>
           </div>
 

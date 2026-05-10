@@ -1,28 +1,36 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import GoalsIcon from './GoalsIcon';
 import { buildGoalPayload, createGoalForm } from './goalUtils';
+import { useManagedForm } from '../../utils/useManagedForm';
 
-const goalSchema = z.object({
-  currentAmount: z
-    .string()
-    .optional()
-    .refine((value) => !value || (Number.isFinite(Number(value)) && Number(value) >= 0), {
-      message: 'Current amount must be zero or greater.',
-    }),
-  goalType: z.enum(['save', 'payoff']),
-  id: z.string().optional(),
-  targetAmount: z
-    .string()
-    .min(1, 'Enter a target amount.')
-    .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, {
-      message: 'Target amount must be greater than zero.',
-    }),
-  targetDate: z.string().optional(),
-  title: z.string().trim().min(2, 'Goal name must be at least 2 characters.').max(80, 'Keep goal name under 80 characters.'),
-});
+const validateGoalForm = (values) => {
+  const errors = {};
+  const currentAmount = Number(values.currentAmount);
+  const targetAmount = Number(values.targetAmount);
+  const title = String(values.title || '').trim();
+
+  if (values.currentAmount && (!Number.isFinite(currentAmount) || currentAmount < 0)) {
+    errors.currentAmount = 'Current amount must be zero or greater.';
+  }
+
+  if (!['save', 'payoff'].includes(values.goalType)) {
+    errors.goalType = 'Choose a supported goal type.';
+  }
+
+  if (!String(values.targetAmount || '')) {
+    errors.targetAmount = 'Enter a target amount.';
+  } else if (!Number.isFinite(targetAmount) || targetAmount <= 0) {
+    errors.targetAmount = 'Target amount must be greater than zero.';
+  }
+
+  if (title.length < 2) {
+    errors.title = 'Goal name must be at least 2 characters.';
+  } else if (title.length > 80) {
+    errors.title = 'Keep goal name under 80 characters.';
+  }
+
+  return errors;
+};
 
 function FieldError({ message }) {
   if (!message) {
@@ -34,14 +42,9 @@ function FieldError({ message }) {
 
 function GoalFormDialog({ goal, isSaving, onClose, onSubmit, saveError }) {
   const defaultValues = useMemo(() => createGoalForm(goal), [goal]);
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-  } = useForm({
+  const { errors, handleSubmit, register, reset } = useManagedForm({
     defaultValues,
-    resolver: zodResolver(goalSchema),
+    validate: validateGoalForm,
   });
 
   useEffect(() => {
@@ -85,7 +88,7 @@ function GoalFormDialog({ goal, isSaving, onClose, onSubmit, saveError }) {
                 disabled={isSaving}
                 autoFocus
               />
-              <FieldError message={errors.title?.message} />
+              <FieldError message={errors.title} />
             </label>
 
             <label className="ledger-form-field">
@@ -94,6 +97,7 @@ function GoalFormDialog({ goal, isSaving, onClose, onSubmit, saveError }) {
                 <option value="save">Save up</option>
                 <option value="payoff">Pay down</option>
               </select>
+              <FieldError message={errors.goalType} />
             </label>
 
             <label className="ledger-form-field">
@@ -106,7 +110,7 @@ function GoalFormDialog({ goal, isSaving, onClose, onSubmit, saveError }) {
                 {...register('targetAmount')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.targetAmount?.message} />
+              <FieldError message={errors.targetAmount} />
             </label>
 
             <label className="ledger-form-field">
@@ -119,13 +123,13 @@ function GoalFormDialog({ goal, isSaving, onClose, onSubmit, saveError }) {
                 {...register('currentAmount')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.currentAmount?.message} />
+              <FieldError message={errors.currentAmount} />
             </label>
 
             <label className="ledger-form-field">
               <span>Target date</span>
               <input type="date" {...register('targetDate')} disabled={isSaving} />
-              <FieldError message={errors.targetDate?.message} />
+              <FieldError message={errors.targetDate} />
             </label>
           </div>
 

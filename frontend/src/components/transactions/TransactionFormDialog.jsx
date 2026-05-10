@@ -1,12 +1,11 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import TransactionsIcon from './TransactionsIcon';
 import {
   buildTransactionPayload,
   createTransactionForm,
+  validateTransactionForm,
 } from './transactionUtils';
+import { useManagedForm } from '../../utils/useManagedForm';
 
 function FieldError({ message }) {
   if (!message) {
@@ -15,39 +14,6 @@ function FieldError({ message }) {
 
   return <span className="ledger-field-error">{message}</span>;
 }
-
-const createTransactionSchema = (categories) =>
-  z
-    .object({
-      accountId: z.string().optional(),
-      amount: z
-        .string()
-        .min(1, 'Enter an amount greater than zero.')
-        .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, {
-          message: 'Enter an amount greater than zero.',
-        }),
-      categoryId: z.string().min(1, 'Choose a category.'),
-      description: z
-        .string()
-        .trim()
-        .min(1, 'Enter a merchant, payee, or short title.')
-        .max(255, 'Keep the title under 255 characters.'),
-      isRecurring: z.boolean().optional(),
-      notes: z.string().max(500, 'Keep notes under 500 characters.').optional(),
-      transactionDate: z.string().min(1, 'Choose a transaction date.'),
-      type: z.enum(['expense', 'income']),
-    })
-    .superRefine((values, context) => {
-      const category = categories.find((item) => String(item.id) === String(values.categoryId));
-
-      if (category && category.type !== values.type) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'The selected category must match the transaction type.',
-          path: ['categoryId'],
-        });
-      }
-    });
 
 function TransactionFormDialog({
   accountOptions,
@@ -60,24 +26,17 @@ function TransactionFormDialog({
   transaction,
 }) {
   const title = mode === 'edit' ? 'Edit transaction' : 'Add transaction';
-  const schema = useMemo(() => createTransactionSchema(categories), [categories]);
+  const validateForm = useMemo(() => (values) => validateTransactionForm(values, categories), [categories]);
   const defaultValues = useMemo(
     () => createTransactionForm(transaction, categories),
     [categories, transaction]
   );
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-    setValue,
-    watch,
-  } = useForm({
+  const { errors, handleSubmit, register, reset, setFieldValue, values } = useManagedForm({
     defaultValues,
-    resolver: zodResolver(schema),
+    validate: validateForm,
   });
-  const transactionType = watch('type');
-  const selectedCategoryId = watch('categoryId');
+  const transactionType = values.type;
+  const selectedCategoryId = values.categoryId;
   const formCategories = useMemo(
     () => categories.filter((category) => category.type === transactionType),
     [categories, transactionType]
@@ -97,10 +56,8 @@ function TransactionFormDialog({
     }
 
     const fallbackCategory = categories.find((category) => category.type === transactionType);
-    setValue('categoryId', fallbackCategory?.id ? String(fallbackCategory.id) : '', {
-      shouldValidate: true,
-    });
-  }, [categories, selectedCategoryId, setValue, transactionType]);
+    setFieldValue('categoryId', fallbackCategory?.id ? String(fallbackCategory.id) : '');
+  }, [categories, selectedCategoryId, setFieldValue, transactionType]);
 
   const handleValidSubmit = async (values) => {
     await onSubmit(buildTransactionPayload(values));
@@ -140,7 +97,7 @@ function TransactionFormDialog({
                 autoFocus
                 disabled={isSaving}
               />
-              <FieldError message={errors.description?.message} />
+              <FieldError message={errors.description} />
             </label>
 
             <label className="ledger-form-field">
@@ -149,6 +106,7 @@ function TransactionFormDialog({
                 <option value="expense">Expense</option>
                 <option value="income">Income</option>
               </select>
+              <FieldError message={errors.type} />
             </label>
 
             <label className="ledger-form-field">
@@ -161,7 +119,7 @@ function TransactionFormDialog({
                 placeholder="0.00"
                 disabled={isSaving}
               />
-              <FieldError message={errors.amount?.message} />
+              <FieldError message={errors.amount} />
             </label>
 
             <label className="ledger-form-field">
@@ -177,7 +135,7 @@ function TransactionFormDialog({
                   </option>
                 ))}
               </select>
-              <FieldError message={errors.categoryId?.message} />
+              <FieldError message={errors.categoryId} />
             </label>
 
             <label className="ledger-form-field">
@@ -187,7 +145,7 @@ function TransactionFormDialog({
                 {...register('transactionDate')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.transactionDate?.message} />
+              <FieldError message={errors.transactionDate} />
             </label>
 
             <label className="ledger-form-field">
@@ -212,9 +170,10 @@ function TransactionFormDialog({
               <textarea
                 {...register('notes')}
                 placeholder="Private note for your own reference"
+                maxLength="500"
                 disabled={isSaving}
               />
-              <FieldError message={errors.notes?.message} />
+              <FieldError message={errors.notes} />
             </label>
           </div>
 

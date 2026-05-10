@@ -1,29 +1,53 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import AccountsIcon from './AccountsIcon';
 import { accountTypeOptions, createAccountForm } from './accountUtils';
+import { useManagedForm } from '../../utils/useManagedForm';
 
-const accountSchema = z.object({
-  accountType: z.enum(['checking', 'savings', 'credit_card', 'cash', 'investment', 'other']),
-  currency: z
-    .string()
-    .trim()
-    .regex(/^[A-Za-z]{3}$/, 'Use a three-letter currency code.'),
-  id: z.union([z.string(), z.number()]).optional(),
-  institutionName: z.string().max(120, 'Keep institution under 120 characters.').optional(),
-  isPrimary: z.boolean().optional(),
-  maskedIdentifier: z.string().max(20, 'Keep identifier under 20 characters.').optional(),
-  name: z.string().trim().min(2, 'Name must be at least 2 characters.').max(80, 'Keep name under 80 characters.'),
-  notes: z.string().max(255, 'Keep notes under 255 characters.').optional(),
-  openingBalance: z
-    .string()
-    .min(1, 'Enter an opening balance.')
-    .refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0, {
-      message: 'Opening balance must be zero or greater.',
-    }),
-});
+const accountTypeValues = accountTypeOptions.map((option) => option.value);
+
+const validateAccountForm = (values) => {
+  const errors = {};
+  const currency = String(values.currency || '').trim();
+  const institutionName = String(values.institutionName || '');
+  const maskedIdentifier = String(values.maskedIdentifier || '');
+  const name = String(values.name || '').trim();
+  const notes = String(values.notes || '');
+  const openingBalance = Number(values.openingBalance);
+
+  if (!accountTypeValues.includes(values.accountType)) {
+    errors.accountType = 'Choose a supported account type.';
+  }
+
+  if (!/^[A-Za-z]{3}$/.test(currency)) {
+    errors.currency = 'Use a three-letter currency code.';
+  }
+
+  if (institutionName.length > 120) {
+    errors.institutionName = 'Keep institution under 120 characters.';
+  }
+
+  if (maskedIdentifier.length > 20) {
+    errors.maskedIdentifier = 'Keep identifier under 20 characters.';
+  }
+
+  if (name.length < 2) {
+    errors.name = 'Name must be at least 2 characters.';
+  } else if (name.length > 80) {
+    errors.name = 'Keep name under 80 characters.';
+  }
+
+  if (notes.length > 255) {
+    errors.notes = 'Keep notes under 255 characters.';
+  }
+
+  if (String(values.openingBalance || '').length < 1) {
+    errors.openingBalance = 'Enter an opening balance.';
+  } else if (!Number.isFinite(openingBalance) || openingBalance < 0) {
+    errors.openingBalance = 'Opening balance must be zero or greater.';
+  }
+
+  return errors;
+};
 
 function FieldError({ message }) {
   if (!message) {
@@ -36,15 +60,11 @@ function FieldError({ message }) {
 function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) {
   const mode = account ? 'edit' : 'add';
   const defaultValues = useMemo(() => createAccountForm(account), [account]);
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-  } = useForm({
+  const form = useManagedForm({
     defaultValues,
-    resolver: zodResolver(accountSchema),
+    validate: validateAccountForm,
   });
+  const { errors, handleSubmit, register, reset } = form;
 
   useEffect(() => {
     reset(defaultValues);
@@ -53,8 +73,9 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
   const handleValidSubmit = async (values) => {
     await onSubmit({
       ...values,
-      currency: values.currency.toUpperCase(),
+      currency: values.currency.trim().toUpperCase(),
       id: account?.id,
+      name: values.name.trim(),
     });
   };
 
@@ -91,7 +112,7 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                 disabled={isSaving}
                 autoFocus
               />
-              <FieldError message={errors.name?.message} />
+              <FieldError message={errors.name} />
             </label>
 
             <label className="vault-field">
@@ -103,12 +124,13 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                   </option>
                 ))}
               </select>
+              <FieldError message={errors.accountType} />
             </label>
 
             <label className="vault-field">
               <span>Currency</span>
               <input type="text" maxLength="3" {...register('currency')} disabled={isSaving} />
-              <FieldError message={errors.currency?.message} />
+              <FieldError message={errors.currency} />
             </label>
 
             <label className="vault-field">
@@ -119,7 +141,7 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                 {...register('institutionName')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.institutionName?.message} />
+              <FieldError message={errors.institutionName} />
             </label>
 
             <label className="vault-field">
@@ -130,7 +152,7 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                 {...register('maskedIdentifier')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.maskedIdentifier?.message} />
+              <FieldError message={errors.maskedIdentifier} />
             </label>
 
             <label className="vault-field">
@@ -143,7 +165,7 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                 {...register('openingBalance')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.openingBalance?.message} />
+              <FieldError message={errors.openingBalance} />
             </label>
 
             <label className="vault-field vault-field-wide">
@@ -153,7 +175,7 @@ function AccountFormDialog({ account, isSaving, onClose, onSubmit, saveError }) 
                 {...register('notes')}
                 disabled={isSaving}
               />
-              <FieldError message={errors.notes?.message} />
+              <FieldError message={errors.notes} />
             </label>
           </div>
 

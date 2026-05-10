@@ -1,41 +1,37 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import BudgetsIcon from './BudgetsIcon';
 import { buildBudgetPayload, createBudgetForm, monthNames } from './budgetUtils';
+import { useManagedForm } from '../../utils/useManagedForm';
 
-const createBudgetSchema = (categories) =>
-  z
-    .object({
-      amountLimit: z
-        .string()
-        .min(1, 'Enter a monthly limit.')
-        .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, {
-          message: 'Budget limit must be greater than zero.',
-        }),
-      categoryId: z.string().min(1, 'Choose an expense category.'),
-      id: z.string().optional(),
-      month: z.string().refine((value) => {
-        const month = Number(value);
-        return Number.isInteger(month) && month >= 1 && month <= 12;
-      }, 'Choose a valid month.'),
-      year: z.string().refine((value) => {
-        const year = Number(value);
-        return Number.isInteger(year) && year >= 2000 && year <= 2100;
-      }, 'Choose a valid year.'),
-    })
-    .superRefine((values, context) => {
-      const selectedCategory = categories.find((category) => String(category.id) === String(values.categoryId));
+const createBudgetValidator = (categories) => (values) => {
+  const errors = {};
+  const amountLimit = Number(values.amountLimit);
+  const month = Number(values.month);
+  const year = Number(values.year);
+  const selectedCategory = categories.find((category) => String(category.id) === String(values.categoryId));
 
-      if (!selectedCategory) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Choose an available expense category.',
-          path: ['categoryId'],
-        });
-      }
-    });
+  if (!String(values.amountLimit || '')) {
+    errors.amountLimit = 'Enter a monthly limit.';
+  } else if (!Number.isFinite(amountLimit) || amountLimit <= 0) {
+    errors.amountLimit = 'Budget limit must be greater than zero.';
+  }
+
+  if (!values.categoryId) {
+    errors.categoryId = 'Choose an expense category.';
+  } else if (!selectedCategory) {
+    errors.categoryId = 'Choose an available expense category.';
+  }
+
+  if (!Number.isInteger(month) || month < 1 || month > 12) {
+    errors.month = 'Choose a valid month.';
+  }
+
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    errors.year = 'Choose a valid year.';
+  }
+
+  return errors;
+};
 
 function FieldError({ message }) {
   if (!message) {
@@ -46,19 +42,14 @@ function FieldError({ message }) {
 }
 
 function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, period, presetCategoryId, saveError }) {
-  const schema = useMemo(() => createBudgetSchema(categories), [categories]);
+  const validateBudgetForm = useMemo(() => createBudgetValidator(categories), [categories]);
   const defaultValues = useMemo(
     () => createBudgetForm(budget, period, categories, presetCategoryId),
     [budget, categories, period, presetCategoryId]
   );
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-    reset,
-  } = useForm({
+  const { errors, handleSubmit, register, reset } = useManagedForm({
     defaultValues,
-    resolver: zodResolver(schema),
+    validate: validateBudgetForm,
   });
 
   useEffect(() => {
@@ -108,7 +99,7 @@ function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, per
                   </option>
                 ))}
               </select>
-              <FieldError message={errors.categoryId?.message} />
+              <FieldError message={errors.categoryId} />
             </label>
 
             <label className="ledger-form-field">
@@ -121,7 +112,7 @@ function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, per
                 {...register('amountLimit')}
                 disabled={isSaving || !categories.length}
               />
-              <FieldError message={errors.amountLimit?.message} />
+              <FieldError message={errors.amountLimit} />
             </label>
 
             <label className="ledger-form-field">
@@ -133,7 +124,7 @@ function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, per
                   </option>
                 ))}
               </select>
-              <FieldError message={errors.month?.message} />
+              <FieldError message={errors.month} />
             </label>
 
             <label className="ledger-form-field ledger-form-field-wide">
@@ -145,7 +136,7 @@ function BudgetFormDialog({ budget, categories, isSaving, onClose, onSubmit, per
                 {...register('year')}
                 disabled={isSaving || !categories.length}
               />
-              <FieldError message={errors.year?.message} />
+              <FieldError message={errors.year} />
             </label>
           </div>
 

@@ -127,6 +127,10 @@ export const validateTransactionForm = (form, categories) => {
   const category = categories.find((item) => String(item.id) === String(form.categoryId));
   const amount = Number(form.amount);
 
+  if (!['expense', 'income'].includes(form.type)) {
+    errors.type = 'Choose a supported transaction type.';
+  }
+
   if (!form.description.trim()) {
     errors.description = 'Enter a merchant, payee, or short title.';
   }
@@ -141,6 +145,10 @@ export const validateTransactionForm = (form, categories) => {
 
   if (!form.transactionDate) {
     errors.transactionDate = 'Choose a transaction date.';
+  }
+
+  if (form.notes?.length > 500) {
+    errors.notes = 'Keep notes under 500 characters.';
   }
 
   if (!form.categoryId) {
