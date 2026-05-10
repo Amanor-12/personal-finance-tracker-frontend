@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { accountStore } from '../../utils/accountStore';
 
-function PlaidConnectAction({ disabled = false, onConnected, onError, onStart }) {
+function PlaidConnectAction({ autoStart = false, disabled = false, onConnected, onError, onStart }) {
   const [isPreparing, setIsPreparing] = useState(false);
   const [linkToken, setLinkToken] = useState(null);
   const [pendingOpen, setPendingOpen] = useState(false);
+  const autoStartTriggered = useRef(false);
 
   const { error: plaidError, open, ready } = usePlaidLink({
     onExit(exitError) {
@@ -74,6 +75,19 @@ function PlaidConnectAction({ disabled = false, onConnected, onError, onStart })
       setIsPreparing(false);
     }
   };
+
+  const triggerPlaidAutoStart = useEffectEvent(() => {
+    void handleClick();
+  });
+
+  useEffect(() => {
+    if (!autoStart || autoStartTriggered.current) {
+      return;
+    }
+
+    autoStartTriggered.current = true;
+    triggerPlaidAutoStart();
+  }, [autoStart]);
 
   return (
     <button className="ref-secondary-button" type="button" onClick={handleClick} disabled={disabled || isPreparing}>

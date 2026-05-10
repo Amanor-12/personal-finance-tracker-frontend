@@ -9,6 +9,8 @@ const SENTRY_TRACES_SAMPLE_RATE = Number(import.meta.env.VITE_SENTRY_TRACES_SAMP
 
 let sentryInitialized = false;
 let sentryModulePromise = null;
+let sentryBootstrapScheduled = false;
+let pendingSentryUser = null;
 
 const traceTargets = [
   /^\//,
@@ -30,6 +32,31 @@ const normalizeError = (errorLike) => {
   }
 
   return new Error('Unknown frontend error');
+};
+
+const buildSentryUser = (user) => {
+  if (!user?.id) {
+    return null;
+  }
+
+  return {
+    email: user.email || undefined,
+    id: String(user.id),
+    username: user.fullName || user.name || undefined,
+  };
+};
+
+const applySentryUser = (Sentry, user) => {
+  if (!Sentry) {
+    return;
+  }
+
+  if (!user?.id) {
+    Sentry.setUser(null);
+    return;
+  }
+
+  Sentry.setUser(user);
 };
 
 export const isSentryEnabled = () => Boolean(SENTRY_DSN);
@@ -74,7 +101,46 @@ export const initializeSentry = async () => {
   });
 
   sentryInitialized = true;
+  applySentryUser(Sentry, pendingSentryUser);
   return true;
+};
+
+export const scheduleSentryInitialization = ({ timeoutMs = 2400 } = {}) => {
+  if (!isSentryEnabled() || sentryInitialized || sentryBootstrapScheduled || typeof window === 'undefined') {
+    return;
+  }
+
+  sentryBootstrapScheduled = true;
+
+  const runInitialization = () => {
+    void initializeSentry().catch(() => {
+      sentryBootstrapScheduled = false;
+    });
+  };
+
+  const queueIdleInitialization = () => {
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(runInitialization, {
+        timeout: timeoutMs,
+      });
+      return;
+    }
+
+    window.setTimeout(runInitialization, Math.min(timeoutMs, 1200));
+  };
+
+  if (document.readyState === 'complete') {
+    queueIdleInitialization();
+    return;
+  }
+
+  window.addEventListener(
+    'load',
+    () => {
+      queueIdleInitialization();
+    },
+    { once: true }
+  );
 };
 
 export const captureSentryException = async (errorLike, context = {}) => {
@@ -82,6 +148,7 @@ export const captureSentryException = async (errorLike, context = {}) => {
     return null;
   }
 
+  await initializeSentry().catch(() => false);
   const Sentry = await loadSentryModule().catch(() => null);
 
   if (!Sentry) {
@@ -114,20 +181,17 @@ export const setSentryUser = async (user) => {
     return;
   }
 
+  pendingSentryUser = buildSentryUser(user);
+
+  if (!sentryInitialized) {
+    return;
+  }
+
   const Sentry = await loadSentryModule().catch(() => null);
 
   if (!Sentry) {
     return;
   }
 
-  if (!user?.id) {
-    Sentry.setUser(null);
-    return;
-  }
-
-  Sentry.setUser({
-    email: user.email || undefined,
-    id: String(user.id),
-    username: user.fullName || user.name || undefined,
-  });
+  applySentryUser(Sentry, pendingSentryUser);
 };

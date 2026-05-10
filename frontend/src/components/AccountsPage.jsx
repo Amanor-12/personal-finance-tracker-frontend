@@ -4,7 +4,6 @@ import { ResourceLimitCard } from './billing/FeatureGate';
 import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
 import AccountsIcon from './accounts/AccountsIcon';
-import PlaidConnectAction from './accounts/PlaidConnectAction';
 import { formatAccountCurrency, getAccountTypeLabel } from './accounts/accountUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { useBillingAccess } from '../context/useBillingAccess';
@@ -12,6 +11,21 @@ import { accountStore } from '../utils/accountStore';
 import { loadAccountFormDialog } from '../utils/dialogPrefetch';
 
 const AccountFormDialog = lazy(loadAccountFormDialog);
+const loadPlaidConnectAction = (() => {
+  let request = null;
+
+  return () => {
+    if (!request) {
+      request = import('./accounts/PlaidConnectAction').catch((error) => {
+        request = null;
+        throw error;
+      });
+    }
+
+    return request;
+  };
+})();
+const PlaidConnectAction = lazy(loadPlaidConnectAction);
 
 const summarizeAccounts = (accounts) => {
   const active = accounts.filter((account) => account.status === 'active');
@@ -121,6 +135,8 @@ function AccountsPage({ currentUser, onLogout }) {
   const [bankSyncMessage, setBankSyncMessage] = useState('');
   const [isLoadingBankSync, setIsLoadingBankSync] = useState(true);
   const [isCreatingBankConnection, setIsCreatingBankConnection] = useState(false);
+  const [isPlaidActionVisible, setIsPlaidActionVisible] = useState(false);
+  const [shouldAutoStartPlaid, setShouldAutoStartPlaid] = useState(false);
   const [syncingConnectionId, setSyncingConnectionId] = useState(null);
   const [reconcilingTransactionId, setReconcilingTransactionId] = useState(null);
   const [editingAccount, setEditingAccount] = useState(null);
@@ -251,6 +267,11 @@ function AccountsPage({ currentUser, onLogout }) {
   const sandboxProvider = bankProviders.find((provider) => provider.id === 'sandbox') || null;
   const warmAccountDialog = () => {
     void loadAccountFormDialog();
+  };
+  const warmPlaidConnectAction = () => {
+    if (plaidProvider?.status === 'available') {
+      void loadPlaidConnectAction();
+    }
   };
 
   const openAddDialog = () => {
@@ -385,6 +406,7 @@ function AccountsPage({ currentUser, onLogout }) {
   };
 
   const handlePlaidConnected = (result) => {
+    setShouldAutoStartPlaid(false);
     setRefreshKey((value) => value + 1);
     setBankSyncMessage(
       result.message ||
@@ -393,7 +415,15 @@ function AccountsPage({ currentUser, onLogout }) {
   };
 
   const handlePlaidError = (message) => {
+    setShouldAutoStartPlaid(false);
     setBankSyncMessage(message || 'Plaid connection could not be completed.');
+  };
+
+  const activatePlaidConnect = () => {
+    warmPlaidConnectAction();
+    setIsPlaidActionVisible(true);
+    setShouldAutoStartPlaid(true);
+    setBankSyncMessage('Preparing Plaid Link...');
   };
 
   const rail = (
@@ -543,11 +573,32 @@ function AccountsPage({ currentUser, onLogout }) {
               <div className="accounts-wallet-actions">
                 <div className="settings-inline-actions">
                   {plaidProvider?.status === 'available' ? (
-                    <PlaidConnectAction
-                      onConnected={handlePlaidConnected}
-                      onError={handlePlaidError}
-                      onStart={() => setBankSyncMessage('Preparing Plaid Link...')}
-                    />
+                    isPlaidActionVisible ? (
+                      <Suspense
+                        fallback={
+                          <button className="ref-secondary-button" type="button" disabled>
+                            Preparing Plaid...
+                          </button>
+                        }
+                      >
+                        <PlaidConnectAction
+                          autoStart={shouldAutoStartPlaid}
+                          onConnected={handlePlaidConnected}
+                          onError={handlePlaidError}
+                          onStart={() => setBankSyncMessage('Preparing Plaid Link...')}
+                        />
+                      </Suspense>
+                    ) : (
+                      <button
+                        className="ref-secondary-button"
+                        type="button"
+                        onClick={activatePlaidConnect}
+                        onFocus={warmPlaidConnectAction}
+                        onMouseEnter={warmPlaidConnectAction}
+                      >
+                        Connect live institution
+                      </button>
+                    )
                   ) : null}
                   {sandboxProvider ? (
                     <button
