@@ -29,6 +29,24 @@ const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 const frontendIndexPath = path.join(frontendDistPath, 'index.html');
 const hasFrontendBuild = fs.existsSync(frontendIndexPath);
 
+const isLoopbackDevelopmentOrigin = (origin) => {
+  if (isProduction || !origin) {
+    return false;
+  }
+
+  try {
+    const { hostname, protocol } = new URL(origin);
+    const normalizedHostname = hostname.replace(/^\[|\]$/g, '');
+
+    return (
+      ['http:', 'https:'].includes(protocol) &&
+      ['localhost', '127.0.0.1', '::1'].includes(normalizedHostname)
+    );
+  } catch {
+    return false;
+  }
+};
+
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(attachRequestContext);
@@ -48,7 +66,12 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.length === 0 ||
+        allowedOrigins.includes(origin) ||
+        isLoopbackDevelopmentOrigin(origin)
+      ) {
         return callback(null, true);
       }
 

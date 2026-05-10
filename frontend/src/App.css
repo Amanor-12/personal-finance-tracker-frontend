@@ -810,15 +810,37 @@ body,
 
 .ref-primary-button,
 .ref-secondary-button {
-  color: #ffffff;
-  background: linear-gradient(135deg, #6c66f8 0%, #5248f0 50%, #2f99f4 100%);
-}
-
-.ref-primary-button {
   min-height: 42px;
   padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
   border-radius: 12px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 850;
+  text-decoration: none;
+  background: linear-gradient(135deg, #6c66f8 0%, #5248f0 50%, #2f99f4 100%);
   box-shadow: 0 16px 30px rgba(82, 72, 240, 0.22);
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.ref-primary-button:hover,
+.ref-secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.ref-primary-button:disabled,
+.ref-secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+  box-shadow: none;
 }
 
 .ref-content-grid {
@@ -2374,10 +2396,17 @@ body,
   justify-self: start;
   min-height: 44px;
   padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 14px;
+  border: 0;
   color: #ffffff;
+  font: inherit;
   font-weight: 800;
+  text-decoration: none;
   background: linear-gradient(135deg, #6c66f8 0%, #5248f0 50%, #2f99f4 100%);
+  cursor: pointer;
 }
 
 .settings-toggle-list {
@@ -2395,6 +2424,11 @@ body,
   border-radius: 20px;
   border: 1px solid rgba(202, 210, 216, 0.7);
   background: linear-gradient(180deg, #fafbfd 0%, #f4f7fb 100%);
+}
+
+.settings-toggle.is-disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .settings-toggle-copy strong,
@@ -2428,6 +2462,11 @@ body,
   position: absolute;
   inset: 0;
   opacity: 0;
+  cursor: pointer;
+}
+
+.settings-toggle-pill input:disabled {
+  cursor: wait;
 }
 
 .settings-toggle-pill.is-active {
@@ -2639,6 +2678,23 @@ body,
 .settings-save-button:disabled {
   cursor: not-allowed;
   opacity: 0.62;
+}
+
+.settings-data-actions {
+  margin-top: -2px;
+}
+
+.settings-disabled-action {
+  min-height: 44px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 14px;
+  color: #65718a;
+  font-size: 0.88rem;
+  font-weight: 800;
+  background: rgba(242, 245, 250, 0.94);
+  border: 1px solid rgba(202, 210, 216, 0.74);
 }
 
 .settings-link-button {
@@ -14526,9 +14582,32 @@ textarea:focus-visible,
 
 .goals-portfolio-console .goals-progress-orb {
   background:
-    radial-gradient(circle closest-side, rgba(255, 255, 255, 0.96) 58%, transparent 59% 100%),
-    conic-gradient(#2bc1b0 0 var(--goal-progress), #5a5ef6 var(--goal-progress) calc(var(--goal-progress) + 16%), rgba(255, 255, 255, 0.18) 0 100%);
+    radial-gradient(circle closest-side, #ffffff 55%, rgba(255, 255, 255, 0.12) 56% 59%, transparent 60% 100%),
+    conic-gradient(#2fc7b4 0 var(--goal-progress), #6f7cff var(--goal-progress) calc(var(--goal-progress) + 16%), rgba(255, 255, 255, 0.26) 0 100%);
+  border-color: rgba(255, 255, 255, 0.32);
   box-shadow: 0 24px 42px rgba(24, 36, 93, 0.18);
+}
+
+.goals-portfolio-console .goals-progress-orb span {
+  color: #0b1533;
+}
+
+.goals-portfolio-console .goals-progress-orb strong,
+.goals-portfolio-console .goals-progress-orb small {
+  color: #45516b;
+}
+
+.goals-portfolio-console .goals-portfolio-panel .ref-secondary-button {
+  min-height: 46px;
+  margin-top: 18px;
+  padding: 0 18px;
+  background: rgba(7, 17, 45, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 18px 34px rgba(13, 22, 58, 0.16);
+}
+
+.goals-portfolio-console .goals-portfolio-panel .ref-secondary-button:hover {
+  background: rgba(7, 17, 45, 0.44);
 }
 
 .recurring-queue-console {

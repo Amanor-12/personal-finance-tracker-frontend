@@ -117,15 +117,15 @@ function FieldError({ message }) {
   return message ? <span className="settings-field-error">{message}</span> : null;
 }
 
-function SettingsToggle({ checked, label, note, register }) {
+function SettingsToggle({ checked, disabled = false, label, note, register }) {
   return (
-    <label className="settings-toggle">
+    <label className={`settings-toggle${disabled ? ' is-disabled' : ''}`}>
       <span className="settings-toggle-copy">
         <strong>{label}</strong>
         <span>{note}</span>
       </span>
       <span className={`settings-toggle-pill${checked ? ' is-active' : ''}`}>
-        <input type="checkbox" {...register} />
+        <input type="checkbox" {...register} disabled={disabled} />
         <span className="settings-toggle-knob" />
       </span>
     </label>
@@ -210,6 +210,8 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   const [deleteAccountMessage, setDeleteAccountMessage] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [isSavingPreferences, setIsSavingPreferences] = useState(false);
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
   const [isSyncingSettings, setIsSyncingSettings] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [isLoadingMfa, setIsLoadingMfa] = useState(false);
@@ -596,6 +598,11 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
         setProfileMessage('Profile saved.');
       }
     } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
       setProfileMessage(error.message || 'Profile could not be saved.');
     } finally {
       setIsSavingProfile(false);
@@ -624,6 +631,7 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
   };
 
   const handlePreferencesSubmit = async (values) => {
+    setIsSavingPreferences(true);
     setPreferencesMessage('');
 
     try {
@@ -635,11 +643,19 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       });
       setPreferencesMessage('Preferences saved.');
     } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
       setPreferencesMessage(error.message || 'Preferences could not be saved.');
+    } finally {
+      setIsSavingPreferences(false);
     }
   };
 
   const handleNotificationsSubmit = async (values) => {
+    setIsSavingNotifications(true);
     setNotificationMessage('');
 
     try {
@@ -651,7 +667,14 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
       });
       setNotificationMessage('Notifications saved.');
     } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
       setNotificationMessage(error.message || 'Notifications could not be saved.');
+    } finally {
+      setIsSavingNotifications(false);
     }
   };
 
@@ -664,15 +687,26 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
-      const nextSessions = await authStore.getSessions();
-      setSessions(nextSessions);
+      if (supportsSecurityControls) {
+        const nextSessions = await authStore.getSessions();
+        setSessions(nextSessions);
+      }
       passwordForm.reset({
         confirmPassword: '',
         currentPassword: '',
         newPassword: '',
       });
-      setSecurityMessage('Password updated. Other sessions were revoked and the current device was rotated onto a fresh session.');
+      setSecurityMessage(
+        supportsSecurityControls
+          ? 'Password updated. Other sessions were revoked and the current device was rotated onto a fresh session.'
+          : 'Password updated.'
+      );
     } catch (error) {
+      if (error.status === 401) {
+        await onLogout();
+        return;
+      }
+
       setSecurityMessage(error.message || 'Password could not be updated.');
     } finally {
       setIsSavingPassword(false);
@@ -1053,41 +1087,45 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                 body="Set the baseline language for amounts, weeks, and display density. These preferences stay with the workspace."
               />
               <form className="settings-form" onSubmit={preferencesForm.handleSubmit(handlePreferencesSubmit)}>
+                {isSyncingSettings ? <p className="settings-message">Loading latest workspace settings...</p> : null}
                 {preferencesMessage ? <p className="settings-message">{preferencesMessage}</p> : null}
                 <div className="settings-field-grid">
                   <label className="settings-field">
                     <span>Currency</span>
-                    <select {...preferencesForm.register('currency')}>
+                    <select {...preferencesForm.register('currency')} disabled={isSavingPreferences || isSyncingSettings}>
                       {currencyOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
                       ))}
                     </select>
+                    <FieldError message={preferencesForm.errors.currency} />
                   </label>
                   <label className="settings-field">
                     <span>Week starts</span>
-                    <select {...preferencesForm.register('weekStart')}>
+                    <select {...preferencesForm.register('weekStart')} disabled={isSavingPreferences || isSyncingSettings}>
                       {weekStartOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
                       ))}
                     </select>
+                    <FieldError message={preferencesForm.errors.weekStart} />
                   </label>
                   <label className="settings-field settings-field-wide">
                     <span>Amount view</span>
-                    <select {...preferencesForm.register('amountView')}>
+                    <select {...preferencesForm.register('amountView')} disabled={isSavingPreferences || isSyncingSettings}>
                       {amountViewOptions.map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
                       ))}
                     </select>
+                    <FieldError message={preferencesForm.errors.amountView} />
                   </label>
                 </div>
-                <button className="settings-save-button" type="submit">
-                  Save preferences
+                <button className="settings-save-button" type="submit" disabled={isSavingPreferences || isSyncingSettings}>
+                  {isSavingPreferences ? 'Saving preferences...' : 'Save preferences'}
                 </button>
               </form>
             </article>
@@ -1101,29 +1139,33 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                 body="These switches stay attached to the workspace so notification intent remains consistent as delivery expands."
               />
               <form className="settings-form" onSubmit={notificationForm.handleSubmit(handleNotificationsSubmit)}>
+                {isSyncingSettings ? <p className="settings-message">Loading latest notification settings...</p> : null}
                 {notificationMessage ? <p className="settings-message">{notificationMessage}</p> : null}
                 <div className="settings-toggle-list">
                   <SettingsToggle
                     checked={notificationValues.paymentReminders}
+                    disabled={isSavingNotifications || isSyncingSettings}
                     label="Payment reminders"
                     note="Show reminders for recurring payments when reminder delivery is connected."
                     register={notificationForm.register('paymentReminders')}
                   />
                   <SettingsToggle
                     checked={notificationValues.weeklySummary}
+                    disabled={isSavingNotifications || isSyncingSettings}
                     label="Weekly summary"
                     note="Prepare a weekly recap of actual activity."
                     register={notificationForm.register('weeklySummary')}
                   />
                   <SettingsToggle
                     checked={notificationValues.loginAlerts}
+                    disabled={isSavingNotifications || isSyncingSettings}
                     label="Login alerts"
                     note="Keep account-access visibility enabled."
                     register={notificationForm.register('loginAlerts')}
                   />
                 </div>
-                <button className="settings-save-button" type="submit">
-                  Save notifications
+                <button className="settings-save-button" type="submit" disabled={isSavingNotifications || isSyncingSettings}>
+                  {isSavingNotifications ? 'Saving notifications...' : 'Save notifications'}
                 </button>
               </form>
             </article>
@@ -1563,6 +1605,24 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
                     <strong>Unavailable</strong>
                     <p>Account deletion stays hidden until the account can be removed safely with proper review and auditing.</p>
                   </div>
+                )}
+              </div>
+
+              <div className="settings-inline-actions settings-data-actions">
+                {supportsTransactionExport ? (
+                  hasPaidExports ? (
+                    <Link className="settings-save-button settings-link-button" to="/transactions">
+                      Open CSV export tools
+                    </Link>
+                  ) : (
+                    <Link className="settings-save-button settings-link-button" to="/pricing">
+                      Upgrade for CSV export
+                    </Link>
+                  )
+                ) : (
+                  <span className="settings-disabled-action">
+                    Export actions are unavailable in this deployment.
+                  </span>
                 )}
               </div>
 

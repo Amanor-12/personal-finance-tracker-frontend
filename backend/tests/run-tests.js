@@ -65,6 +65,19 @@ const tests = [
     },
   },
   {
+    name: 'development CORS accepts fallback Vite loopback origins',
+    async run() {
+      const response = await request(app)
+        .options('/api/auth/login')
+        .set('Origin', 'http://127.0.0.1:5174')
+        .set('Access-Control-Request-Method', 'POST')
+        .expect(204);
+
+      assert.equal(response.headers['access-control-allow-origin'], 'http://127.0.0.1:5174');
+      assert.equal(response.headers['access-control-allow-credentials'], 'true');
+    },
+  },
+  {
     name: 'auth supports MFA enrollment and login challenges',
     async run() {
       const agent = request.agent(app);

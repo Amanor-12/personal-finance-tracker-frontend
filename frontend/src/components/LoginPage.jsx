@@ -22,6 +22,13 @@ const isLocalDevelopmentHost = () => {
   return ['localhost', '127.0.0.1'].includes(window.location.hostname);
 };
 
+const formatAuthErrorMessage = (message, error) => {
+  const fallbackMessage = message || 'Rivo could not complete that request. Please try again.';
+  const status = Number(error?.status || 0);
+
+  return status >= 500 ? appendSupportReference(fallbackMessage, error) : fallbackMessage;
+};
+
 function AuthIcon({ type }) {
   const icons = {
     user: (
@@ -173,7 +180,7 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
         navigate(redirectPath, { replace: true });
       } catch (error) {
         setMessage(
-          appendSupportReference(
+          formatAuthErrorMessage(
             error.message || 'Rivo could not verify the multi-factor code.',
             error
           )
@@ -259,12 +266,7 @@ function LoginPage({ mode = 'login', onCompleteMfaLogin, onLogin, onSignUp }) {
             : "Rivo can't connect right now. Please try again in a moment."
           : error.message;
 
-      setMessage(
-        appendSupportReference(
-          authMessage || 'Rivo could not complete that request. Please try again.',
-          error
-        )
-      );
+      setMessage(formatAuthErrorMessage(authMessage, error));
       setMessageTone('error');
     } finally {
       setIsSubmitting(false);
