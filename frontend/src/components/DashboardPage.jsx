@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FinanceLayout from './FinanceLayout';
+import { formatAccountCurrency, getAccountTypeLabel } from './accounts/accountUtils';
 import { useBillingAccess } from '../context/useBillingAccess';
 import { accountStore } from '../utils/accountStore';
 import { cardStore } from '../utils/cardStore';
@@ -67,12 +68,46 @@ const formatCurrency = (value) => currencyFormatter.format(value || 0);
 const formatShortDate = (value) => shortDateFormatter.format(new Date(value));
 const formatAxisValue = (value) => axisValueFormatter.format(value || 0);
 
-const getCardTitle = (card) => card?.nickname?.trim() || `${card?.brand || 'Rivo'} Card`;
+const getDashboardAccountTheme = (accountType) => {
+  if (accountType === 'savings' || accountType === 'investment') {
+    return 'emerald';
+  }
+
+  if (accountType === 'cash') {
+    return 'sunset';
+  }
+
+  return 'indigo';
+};
+
+const createAccountWalletItem = (account) => ({
+  balanceLabel: formatAccountCurrency(account.currentBalance, account.currency),
+  brand: account.institutionName || 'Rivo Wallet',
+  currency: account.currency || 'USD',
+  holderName: `${getAccountTypeLabel(account.accountType)} account`,
+  id: `account-${account.id}`,
+  last4: account.maskedIdentifier || account.accountType || 'manual',
+  nickname: account.name || account.institutionName || getAccountTypeLabel(account.accountType),
+  sourceType: 'account',
+  theme: getDashboardAccountTheme(account.accountType),
+});
+
+const getCardTitle = (card) => {
+  if (card?.nickname?.trim()) {
+    return card.nickname.trim();
+  }
+
+  if (card?.sourceType === 'account') {
+    return card?.brand || 'Wallet';
+  }
+
+  return `${card?.brand || 'Rivo'} Card`;
+};
 const matchesCardQuery = (card, query) =>
   !query ||
-  [getCardTitle(card), card?.holderName, card?.brand, card?.last4]
+  [getCardTitle(card), card?.holderName, card?.brand, card?.last4, card?.balanceLabel]
     .filter(Boolean)
-    .some((value) => value.toLowerCase().includes(query));
+    .some((value) => String(value).toLowerCase().includes(query));
 
 const padValue = (value) => String(value).padStart(2, '0');
 const toMonthKey = (date) => `${date.getFullYear()}-${padValue(date.getMonth() + 1)}`;
@@ -310,11 +345,12 @@ function CardSearchIcon() {
 }
 
 function WalletStackCard({ card, depth = 0, placeholder = false, isActive = false, onSelect = null }) {
+  const isAccount = card?.sourceType === 'account';
   const theme = placeholder ? 'indigo' : card?.theme || 'indigo';
-  const title = placeholder ? 'Rivo' : card?.brand || 'Card';
-  const label = placeholder ? 'Preview card' : card?.holderName || 'Card holder';
-  const number = placeholder ? '**** ----' : `**** ${card.last4}`;
-  const expiry = placeholder ? '--/--' : card?.expiry || '--/--';
+  const title = placeholder ? 'Rivo' : card?.brand || (isAccount ? 'Wallet' : 'Card');
+  const label = placeholder ? 'Preview wallet' : card?.holderName || (isAccount ? 'Money source' : 'Card holder');
+  const number = placeholder ? '**** ----' : isAccount ? card?.balanceLabel || '$0.00' : `**** ${card?.last4 || '----'}`;
+  const expiry = placeholder ? '--/--' : isAccount ? card?.currency || 'USD' : card?.expiry || '--/--';
   const tail = placeholder ? 'preview' : getCardTitle(card);
   const Element = onSelect ? 'button' : 'article';
 
@@ -367,6 +403,7 @@ function DashboardPage({ currentUser, onLogout }) {
   const { hasFeature } = useBillingAccess();
   const [isLoading, setIsLoading] = useState(true);
   const [activeCardId, setActiveCardId] = useState('');
+  const [accounts, setAccounts] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [cardSearch, setCardSearch] = useState('');
   const [cards, setCards] = useState([]);
@@ -385,6 +422,7 @@ function DashboardPage({ currentUser, onLogout }) {
 
     const loadWorkspaceData = async () => {
       if (!currentUser?.id) {
+        setAccounts([]);
         setBudgets([]);
         setCards([]);
         setExpenseCategories([]);
@@ -442,6 +480,10 @@ function DashboardPage({ currentUser, onLogout }) {
         const nextCategories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
         const nextTransactions =
           transactionsResult.status === 'fulfilled' ? transactionsResult.value : [];
+        const nextAccounts =
+          accountsResult.status === 'fulfilled'
+            ? accountsResult.value.filter((account) => account.status === 'active')
+            : [];
         const nextBudgets = budgetsResult.status === 'fulfilled' ? budgetsResult.value : [];
         const nextRecurringPayments =
           recurringResult.status === 'fulfilled' ? recurringResult.value : [];
@@ -457,7 +499,11 @@ function DashboardPage({ currentUser, onLogout }) {
             ? cardsResult.reason?.message || 'Cards are unavailable.'
             : '',
         ].filter(Boolean);
+        const nextWalletItems = nextCards.length
+          ? nextCards.map((card) => ({ ...card, sourceType: 'card' }))
+          : nextAccounts.map(createAccountWalletItem);
 
+        setAccounts(nextAccounts);
         setBudgets(nextBudgets);
         setCards(nextCards);
         setSnapshot(nextSnapshot);
@@ -465,16 +511,15 @@ function DashboardPage({ currentUser, onLogout }) {
         setRecurringPayments(nextRecurringPayments);
         setExpenseCategories(nextExpenseCategories);
         setWorkspaceSignals({
-          accounts:
-            accountsResult.status === 'fulfilled'
-              ? accountsResult.value.filter((account) => account.status === 'active').length
-              : 0,
+          accounts: nextAccounts.length,
           budgets: nextBudgets.length,
           goals: goalsResult.status === 'fulfilled' ? goalsResult.value.length : 0,
           recurring: nextRecurringPayments.filter((payment) => payment.status === 'active').length,
         });
         setActiveCardId((currentActiveCardId) =>
-          nextCards.some((card) => card.id === currentActiveCardId) ? currentActiveCardId : nextCards[0]?.id || ''
+          nextWalletItems.some((card) => card.id === currentActiveCardId)
+            ? currentActiveCardId
+            : nextWalletItems[0]?.id || ''
         );
         setDataMessage(issues[0] || '');
       } catch (error) {
@@ -487,6 +532,7 @@ function DashboardPage({ currentUser, onLogout }) {
           return;
         }
 
+        setAccounts([]);
         setCards([]);
         setBudgets([]);
         setExpenseCategories([]);
@@ -645,14 +691,21 @@ function DashboardPage({ currentUser, onLogout }) {
   const flowTooltipY = highlightedMoneyFlowPoint
     ? clampValue(flowGuideTop - tooltipHeight - 12, 8, CHART_HEIGHT - tooltipHeight - 8)
     : 0;
+  const walletItems = useMemo(
+    () =>
+      cards.length
+        ? cards.map((card) => ({ ...card, sourceType: 'card' }))
+        : accounts.map(createAccountWalletItem),
+    [accounts, cards]
+  );
   const cardSearchQuery = cardSearch.trim().toLowerCase();
   const filteredCards = useMemo(() => {
     if (!cardSearchQuery) {
-      return cards;
+      return walletItems;
     }
 
-    return cards.filter((card) => matchesCardQuery(card, cardSearchQuery));
-  }, [cardSearchQuery, cards]);
+    return walletItems.filter((card) => matchesCardQuery(card, cardSearchQuery));
+  }, [cardSearchQuery, walletItems]);
 
   const activeCard = filteredCards.find((card) => card.id === activeCardId) || filteredCards[0] || null;
   const visibleCards = useMemo(() => {
@@ -668,7 +721,12 @@ function DashboardPage({ currentUser, onLogout }) {
   }, [activeCard, filteredCards]);
   const stackedCards = visibleCards.length ? visibleCards.slice().reverse() : [];
   const cardPickerCards = filteredCards.slice(0, 6);
-  const totalCards = cards.length;
+  const totalWalletItems = walletItems.length;
+  const heroPills = [
+    totalWalletItems ? `${totalWalletItems} wallet${totalWalletItems > 1 ? 's' : ''}` : 'No wallets',
+    recentPayments.length ? `${recentPayments.length} payments` : '0 payments',
+    workspaceSignals.accounts ? `${workspaceSignals.accounts} accounts` : '0 accounts',
+  ];
 
   const workspaceModules = [
     {
@@ -729,37 +787,6 @@ function DashboardPage({ currentUser, onLogout }) {
         actionLabel: `Open ${nextWorkspaceModule.label.toLowerCase()}`,
         actionRoute: nextWorkspaceModule.route,
       };
-  const netCashFlow = moneyFlowTotals.income - moneyFlowTotals.expenses;
-  const latestPayment = recentPayments[0] || null;
-  const dashboardFocusCards = [
-    {
-      label: 'Cash flow',
-      value: formatCurrency(netCashFlow),
-      helper:
-        moneyFlowMode === 'planned'
-          ? 'Projected from budgets and recurring commitments.'
-          : netCashFlow >= 0
-            ? 'Income is ahead of expense activity in this view.'
-            : 'Expenses are outrunning income in this view.',
-      tone: netCashFlow >= 0 ? 'positive' : 'warning',
-    },
-    {
-      label: 'Latest movement',
-      value: latestPayment ? 'Recent payment' : 'No activity yet',
-      helper: latestPayment
-        ? `${latestPayment.paymentSource || 'Expense'} - ${formatShortDate(latestPayment.date)}`
-        : 'Add a transaction to make the overview useful.',
-      tone: latestPayment ? 'neutral' : 'empty',
-      to: latestPayment ? '/transactions' : '/transactions',
-    },
-    {
-      label: 'Next action',
-      value: workspaceSummary.actionLabel,
-      helper: workspaceSummary.copy,
-      tone: connectedModules === accessibleModules.length ? 'positive' : 'action',
-      to: workspaceSummary.actionRoute,
-    },
-  ];
 
   const flowState = recentPayments.length
     ? {
@@ -789,11 +816,11 @@ function DashboardPage({ currentUser, onLogout }) {
         <label className="ref-card-search" aria-label="Search cards">
           <CardSearchIcon />
           <input
-            disabled={!totalCards}
+            disabled={!totalWalletItems}
             type="search"
             value={cardSearch}
             onChange={(event) => setCardSearch(event.target.value)}
-            placeholder={totalCards ? 'Search cards' : 'Cards appear here after setup'}
+            placeholder={totalWalletItems ? 'Search wallets' : 'Wallets appear here after setup'}
           />
         </label>
 
@@ -814,8 +841,8 @@ function DashboardPage({ currentUser, onLogout }) {
               })
             : (
               <div className="ref-empty-card ref-wallet-stack-empty">
-                <strong>No saved cards yet</strong>
-                <p>Add cards from Wallets once you want faster card-level views in the overview workspace.</p>
+                <strong>No wallets connected yet</strong>
+                <p>Add an account from Wallets and it will appear here as the overview money source.</p>
                 <Link className="ref-inline-filter" to="/accounts">
                   Open wallets
                 </Link>
@@ -833,7 +860,7 @@ function DashboardPage({ currentUser, onLogout }) {
                 onClick={() => setActiveCardId(card.id)}
               >
                 <span>{getCardTitle(card)}</span>
-                <small>**** {card.last4}</small>
+                <small>{card.sourceType === 'account' ? card.last4 : `**** ${card.last4}`}</small>
               </button>
             ))}
           </div>
@@ -842,10 +869,10 @@ function DashboardPage({ currentUser, onLogout }) {
         <div className="ref-wallet-stack-meta">
           <p className="ref-wallet-stack-caption">
             {cardSearchQuery && !filteredCards.length
-              ? 'No card found.'
-              : totalCards
-                ? `${totalCards} saved to your workspace`
-                : 'Open Wallets to add cards or connect the accounts you use every day.'}
+              ? 'No wallet found.'
+              : totalWalletItems
+                ? `${totalWalletItems} visible in your workspace`
+                : 'Open Wallets to add the accounts you use every day.'}
           </p>
         </div>
 
@@ -919,33 +946,30 @@ function DashboardPage({ currentUser, onLogout }) {
         <article className="ref-hero-card">
           <div className="ref-hero-copy">
             <span className="ref-section-chip">Workspace</span>
-            <h2>Start with the three things that matter.</h2>
-            <p>The overview should answer cash direction, latest activity, and the next useful action before anything else.</p>
+            <h2>Your wallet, ready.</h2>
+            <p>Review wallets, payments, and setup progress from one clear control center.</p>
 
-            <div className="ref-focus-card-grid" aria-label="Dashboard priorities">
-              {dashboardFocusCards.map((card) => {
-                const Element = card.to ? Link : 'article';
+            <div className="ref-hero-pill-row" aria-label="Workspace status">
+              {heroPills.map((pill) => (
+                <span key={pill}>{pill}</span>
+              ))}
+            </div>
 
-                return (
-                  <Element
-                    key={card.label}
-                    className={`ref-focus-card tone-${card.tone}${card.to ? ' is-clickable' : ''}`}
-                    to={card.to}
-                  >
-                    <span>{card.label}</span>
-                    <strong>{card.value}</strong>
-                    <p>{card.helper}</p>
-                  </Element>
-                );
-              })}
+            <div className="ref-hero-actions">
+              <Link className="ref-primary-cta" to="/accounts">
+                Open wallets
+              </Link>
+              <Link className="ref-secondary-cta" to="/transactions">
+                Open transactions
+              </Link>
             </div>
           </div>
 
-          <div className="ref-hero-decision-stack" aria-label="Workspace summary">
-            <span>{workspaceSummary.kicker}</span>
-            <strong>{workspaceSummary.title}</strong>
-            <p>{workspaceSummary.copy}</p>
-            <Link to={workspaceSummary.actionRoute}>{workspaceSummary.actionLabel}</Link>
+          <div className="ref-hero-visual" aria-hidden="true">
+            <span className="ref-hero-orbit ref-hero-orbit-one" />
+            <span className="ref-hero-orbit ref-hero-orbit-two" />
+            <span className="ref-hero-glow" />
+            <span className="ref-hero-glass" />
           </div>
         </article>
 

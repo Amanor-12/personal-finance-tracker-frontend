@@ -293,7 +293,7 @@ function RecurringPage({ currentUser, onLogout }) {
                 </button>
               </div>
 
-              <article className="recurring-next-card">
+              <article className="recurring-next-card recurring-next-visual-card">
                 <span>Next due</span>
                 <strong>{nextPayment?.name || 'Nothing scheduled'}</strong>
                 <p>
@@ -301,6 +301,25 @@ function RecurringPage({ currentUser, onLogout }) {
                     ? `${formatRecurringCurrency(nextPayment.amount)} ${formatDaysUntil(nextPayment.daysUntilNextPayment)}`
                     : 'Create one recurring item to build your queue.'}
                 </p>
+                <div className="recurring-next-visual" aria-hidden="true">
+                  <span className="recurring-visual-ring" />
+                  <span className="recurring-visual-pulse" />
+                  <span className="recurring-visual-bill recurring-visual-bill-primary">
+                    <i />
+                    <strong>{nextPayment?.name || 'Rent'}</strong>
+                    <small>{nextPayment ? formatDaysUntil(nextPayment.daysUntilNextPayment) : 'Due soon'}</small>
+                  </span>
+                  <span className="recurring-visual-bill recurring-visual-bill-secondary">
+                    <i />
+                    <strong>Utilities</strong>
+                    <small>Queued</small>
+                  </span>
+                  <span className="recurring-visual-bill recurring-visual-bill-tertiary">
+                    <i />
+                    <strong>Cloud</strong>
+                    <small>Tracked</small>
+                  </span>
+                </div>
               </article>
             </section>
 

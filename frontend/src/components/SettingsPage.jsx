@@ -950,10 +950,19 @@ function SettingsPage({ currentUser, onLogout, onUpdateProfile }) {
           <h2>Quiet controls for serious money software.</h2>
           <p>Keep profile, security, notifications, and data controls separated so sensitive actions never feel casual.</p>
         </div>
-        <div className="settings-command-card" aria-label="Account state">
+        <div className="settings-command-card settings-command-visual-card" aria-label="Account state">
           <span>Signed in as</span>
           <strong>{currentUser?.email}</strong>
           <p>{storedSettings.workspaceName}</p>
+          <div className="settings-command-visual" aria-hidden="true">
+            <span className="settings-visual-orbit" />
+            <span className="settings-visual-shield">
+              <i />
+            </span>
+            <span className="settings-visual-row settings-visual-row-one" />
+            <span className="settings-visual-row settings-visual-row-two" />
+            <span className="settings-visual-row settings-visual-row-three" />
+          </div>
         </div>
       </section>
 
