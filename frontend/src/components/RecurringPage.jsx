@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
 import { FeatureGate } from './billing/FeatureGate';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import DeleteRecurringDialog from './recurring/DeleteRecurringDialog';
-import RecurringFormDialog from './recurring/RecurringFormDialog';
 import RecurringIcon from './recurring/RecurringIcon';
 import {
   EMPTY_RECURRING_FILTERS,
@@ -22,8 +22,11 @@ import {
 } from './recurring/recurringUtils';
 import { useBillingAccess } from '../context/useBillingAccess';
 import { accountStore } from '../utils/accountStore';
+import { loadRecurringFormDialog } from '../utils/dialogPrefetch';
 import { financeStore } from '../utils/financeStore';
 import { isProTier } from '../utils/tierAccess';
+
+const RecurringFormDialog = lazy(loadRecurringFormDialog);
 
 function RecurringPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
@@ -44,6 +47,9 @@ function RecurringPage({ currentUser, onLogout }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const warmRecurringDialog = () => {
+    void loadRecurringFormDialog();
+  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -165,12 +171,14 @@ function RecurringPage({ currentUser, onLogout }) {
   };
 
   const openCreate = () => {
+    warmRecurringDialog();
     setEditingPayment(null);
     setSaveError('');
     setIsFormOpen(true);
   };
 
   const openEdit = (payment) => {
+    warmRecurringDialog();
     setEditingPayment(payment);
     setSaveError('');
     setIsFormOpen(true);
@@ -558,20 +566,29 @@ function RecurringPage({ currentUser, onLogout }) {
       </FinanceLayout>
 
       {isFormOpen ? (
-        <RecurringFormDialog
-          accounts={accounts}
-          categories={categories}
-          isSaving={isSaving}
-          onClose={() => {
-            if (!isSaving) {
-              setIsFormOpen(false);
-              setEditingPayment(null);
-            }
-          }}
-          onSubmit={savePayment}
-          payment={editingPayment}
-          saveError={saveError}
-        />
+        <Suspense
+          fallback={
+            <DialogLoadFrame
+              body="Loading the renewal editor so you can adjust cadence, account routing, and forecast details."
+              title={editingPayment ? 'Opening renewal details' : 'Opening recurring payment form'}
+            />
+          }
+        >
+          <RecurringFormDialog
+            accounts={accounts}
+            categories={categories}
+            isSaving={isSaving}
+            onClose={() => {
+              if (!isSaving) {
+                setIsFormOpen(false);
+                setEditingPayment(null);
+              }
+            }}
+            onSubmit={savePayment}
+            payment={editingPayment}
+            saveError={saveError}
+          />
+        </Suspense>
       ) : null}
 
       <DeleteRecurringDialog

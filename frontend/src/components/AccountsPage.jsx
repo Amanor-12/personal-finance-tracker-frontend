@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ResourceLimitCard } from './billing/FeatureGate';
+import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
-import AccountFormDialog from './accounts/AccountFormDialog';
 import AccountsIcon from './accounts/AccountsIcon';
 import PlaidConnectAction from './accounts/PlaidConnectAction';
 import { formatAccountCurrency, getAccountTypeLabel } from './accounts/accountUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { useBillingAccess } from '../context/useBillingAccess';
 import { accountStore } from '../utils/accountStore';
+import { loadAccountFormDialog } from '../utils/dialogPrefetch';
+
+const AccountFormDialog = lazy(loadAccountFormDialog);
 
 const summarizeAccounts = (accounts) => {
   const active = accounts.filter((account) => account.status === 'active');
@@ -246,6 +249,9 @@ function AccountsPage({ currentUser, onLogout }) {
   const canCreateAccount = accountLimit === null || accountUsage < accountLimit;
   const plaidProvider = bankProviders.find((provider) => provider.id === 'plaid') || null;
   const sandboxProvider = bankProviders.find((provider) => provider.id === 'sandbox') || null;
+  const warmAccountDialog = () => {
+    void loadAccountFormDialog();
+  };
 
   const openAddDialog = () => {
     if (!canCreateAccount) {
@@ -253,12 +259,14 @@ function AccountsPage({ currentUser, onLogout }) {
       return;
     }
 
+    warmAccountDialog();
     setEditingAccount(null);
     setSaveError('');
     setIsFormOpen(true);
   };
 
   const openEditDialog = (account) => {
+    warmAccountDialog();
     setEditingAccount(account);
     setSaveError('');
     setIsFormOpen(true);
@@ -708,18 +716,27 @@ function AccountsPage({ currentUser, onLogout }) {
       </FinanceLayout>
 
       {isFormOpen ? (
-        <AccountFormDialog
-          account={editingAccount}
-          isSaving={isSaving}
-          onClose={() => {
-            if (!isSaving) {
-              setIsFormOpen(false);
-              setEditingAccount(null);
-            }
-          }}
-          onSubmit={handleSaveAccount}
-          saveError={saveError}
-        />
+        <Suspense
+          fallback={
+            <DialogLoadFrame
+              body="Pulling in the account editor so you can update balances, institutions, and primary wallet settings."
+              title={editingAccount ? 'Opening account details' : 'Opening new account form'}
+            />
+          }
+        >
+          <AccountFormDialog
+            account={editingAccount}
+            isSaving={isSaving}
+            onClose={() => {
+              if (!isSaving) {
+                setIsFormOpen(false);
+                setEditingAccount(null);
+              }
+            }}
+            onSubmit={handleSaveAccount}
+            saveError={saveError}
+          />
+        </Suspense>
       ) : null}
     </>
   );

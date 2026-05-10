@@ -147,7 +147,90 @@
   transform: translateY(0);
 }
 
+.dialog-load-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 18, 48, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.dialog-load-card {
+  width: min(420px, 100%);
+  padding: 1.45rem 1.5rem;
+  border: 1px solid rgba(202, 210, 216, 0.72);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 28px 60px rgba(17, 27, 66, 0.14);
+  color: #1d2545;
+}
+
+.dialog-load-kicker {
+  display: inline-flex;
+  margin-bottom: 0.85rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(45, 75, 235, 0.08);
+  color: #2d4beb;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dialog-load-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.dialog-load-card p {
+  margin: 0.7rem 0 0;
+  color: #5f6b86;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.dialog-load-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.05rem;
+}
+
+.dialog-load-pulse span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2d4beb, #39b8db);
+  animation: dialog-load-pulse 1s ease-in-out infinite;
+}
+
+.dialog-load-pulse span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dialog-load-pulse span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
 @keyframes app-shell-pulse {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes dialog-load-pulse {
   0%,
   100% {
     opacity: 0.36;

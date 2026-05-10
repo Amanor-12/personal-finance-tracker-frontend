@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ResourceLimitCard } from './billing/FeatureGate';
+import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
 import DeleteGoalDialog from './goals/DeleteGoalDialog';
-import GoalFormDialog from './goals/GoalFormDialog';
 import GoalsIcon from './goals/GoalsIcon';
 import { formatGoalCurrency, formatGoalDate, getGoalProgressPercent, getGoalTypeLabel } from './goals/goalUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { useBillingAccess } from '../context/useBillingAccess';
 import { aiStore } from '../utils/aiStore';
+import { loadGoalFormDialog } from '../utils/dialogPrefetch';
 import { financeStore } from '../utils/financeStore';
+
+const GoalFormDialog = lazy(loadGoalFormDialog);
 
 const summarizeGoals = (goals) =>
   goals.reduce(
@@ -232,6 +235,9 @@ function GoalsPage({ currentUser, onLogout }) {
     [activeGoals]
   );
   const hasProGoalGuidance = Boolean(access.featureAccess?.goalGuidance);
+  const warmGoalDialog = () => {
+    void loadGoalFormDialog();
+  };
 
   const openCreate = () => {
     if (!canCreateGoal) {
@@ -239,6 +245,7 @@ function GoalsPage({ currentUser, onLogout }) {
       return;
     }
 
+    warmGoalDialog();
     setEditingGoal(null);
     setSaveError('');
     setIsFormOpen(true);
@@ -560,7 +567,9 @@ function GoalsPage({ currentUser, onLogout }) {
                   </div>
                   <div className="goals-card-actions">
                     <button type="button" onClick={() => {
+                      warmGoalDialog();
                       setEditingGoal(goal);
+                      setSaveError('');
                       setIsFormOpen(true);
                     }}>Update</button>
                     <button className="is-danger" type="button" onClick={() => setDeleteCandidate(goal)}>Delete</button>
@@ -596,18 +605,27 @@ function GoalsPage({ currentUser, onLogout }) {
       </FinanceLayout>
 
       {isFormOpen ? (
-        <GoalFormDialog
-          goal={editingGoal}
-          isSaving={isSaving}
-          onClose={() => {
-            if (!isSaving) {
-              setIsFormOpen(false);
-              setEditingGoal(null);
-            }
-          }}
-          onSubmit={saveGoal}
-          saveError={saveError}
-        />
+        <Suspense
+          fallback={
+            <DialogLoadFrame
+              body="Loading the goal editor so you can adjust pace, target timing, and contribution details without a full route refresh."
+              title={editingGoal ? 'Opening goal details' : 'Opening new goal form'}
+            />
+          }
+        >
+          <GoalFormDialog
+            goal={editingGoal}
+            isSaving={isSaving}
+            onClose={() => {
+              if (!isSaving) {
+                setIsFormOpen(false);
+                setEditingGoal(null);
+              }
+            }}
+            onSubmit={saveGoal}
+            saveError={saveError}
+          />
+        </Suspense>
       ) : null}
 
       <DeleteGoalDialog

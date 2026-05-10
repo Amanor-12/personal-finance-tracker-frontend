@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ResourceLimitCard } from './billing/FeatureGate';
+import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
-import BudgetFormDialog from './budgets/BudgetFormDialog';
 import BudgetsIcon from './budgets/BudgetsIcon';
 import DeleteBudgetDialog from './budgets/DeleteBudgetDialog';
 import { formatBudgetCurrency, formatBudgetPeriod, getCurrentBudgetPeriod } from './budgets/budgetUtils';
 import { PremiumEmpty, PremiumPanel, PremiumSkeleton } from './premium/PremiumPage';
 import { useBillingAccess } from '../context/useBillingAccess';
 import { financeStore } from '../utils/financeStore';
+import { loadBudgetFormDialog } from '../utils/dialogPrefetch';
+
+const BudgetFormDialog = lazy(loadBudgetFormDialog);
 
 const summarizeBudgets = (budgets) =>
   budgets.reduce(
@@ -181,6 +184,9 @@ function BudgetPage({ currentUser, onLogout }) {
     return signals.slice(0, 4);
   }, [summary.overspent, summary.watch, topPressureBudget, unbudgetedCategories.length]);
   const premiumBudgetAutomation = Boolean(access.featureAccess?.smartBudgeting);
+  const warmBudgetDialog = () => {
+    void loadBudgetFormDialog();
+  };
 
   const openCreate = () => {
     if (!canCreateBudget) {
@@ -188,6 +194,7 @@ function BudgetPage({ currentUser, onLogout }) {
       return;
     }
 
+    warmBudgetDialog();
     setEditingBudget(null);
     setSaveError('');
     setIsFormOpen(true);
@@ -428,7 +435,9 @@ function BudgetPage({ currentUser, onLogout }) {
                   </div>
                   <div className="budget-board-actions">
                     <button type="button" onClick={() => {
+                      warmBudgetDialog();
                       setEditingBudget(budget);
+                      setSaveError('');
                       setIsFormOpen(true);
                     }}>Edit</button>
                     <button className="is-danger" type="button" onClick={() => setDeleteCandidate(budget)}>Delete</button>
@@ -463,21 +472,30 @@ function BudgetPage({ currentUser, onLogout }) {
       </FinanceLayout>
 
       {isFormOpen ? (
-        <BudgetFormDialog
-          budget={editingBudget}
-          categories={categories}
-          isSaving={isSaving}
-          onClose={() => {
-            if (!isSaving) {
-              setIsFormOpen(false);
-              setEditingBudget(null);
-            }
-          }}
-          onSubmit={saveBudget}
-          period={period}
-          presetCategoryId=""
-          saveError={saveError}
-        />
+        <Suspense
+          fallback={
+            <DialogLoadFrame
+              body="Loading the planning editor so you can set a limit, period, and category without blocking the workspace."
+              title={editingBudget ? 'Opening budget details' : 'Opening new budget form'}
+            />
+          }
+        >
+          <BudgetFormDialog
+            budget={editingBudget}
+            categories={categories}
+            isSaving={isSaving}
+            onClose={() => {
+              if (!isSaving) {
+                setIsFormOpen(false);
+                setEditingBudget(null);
+              }
+            }}
+            onSubmit={saveBudget}
+            period={period}
+            presetCategoryId=""
+            saveError={saveError}
+          />
+        </Suspense>
       ) : null}
 
       <DeleteBudgetDialog

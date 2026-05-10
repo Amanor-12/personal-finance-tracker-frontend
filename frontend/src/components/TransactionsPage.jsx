@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DialogLoadFrame from './DialogLoadFrame';
 import FinanceLayout from './FinanceLayout';
 import { FeatureGate } from './billing/FeatureGate';
 import { PremiumPanel } from './premium/PremiumPage';
 import DeleteTransactionDialog from './transactions/DeleteTransactionDialog';
 import TransactionDetailDrawer from './transactions/TransactionDetailDrawer';
 import TransactionFilters from './transactions/TransactionFilters';
-import TransactionFormDialog from './transactions/TransactionFormDialog';
 import TransactionLedger from './transactions/TransactionLedger';
 import TransactionSummary from './transactions/TransactionSummary';
 import TransactionsIcon from './transactions/TransactionsIcon';
@@ -21,8 +21,11 @@ import {
 import { useBillingAccess } from '../context/useBillingAccess';
 import { aiStore } from '../utils/aiStore';
 import { accountStore } from '../utils/accountStore';
+import { loadTransactionFormDialog } from '../utils/dialogPrefetch';
 import { financeStore } from '../utils/financeStore';
 import { isPlusTier, isProTier } from '../utils/tierAccess';
+
+const TransactionFormDialog = lazy(loadTransactionFormDialog);
 
 function TransactionsPage({ currentUser, onLogout }) {
   const navigate = useNavigate();
@@ -54,6 +57,9 @@ function TransactionsPage({ currentUser, onLogout }) {
   const [saveError, setSaveError] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [aiSuggestions, setAiSuggestions] = useState([]);
+  const warmTransactionDialog = () => {
+    void loadTransactionFormDialog();
+  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -160,12 +166,14 @@ function TransactionsPage({ currentUser, onLogout }) {
   };
 
   const openAddDialog = () => {
+    warmTransactionDialog();
     setEditingTransaction(null);
     setSaveError('');
     setFormMode('add');
   };
 
   const openEditDialog = (transaction) => {
+    warmTransactionDialog();
     setEditingTransaction(transaction);
     setSaveError('');
     setFormMode('edit');
@@ -883,22 +891,31 @@ function TransactionsPage({ currentUser, onLogout }) {
       ) : null}
 
       {formMode ? (
-        <TransactionFormDialog
-          accountOptions={accountOptions}
-          categories={categories}
-          isSaving={isSaving}
-          mode={formMode}
-          onClose={() => {
-            if (!isSaving) {
-              setFormMode('');
-              setEditingTransaction(null);
-              setSaveError('');
-            }
-          }}
-          onSubmit={handleSaveTransaction}
-          saveError={saveError}
-          transaction={editingTransaction}
-        />
+        <Suspense
+          fallback={
+            <DialogLoadFrame
+              body="Loading the transaction editor so you can capture amount, category, account, and note details without delaying the ledger."
+              title={formMode === 'edit' ? 'Opening transaction details' : 'Opening transaction form'}
+            />
+          }
+        >
+          <TransactionFormDialog
+            accountOptions={accountOptions}
+            categories={categories}
+            isSaving={isSaving}
+            mode={formMode}
+            onClose={() => {
+              if (!isSaving) {
+                setFormMode('');
+                setEditingTransaction(null);
+                setSaveError('');
+              }
+            }}
+            onSubmit={handleSaveTransaction}
+            saveError={saveError}
+            transaction={editingTransaction}
+          />
+        </Suspense>
       ) : null}
 
       <DeleteTransactionDialog
