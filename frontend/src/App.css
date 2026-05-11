@@ -469,12 +469,16 @@ body,
   display: grid;
   gap: 20px;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .ref-topbar {
   display: flex;
   align-items: center;
   gap: 14px;
+  position: relative;
+  z-index: 180;
 }
 
 .ref-search {
@@ -525,7 +529,7 @@ body,
   top: calc(100% + 10px);
   left: 0;
   right: 0;
-  z-index: 25;
+  z-index: 260;
   padding: 10px;
   border-radius: 22px;
   border: 1px solid rgba(202, 210, 216, 0.76);
@@ -636,6 +640,8 @@ body,
   display: flex;
   align-items: center;
   gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .ref-icon-button,
@@ -696,6 +702,11 @@ body,
 .ref-user-menu {
   position: relative;
   min-width: 214px;
+  z-index: 1;
+}
+
+.ref-user-menu.is-open {
+  z-index: 280;
 }
 
 .ref-user-menu.is-open .ref-user-caret {
@@ -706,7 +717,7 @@ body,
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  z-index: 30;
+  z-index: 280;
   width: min(264px, calc(100vw - 32px));
   padding: 10px;
   display: grid;
@@ -848,6 +859,8 @@ body,
   grid-template-columns: minmax(0, 1fr) 314px;
   gap: 24px;
   align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 .ref-content-grid.is-single-column {

@@ -82,6 +82,25 @@ function ProductMotionSystem({ routePath = '', isWorkspace = false }) {
       <span className="rivo-motion-signal rivo-motion-signal-one" />
       <span className="rivo-motion-signal rivo-motion-signal-two" />
       <span className="rivo-motion-signal rivo-motion-signal-three" />
+      <span className="rivo-motion-command-ring">
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="rivo-motion-ledger-stream">
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="rivo-motion-depth-stack">
+        <i />
+        <i />
+        <i />
+      </span>
     </div>
   );
 }

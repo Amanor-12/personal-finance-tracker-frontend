@@ -202,6 +202,180 @@
   animation: rivoSignalPulse 9s ease-out 3s infinite;
 }
 
+.rivo-motion-command-ring {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(43, 103, 255, 0.08),
+    0 32px 90px rgba(45, 75, 235, 0.12);
+  height: clamp(12rem, 26vw, 22rem);
+  opacity: 0.58;
+  right: clamp(2rem, 8vw, 10rem);
+  top: clamp(5rem, 12vh, 8rem);
+  width: clamp(12rem, 26vw, 22rem);
+  animation: rivoCommandOrbit 28s linear infinite;
+}
+
+.rivo-motion-command-ring::before,
+.rivo-motion-command-ring::after {
+  border-radius: inherit;
+  content: '';
+  inset: 12%;
+  position: absolute;
+}
+
+.rivo-motion-command-ring::before {
+  background:
+    conic-gradient(from 30deg, transparent 0deg, rgba(255, 255, 255, 0.72) 52deg, rgba(42, 211, 190, 0.54) 94deg, transparent 132deg, transparent 360deg);
+  mask-image: radial-gradient(circle, transparent 58%, black 60%, black 68%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle, transparent 58%, black 60%, black 68%, transparent 70%);
+  animation: rivoCommandSweep 5.5s ease-in-out infinite;
+}
+
+.rivo-motion-command-ring::after {
+  border: 1px dashed rgba(255, 255, 255, 0.32);
+  inset: 22%;
+}
+
+.rivo-motion-command-ring i {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  box-shadow: 0 0 30px rgba(32, 143, 255, 0.34);
+  height: 0.58rem;
+  position: absolute;
+  width: 0.58rem;
+}
+
+.rivo-motion-command-ring i:nth-child(1) {
+  right: 12%;
+  top: 24%;
+}
+
+.rivo-motion-command-ring i:nth-child(2) {
+  bottom: 18%;
+  left: 28%;
+}
+
+.rivo-motion-command-ring i:nth-child(3) {
+  background: #2dd4bf;
+  right: 34%;
+  top: 8%;
+}
+
+.rivo-motion-ledger-stream {
+  align-items: end;
+  bottom: clamp(3rem, 9vh, 7rem);
+  display: flex;
+  gap: 0.55rem;
+  height: clamp(7rem, 15vw, 12rem);
+  left: clamp(1.5rem, 5vw, 7rem);
+  opacity: 0.46;
+  width: clamp(15rem, 34vw, 30rem);
+}
+
+.rivo-motion-ledger-stream::before {
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent),
+    linear-gradient(90deg, rgba(32, 143, 255, 0.12), rgba(45, 212, 191, 0.18), rgba(82, 72, 240, 0.12));
+  border-radius: 999px;
+  bottom: 18%;
+  content: '';
+  height: 2px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  transform-origin: 0 50%;
+  animation: rivoLedgerScan 4.6s var(--rivo-motion-ease) infinite;
+}
+
+.rivo-motion-ledger-stream i {
+  --bar-height: 54%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(45, 212, 191, 0.36)),
+    linear-gradient(180deg, var(--tone-a), var(--tone-b));
+  border-radius: 999px;
+  box-shadow: 0 18px 46px rgba(37, 99, 235, 0.12);
+  display: block;
+  flex: 1;
+  height: var(--bar-height);
+  min-width: 0.72rem;
+  transform-origin: 50% 100%;
+  animation: rivoLedgerBars 3.8s ease-in-out infinite;
+}
+
+.rivo-motion-ledger-stream i:nth-child(1) {
+  --bar-height: 38%;
+}
+
+.rivo-motion-ledger-stream i:nth-child(2) {
+  --bar-height: 72%;
+  animation-delay: -420ms;
+}
+
+.rivo-motion-ledger-stream i:nth-child(3) {
+  --bar-height: 48%;
+  animation-delay: -780ms;
+}
+
+.rivo-motion-ledger-stream i:nth-child(4) {
+  --bar-height: 88%;
+  animation-delay: -1.1s;
+}
+
+.rivo-motion-ledger-stream i:nth-child(5) {
+  --bar-height: 60%;
+  animation-delay: -1.45s;
+}
+
+.rivo-motion-ledger-stream i:nth-child(6) {
+  --bar-height: 76%;
+  animation-delay: -1.8s;
+}
+
+.rivo-motion-ledger-stream i:nth-child(7) {
+  --bar-height: 44%;
+  animation-delay: -2.2s;
+}
+
+.rivo-motion-depth-stack {
+  height: clamp(9rem, 16vw, 15rem);
+  left: 52%;
+  opacity: 0.34;
+  top: 18%;
+  transform: translateX(-50%) rotate(-8deg);
+  width: clamp(12rem, 24vw, 22rem);
+}
+
+.rivo-motion-depth-stack i {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.2)),
+    linear-gradient(135deg, var(--tone-a), var(--tone-c));
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 2rem;
+  box-shadow: 0 22px 70px rgba(17, 27, 66, 0.08);
+  height: 54%;
+  position: absolute;
+  width: 68%;
+  animation: rivoDepthStack 9s ease-in-out infinite;
+}
+
+.rivo-motion-depth-stack i:nth-child(1) {
+  left: 0;
+  top: 0;
+}
+
+.rivo-motion-depth-stack i:nth-child(2) {
+  animation-delay: -1.5s;
+  left: 18%;
+  top: 23%;
+}
+
+.rivo-motion-depth-stack i:nth-child(3) {
+  animation-delay: -3s;
+  left: 36%;
+  top: 46%;
+}
+
 .ref-shell {
   isolation: isolate;
   position: relative;
@@ -300,12 +474,73 @@
 .wallet-card,
 .wallets-empty-state {
   backface-visibility: hidden;
+  overflow: hidden;
+  position: relative;
   transform: translateZ(0);
   transition:
     background var(--rivo-motion-medium),
     border-color var(--rivo-motion-medium),
     box-shadow var(--rivo-motion-medium),
     transform var(--rivo-motion-medium);
+}
+
+:where(
+  .ref-panel,
+  .activity-ledger-card,
+  .activity-timeline-card,
+  .billing-summary-card,
+  .billing-value-card,
+  .billing-plan-card,
+  .budget-cockpit-card,
+  .finance-intelligence-card,
+  .goal-focus-card,
+  .goals-portfolio-card,
+  .recurring-queue-card,
+  .reports-metric-card,
+  .reports-support-strip article,
+  .resource-limit-card,
+  .settings-card,
+  .settings-rail-card,
+  .subscription-card,
+  .transaction-card,
+  .transactions-export-card,
+  .wallet-card
+)::before {
+  background:
+    radial-gradient(circle at var(--rivo-pointer-x) var(--rivo-pointer-y), rgba(255, 255, 255, 0.72), transparent 13rem),
+    linear-gradient(120deg, transparent, rgba(37, 99, 235, 0.055), transparent);
+  content: '';
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity var(--rivo-motion-medium);
+}
+
+:where(
+  .ref-panel,
+  .activity-ledger-card,
+  .activity-timeline-card,
+  .billing-summary-card,
+  .billing-value-card,
+  .billing-plan-card,
+  .budget-cockpit-card,
+  .finance-intelligence-card,
+  .goal-focus-card,
+  .goals-portfolio-card,
+  .recurring-queue-card,
+  .reports-metric-card,
+  .reports-support-strip article,
+  .resource-limit-card,
+  .settings-card,
+  .settings-rail-card,
+  .subscription-card,
+  .transaction-card,
+  .transactions-export-card,
+  .wallet-card
+) > * {
+  position: relative;
+  z-index: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -332,6 +567,31 @@
     border-color: rgba(57, 103, 255, 0.22);
     box-shadow: 0 26px 72px rgba(19, 38, 86, 0.14);
     transform: translate3d(0, -5px, 0) scale(1.005);
+  }
+
+  :where(
+    .ref-panel,
+    .activity-ledger-card,
+    .activity-timeline-card,
+    .billing-summary-card,
+    .billing-value-card,
+    .billing-plan-card,
+    .budget-cockpit-card,
+    .finance-intelligence-card,
+    .goal-focus-card,
+    .goals-portfolio-card,
+    .recurring-queue-card,
+    .reports-metric-card,
+    .reports-support-strip article,
+    .resource-limit-card,
+    .settings-card,
+    .settings-rail-card,
+    .subscription-card,
+    .transaction-card,
+    .transactions-export-card,
+    .wallet-card
+  ):hover::before {
+    opacity: 1;
   }
 }
 
@@ -627,6 +887,68 @@ button[type='submit']::after {
   }
 }
 
+@keyframes rivoCommandOrbit {
+  from {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: rotate(360deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes rivoCommandSweep {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: rotate(0deg) scale(0.96);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: rotate(130deg) scale(1.04);
+  }
+}
+
+@keyframes rivoLedgerScan {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scaleX(0.2);
+  }
+
+  48% {
+    opacity: 0.72;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rivoLedgerBars {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scaleY(0.72);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scaleY(1.08);
+  }
+}
+
+@keyframes rivoDepthStack {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+
+  50% {
+    opacity: 0.68;
+    transform: translate3d(10px, -10px, 0) scale(1.03);
+  }
+}
+
 @keyframes rivoRouteResolve {
   from {
     filter: blur(10px);
@@ -752,6 +1074,9 @@ button[type='submit']::after {
 
 @media (max-width: 720px) {
   .rivo-motion-grid,
+  .rivo-motion-command-ring,
+  .rivo-motion-depth-stack,
+  .rivo-motion-ledger-stream,
   .rivo-motion-ribbon,
   .rivo-motion-signal {
     display: none;
